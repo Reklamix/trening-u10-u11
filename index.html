@@ -7,8 +7,8 @@
   <meta name="description" content="Klikateľný tréning U10 a U11 priamo na ihrisko. Jedna činnosť, schéma, dávka a ďalší krok.">
   <title>Tréningy U10 / U11</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123d35'/%3E%3Crect x='15' y='10' width='34' height='44' rx='2' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M15 32h34' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles.css?v=2">
-  <script src="./app.js?v=2" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=3">
+  <script src="./app.js?v=3" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -56,24 +56,27 @@
         <p class="eyebrow">Spoločný postup</p><h1 id="coaching-title">Organizácia</h1><div id="coaching-notes"></div><details class="sources"><summary>Podklady tréningu</summary><div id="sources-list"></div></details><a class="guide-link" href="https://github.com/Reklamix/trening-u10-u11/blob/main/README.md" target="_blank" rel="noopener noreferrer">Ako pridať ďalší tréning ↗</a>
       </section>
       <section id="private-view" class="view" hidden aria-labelledby="private-title">
-        <p class="eyebrow">Len v tomto zariadení</p><h1 id="private-title">Moja súkromná časť</h1>
-        <p class="muted">Osobný ťahák a poznámky sú šifrované heslom. Ich obsah sa neposiela na GitHub ani kolegovi.</p>
-        <div id="vault-setup" hidden class="private-card">
-          <h2>Prvé otvorenie</h2><p>Vyber súbor osobného ťaháka z chatu alebo začni s prázdnymi poznámkami. Nastav si vlastné heslo; budeme ho potrebovať pri každom odomknutí.</p>
-          <form id="setup-form">
-            <label for="private-file">Osobný ťahák alebo šifrovaná záloha (voliteľné)</label><input id="private-file" type="file" accept=".json,application/json">
-            <label for="setup-password">Tvoje heslo (aspoň 8 znakov)</label><input id="setup-password" type="password" minlength="8" autocomplete="new-password" required>
-            <label for="confirm-password">Zopakuj heslo</label><input id="confirm-password" type="password" minlength="8" autocomplete="new-password" required>
-            <button type="submit" class="button">Vytvoriť a odomknúť</button>
-          </form>
-          <p class="small-note">Heslo nevieme obnoviť. Odlož si šifrovanú zálohu. Vymazanie údajov prehliadača vymaže aj túto časť.</p>
+        <p class="eyebrow">Len pre mňa</p><h1 id="private-title">Osobný plán</h1>
+        <p id="private-intro" class="muted">Čo povedať, čo si všímať a ako podporiť odvahu.</p>
+        <div id="vault-locked" hidden class="private-card">
+          <h2>Plán je pripravený</h2><p>Zadaj heslo, ktoré máš v chate. Nič nemusíš sťahovať ani importovať.</p>
+          <form id="unlock-form"><label for="unlock-password">Heslo z chatu</label><input id="unlock-password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required><button class="button" type="submit">Otvoriť osobný plán</button></form>
+          <p class="small-note">Rovnaké heslo otvorí plán aj v inom mobile. Svoje poznámky máš uložené iba v tomto prehliadači.</p>
+          <details id="backup-options" class="sources"><summary>Obnoviť uloženú zálohu</summary><form id="restore-form">
+            <label for="private-file">Šifrovaná záloha</label><input id="private-file" type="file" accept=".json,application/json" required>
+            <label for="restore-password">Heslo k zálohe</label><input id="restore-password" type="password" autocomplete="off" required>
+            <button type="submit" class="button">Otvoriť zálohu</button>
+          </form></details>
         </div>
-        <div id="vault-locked" hidden class="private-card"><h2>Časť je zamknutá</h2><form id="unlock-form"><label for="unlock-password">Tvoje heslo</label><input id="unlock-password" type="password" autocomplete="current-password" required><button class="button" type="submit">Odomknúť</button></form><p class="small-note">V inom telefóne použi šifrovanú zálohu a rovnaké heslo.</p><button id="restore-vault" type="button" class="text-button">Otvoriť inú zálohu</button></div>
         <div id="vault-content" hidden>
-          <div class="private-tools"><button id="lock-vault" class="secondary-button" type="button">Zamknúť</button><button id="export-vault" class="secondary-button" type="button">Šifrovaná záloha</button></div>
-          <div id="personal-sections"></div>
-          <form id="private-notes-form" class="private-card"><h2>Moje pozorovania</h2><label for="private-notes">Čo fungovalo a čo chcem nabudúce zmeniť</label><textarea id="private-notes" rows="7" maxlength="12000" placeholder="Konkrétna situácia, moja reakcia, čo pomohlo…"></textarea><button class="button" type="submit">Uložiť poznámky</button></form>
-          <p class="small-note">Pri opustení súkromnej časti alebo prepnutí aplikácie sa zamkne. Neuložené poznámky sa automaticky neukladajú.</p>
+          <label class="step-label" for="personal-topic">Vyber situáciu</label><select id="personal-topic"></select>
+          <div id="personal-sections" aria-live="polite" aria-atomic="true"></div>
+          <div class="personal-navigation"><button id="personal-previous" class="secondary-button" type="button">← Späť</button><button id="personal-next" class="button" type="button">Ďalší bod →</button></div>
+          <details id="personal-options" class="sources"><summary>Poznámky a možnosti</summary>
+            <form id="private-notes-form" class="private-card"><h2>Moje pozorovania</h2><label for="private-notes">Čo fungovalo a čo chcem nabudúce zmeniť</label><textarea id="private-notes" rows="4" maxlength="12000" placeholder="Konkrétna situácia, moja reakcia, čo pomohlo…"></textarea><button class="button" type="submit">Uložiť poznámky</button></form>
+            <div class="private-tools"><button id="lock-vault" class="secondary-button" type="button">Zamknúť</button><button id="export-vault" class="secondary-button" type="button">Šifrovaná záloha</button></div>
+            <p class="small-note">Poznámky sú iba v tomto prehliadači. Pri odchode sa plán zamkne. Neuložené poznámky sa stratia.</p>
+          </details>
         </div>
         <p id="private-message" class="form-message" role="status"></p>
       </section>

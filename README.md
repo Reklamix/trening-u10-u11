@@ -51,23 +51,24 @@ Spusť v tomto priečinku `python -m http.server 8765` a otvor `http://localhost
 - **Časovač bloku** je predvolene zbalený a spustí sa ručne. Meria celý blok vrátane prestávok. Má pauzu, pokračovanie a reset; pri prechode na inú činnosť sa pozastaví. Čas ráta podľa skutočne uplynutého času aj pri obmedzení frekvencie prehliadača na pozadí. Nedáva zvukový alarm ani automatický prechod. Obnovenie stránky časovače resetuje.
 - Dokončené časti a označené pomôcky si pamätá iba tento prehliadač; do odkazu pre kolegu sa neprenášajú.
 - Na domovskú obrazovku telefónu sa web pridáva cez ponuku Safari alebo Chrome. Stránka vyžaduje pripojenie; nemá deklarovaný offline režim.
-- Klubový web aj repozitár sú verejné. Súkromný obsah vzniká iba v prehliadači návštevníka podľa postupu nižšie. Web nemá sledovanie návštevnosti.
+- Klubový web aj repozitár sú verejné. Osobný plán je zverejnený iba ako šifrovaná obálka; heslo nie je v repozitári. Poznámky zostávajú v prehliadači. Web nemá sledovanie návštevnosti.
 
 ## Moja súkromná časť
 
-1. V mobile otvor **Moje**. Osobný súbor dostaneš samostatne v chate; nie je v tomto verejnom repozitári. Stiahni si ho do mobilu a vyber cez **Osobný ťahák alebo šifrovaná záloha**. Možno začať aj s prázdnymi poznámkami.
-2. Sám si nastav heslo aspoň s 8 znakmi a zopakuj ho. Nikomu ho netreba posielať. Pôvodný stiahnutý osobný súbor je čitateľný; podľa toho s ním zaobchádzaj.
-3. Obsah sa šifruje pomocou AES-256-GCM; kľúč sa odvodzuje PBKDF2-SHA256 s 250 000 iteráciami a náhodnou soľou. Každé uloženie má nový náhodný nonce. V localStorage je iba šifrovaná obálka; heslo sa neukladá.
-4. **Uložiť poznámky** uloží zmeny. **Šifrovaná záloha** zároveň stiahne zálohu pre iné zariadenie. **Zamknúť**, odchod do inej časti alebo prepnutie aplikácie odstráni odomknutý obsah a heslo z aplikačného stavu. Neuložené poznámky sa stratia.
-5. V inom zariadení vyber šifrovanú zálohu a zadaj rovnaké heslo. Obsah sa medzi zariadeniami nesynchronizuje. Pri strate hesla ho nevieme obnoviť; pri vymazaní údajov prehliadača je potrebná záloha.
+1. Otvor **Moje**, zadaj heslo z osobného chatu a klikni **Otvoriť osobný plán**. Netreba nič importovať ani vytvárať ďalšie heslo. Heslo neposielaj kolegovi spolu s verejným odkazom.
+2. Plán zobrazuje vždy jeden bod. **Späť / Ďalší bod** prechádzajú celý obsah; cez **Vyber situáciu** môžeš rovno prejsť na potrebnú tému. **Poznámky a možnosti** sú zbalené.
+3. `personal-plan.enc.json` obsahuje len šifrovaný osobný plán (AES-256-GCM, PBKDF2-SHA256, 250 000 iterácií). Je verejne dostupný na GitHube na základe výslovného súhlasu používateľa z 27. 10. 2026. Heslo a čitateľný osobný zdroj nie sú v repozitári. Heslo sa v aplikácii neukladá.
+4. Rovnaké heslo otvorí pripravený plán aj v inom zariadení. **Uložiť poznámky** ukladá iba do tohto prehliadača a iba šifrovane s novou soľou a nonce. Poznámky sa nesynchronizujú. Staré lokálne záznamy zostávajú zachované a dajú sa otvoriť pôvodným heslom.
+5. **Šifrovaná záloha** uloží poznámky a stiahne šifrovaný súbor. Voliteľne ho obnovíš v zamknutej časti cez **Obnoviť uloženú zálohu**, súbor a jeho heslo. Žiadny import nie je potrebný na bežné otvorenie plánu.
+6. **Zamknúť**, odchod z časti alebo prepnutie aplikácie odstráni otvorený obsah a heslo z aplikačného stavu. Neuložené poznámky sa stratia. Vymazanie údajov prehliadača vymaže lokálne poznámky; pripravený plán zostane dostupný s heslom. Pri strate hesla ho aplikácia neobnoví.
 
-Toto je lokálna šifrovaná časť, nie účet s prihlásením na server. Ochrana závisí od hesla, zabezpečenia zariadenia a dôveryhodného kódu stránky. Zdieľacie tlačidlá nikdy neposielajú súkromný obsah ani heslo. Nepridávaj osobný súbor do verejného repozitára.
+Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Zdieľacie tlačidlá neposielajú súkromný obsah ani heslo. Čitateľný osobný súbor ani heslo nikdy nepridávaj do verejného repozitára. Nový osobný plán najprv šifruj mimo repozitára; nepublikuj ho bez poverenia používateľa.
 
 ## Publikovanie a návrat
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu pri `styles.css?v=2` a `app.js?v=2` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu pri `styles.css?v=3` a `app.js?v=3` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 
@@ -75,4 +76,4 @@ Klubové tréningy 26. a 27. 10. 2026 nadväzujú na schválené plány U11. Pou
 
 Voliteľné `attendanceCases` obsahuje objekty `total` a `groups`; súčet skupín plus dvaja brankári sa musí rovnať celkovému počtu. Voliteľné `variantNotes` v bloku obsahuje dodatočný pokyn pre veľkosť skupiny (napr. kľúče `4`, `5`).
 
-Schémy sú ilustračné; dávky a plné počty sú v texte a tabuľkách. Pôvodné súkromné PDF ani osobný plán dieťaťa nie sú súčasťou tohto repozitára.
+Schémy sú ilustračné; dávky a plné počty sú v texte a tabuľkách. Pôvodné súkromné PDF a čitateľný osobný plán dieťaťa nie sú súčasťou tohto repozitára; osobný plán je iba v šifrovanej obálke.

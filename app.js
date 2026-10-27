@@ -491,6 +491,7 @@ const PrivateVault = {
   function setView(view) {
     if (state.view === 'private' && view !== 'private') lockVault();
     state.view = view;
+    $('main').classList.toggle('private-mode', view === 'private');
     for (const name of ['field', 'overview', 'equipment', 'coaching', 'private']) $(name + '-view').hidden = name !== view;
     document.querySelectorAll('[data-view]').forEach(a => {
       if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
@@ -518,67 +519,92 @@ const PrivateVault = {
     }
     if (!initial) window.scrollTo({ top: 0, behavior: 'instant' });
   }
-  function vaultBlob() {
-    const blob = readLocal(storageKeys.vault, null);
-    return PrivateVault.valid(blob) ? blob : null;
+  const personalPlanId = 'u11-2026-10-27-v1';
+  const personalStorageKey = 'training-private-plan-' + personalPlanId;
+  let personalBundle = null;
+  let personalIndex = 0;
+  function personalSteps() {
+    return state.vault.sections.flatMap((section, sectionIndex) => section.items.map((text, itemIndex) => ({ title: section.title, text, sectionIndex, itemIndex, count: section.items.length })));
+  }
+  async function loadPersonalBundle() {
+    if (!personalBundle) {
+      const response = await fetch('./personal-plan.enc.json', { cache: 'no-cache' });
+      if (!response.ok) throw new Error('Plan unavailable');
+      const blob = await response.json();
+      if (!PrivateVault.valid(blob) || blob.planId !== personalPlanId) throw new Error('Invalid plan');
+      personalBundle = blob;
+    }
+    return personalBundle;
   }
   function lockVault() {
     vaultEpoch++;
-    state.vault = null; state.vaultPassword = null;
+    state.vault = null; state.vaultPassword = null; state.vaultStorageKey = null;
+    personalIndex = 0;
     $('private-notes').value = '';
     $('personal-sections').replaceChildren();
-    for (const id of ['setup-password', 'confirm-password', 'unlock-password']) $(id).value = '';
+    for (const id of ['restore-password', 'unlock-password']) $(id).value = '';
+    $('restore-form').reset(); $('backup-options').open = false; $('personal-options').open = false;
+    $('personal-topic').replaceChildren();
     $('vault-content').hidden = true;
     if (state.view === 'private') renderVault();
   }
   function renderVault() {
     const unlocked = Boolean(state.vault);
-    const exists = Boolean(vaultBlob());
-    $('vault-setup').hidden = unlocked || exists;
-    $('vault-locked').hidden = unlocked || !exists;
+    $('vault-locked').hidden = unlocked;
+    $('private-intro').hidden = unlocked;
     $('vault-content').hidden = !unlocked;
     $('private-message').textContent = '';
     if (!unlocked) return;
-    $('personal-sections').replaceChildren(...state.vault.sections.map(section => {
-      const card = el('div', 'personal-section'); const list = el('ul');
-      section.items.forEach(item => list.append(el('li', '', item)));
-      card.append(el('h2', '', section.title), list); return card;
+    $('personal-topic').replaceChildren(...state.vault.sections.flatMap((section, index) => {
+      if (!section.items.length) return [];
+      const option = el('option', '', section.title); option.value = index; return [option];
     }));
+    renderPersonalStep();
     $('private-notes').value = state.vault.notes;
   }
+  function renderPersonalStep() {
+    if (!state.vault) return;
+    const steps = personalSteps();
+    personalIndex = Math.max(0, Math.min(personalIndex, steps.length - 1));
+    const step = steps[personalIndex];
+    const card = el('div', 'personal-step');
+    if (step) {
+      $('personal-topic').value = step.sectionIndex;
+      card.append(el('p', 'eyebrow', `Bod ${step.itemIndex + 1} z ${step.count} · celkovo ${personalIndex + 1}/${steps.length}`), el('p', 'personal-tip', step.text));
+    } else card.append(el('p', '', 'Tento starší záznam obsahuje iba poznámky. Otvor Poznámky a možnosti.'));
+    $('personal-sections').replaceChildren(card);
+    $('personal-topic').hidden = !steps.length;
+    $('personal-previous').disabled = personalIndex === 0;
+    $('personal-next').disabled = !steps.length || personalIndex === steps.length - 1;
+    $('personal-next').textContent = personalIndex === steps.length - 1 ? 'Plán prejdený ✓' : 'Ďalší bod →';
+  }
   async function saveVault() {
-    const blob = await PrivateVault.encrypt(state.vault, state.vaultPassword);
-    localStorage.setItem(storageKeys.vault, JSON.stringify(blob));
+    const storageKey = state.vaultStorageKey;
+    if (!storageKey || !state.vault) throw new Error('Locked');
+    const blob = { ...await PrivateVault.encrypt(state.vault, state.vaultPassword), ...(storageKey === personalStorageKey ? { planId: personalPlanId } : {}) };
+    localStorage.setItem(storageKey, JSON.stringify(blob));
     return blob;
   }
-  async function setupVault(event) {
+  async function restoreVault(event) {
     event.preventDefault();
     const epoch = vaultEpoch;
     const button = event.submitter;
-    const password = $('setup-password').value;
-    if (password.length < 8 || password !== $('confirm-password').value) { $('private-message').textContent = 'Heslá sa musia zhodovať a mať aspoň 8 znakov.'; return; }
+    const password = $('restore-password').value;
     button.disabled = true;
-    let content = { version: 1, sections: [], notes: '' };
     try {
       if (!crypto.subtle) throw new Error('Secure context required');
       const file = $('private-file').files[0];
-      if (file) {
-        if (file.size > 250000) throw new Error('Too large');
-        const parsed = JSON.parse(await file.text());
-        if (PrivateVault.valid(parsed)) content = await PrivateVault.decrypt(parsed, password);
-        else {
-          if (file.size > 100000) throw new Error('Personal file too large');
-          if (parsed.version !== 1 || !Array.isArray(parsed.sections) || parsed.sections.some(s => typeof s.title !== 'string' || !Array.isArray(s.items) || s.items.some(x => typeof x !== 'string'))) throw new Error('Invalid personal file');
-          content = { version: 1, sections: parsed.sections, notes: typeof parsed.notes === 'string' ? parsed.notes : '' };
-        }
-      }
+      if (!file || file.size > 250000) throw new Error('Invalid file');
+      const parsed = JSON.parse(await file.text());
+      const content = await PrivateVault.decrypt(parsed, password);
       if (epoch !== vaultEpoch || document.hidden || state.view !== 'private') return;
-      state.vault = content; state.vaultPassword = password;
+      state.vault = content; state.vaultPassword = password; state.vaultStorageKey = parsed.planId === personalPlanId ? personalStorageKey : storageKeys.vault;
+      personalIndex = 0;
       await saveVault();
-      $('setup-form').reset(); renderVault();
+      $('restore-form').reset(); $('backup-options').open = false; renderVault();
     } catch {
       lockVault();
-      $('private-message').textContent = 'Časť sa nepodarilo uložiť. Skontroluj súbor, heslo k zálohe a povolené ukladanie v prehliadači. Pôvodné uloženie zostalo zachované.';
+      $('private-message').textContent = 'Zálohu sa nepodarilo otvoriť. Skontroluj súbor, heslo a povolené ukladanie. Pôvodné uloženie zostalo zachované.';
     } finally { button.disabled = false; }
   }
   async function unlockVault(event) {
@@ -586,11 +612,21 @@ const PrivateVault = {
     const epoch = vaultEpoch;
     try {
       const password = $('unlock-password').value;
-      const content = await PrivateVault.decrypt(vaultBlob(), password);
+      const savedPlan = readLocal(personalStorageKey, null);
+      const legacy = readLocal(storageKeys.vault, null);
+      const candidates = [];
+      if (savedPlan) candidates.push({ blob: savedPlan, key: personalStorageKey });
+      if (legacy) candidates.push({ blob: legacy, key: storageKeys.vault });
+      let opened = null;
+      for (const candidate of candidates) {
+        try { opened = { content: await PrivateVault.decrypt(candidate.blob, password), key: candidate.key }; break; } catch { /* Preserve saved data while trying another vault. */ }
+      }
+      if (!opened && !savedPlan) opened = { content: await PrivateVault.decrypt(await loadPersonalBundle(), password), key: personalStorageKey };
+      if (!opened) throw new Error('Saved notes could not be opened');
       if (epoch !== vaultEpoch || document.hidden || state.view !== 'private') return;
-      state.vault = content;
+      state.vault = opened.content; state.vaultStorageKey = opened.key; personalIndex = 0;
       state.vaultPassword = password; $('unlock-password').value = ''; renderVault();
-    } catch { $('private-message').textContent = 'Heslo nesedí alebo je záloha poškodená.'; }
+    } catch { if (epoch === vaultEpoch && state.view === 'private') $('private-message').textContent = 'Plán sa nepodarilo otvoriť. Skopíruj presné heslo z chatu a skontroluj pripojenie. Uložené poznámky zostali zachované.'; }
     finally { button.disabled = false; }
   }
   async function load() {
@@ -645,10 +681,12 @@ const PrivateVault = {
   $('reset-equipment').addEventListener('click', () => { state.gear[state.selected.id] = []; writeLocal(storageKeys.gear, state.gear); renderEquipment(); });
   $('timer-toggle').addEventListener('click', () => { const clock = currentClock(); if (clock.deadline !== null && clock.remaining() > 0) clock.pause(); else clock.start(); updateTimer(); });
   $('timer-reset').addEventListener('click', () => { currentClock().reset(); updateTimer(); });
-  $('setup-form').addEventListener('submit', setupVault);
+  $('restore-form').addEventListener('submit', restoreVault);
+  $('personal-previous').addEventListener('click', () => { personalIndex--; renderPersonalStep(); });
+  $('personal-next').addEventListener('click', () => { personalIndex++; renderPersonalStep(); });
+  $('personal-topic').addEventListener('change', event => { personalIndex = personalSteps().findIndex(step => step.sectionIndex === Number(event.target.value)); renderPersonalStep(); });
   $('unlock-form').addEventListener('submit', unlockVault);
   $('lock-vault').addEventListener('click', lockVault);
-  $('restore-vault').addEventListener('click', () => { $('vault-locked').hidden = true; $('vault-setup').hidden = false; $('private-message').textContent = 'Vyber šifrovanú zálohu. Aktuálne uloženie sa zmení až po úspešnom otvorení.'; });
   $('private-notes-form').addEventListener('submit', async event => {
     event.preventDefault(); const button = event.submitter; button.disabled = true;
     try { state.vault.notes = $('private-notes').value; await saveVault(); $('private-message').textContent = 'Poznámky sú šifrovane uložené v tomto prehliadači.'; }

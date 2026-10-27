@@ -102,7 +102,7 @@ for (const row of gameRows) {
   equal(total, Number(row[0]), 'Every child assigned in final games');
 }
 
-const publicFiles = ['index.html', 'styles.css', 'app.js', 'trainings.json', '.nojekyll', 'README.md'];
+const publicFiles = ['index.html', 'styles.css', 'app.js', 'trainings.json', 'personal-plan.enc.json', '.nojekyll', 'README.md'];
 for (const file of publicFiles) {
   const content = read(file);
   check(!/\uFFFD/.test(content), 'No replacement glyphs');
@@ -140,6 +140,14 @@ await assert.rejects(() => PrivateVault.decrypt(tampered, 'qa-only-synthetic-pas
 const encryptedAgain = await PrivateVault.encrypt(privateFixture, 'qa-only-synthetic-password');
 check(JSON.stringify(encryptedAgain) !== JSON.stringify(encrypted), 'Fresh salt and nonce for each save');
 check(!PrivateVault.valid({ ...encrypted, iterations: 1 }), 'Reject weakened KDF metadata');
+const hostedPlan = JSON.parse(read('personal-plan.enc.json'));
+check(PrivateVault.valid(hostedPlan), 'Hosted plan is an encrypted envelope');
+equal(hostedPlan.planId, 'u11-2026-10-27-v1', 'Hosted plan has expected storage identity');
+equal(Object.keys(hostedPlan).sort(), ['data', 'iterations', 'iv', 'planId', 'salt', 'vaultVersion'], 'Only encrypted envelope metadata is published');
+await assert.rejects(() => PrivateVault.decrypt(hostedPlan, 'qa-only-synthetic-password')); assertions++;
+check(!html.includes('id="setup-form"') && !html.includes('id="confirm-password"'), 'No account creation or password confirmation required');
+check(html.includes('id="personal-next"') && html.includes('id="personal-previous"') && html.includes('id="personal-topic"'), 'Private plan has step navigation and topic picker');
+check(html.includes('<details id="backup-options"') && !html.includes('<details id="backup-options" open'), 'Restore remains optional and collapsed');
 check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No personal file deployed');
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);
