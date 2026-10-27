@@ -48,7 +48,7 @@ Spusť v tomto priečinku `python -m http.server 8765` a otvor `http://localhost
 
 - **Archív** v hornej lište otvorí všetky uložené tréningy od najnovšieho. Vyber konkrétny dátum alebo použi **Zobraziť všetky dni**; kliknutím otvoríš pôvodný celý tréning. Každý deň má vlastný trvalý odkaz `#trening=RRRR-MM-DD`.
 - Štvrtok **29. 10. 2026, 18:00–19:15** má výber 16–24 detí. Počet a brankári ešte nie sú potvrdení; publikovaný je pracovný variant bez brankárov. Zvolený počet sa prenesie do verejného odkazu, rozdelenia skupín, rotácií i schém. Pri 23–24 deťoch sú záverečné plochy zväčšené pre 6-členné tímy.
-- **Prehrať / Pauza / Od začiatku / Ďalší krok** ovládajú spomalenú ukážku akcie. Posuvník umožní presný posun; **Zväčšiť** otvorí schému v samostatnom dialógu. Pri redukovanom pohybe zostáva ručné krokovanie. Animácia sa nespúšťa sama, pozastaví sa pri odchode z časti alebo na pozadie a nemení tréningový časovač. Pokojný záver je statický. Schémy predstavujú jednu možnosť riešenia.
+- **Prehrať / Pauza / Od začiatku / Ďalší krok** ovládajú celú spomalenú ukážku. Prihrávkové cvičenie a rondo prejdú cez všetkých prihrávajúcich späť na začiatok. Priebežný krok/čas a zelené **Ukážka dokončená** označujú koniec, potom je dostupné **Prehrať znova**. Posuvník umožní presný posun; **Zväčšiť** otvorí dialóg a prehrávanie pokračuje aj pri otvorení či zatvorení. Prehrávanie sa spúšťa len výslovným tlačidlom, aj pri preferencii redukovaného pohybu je možné použiť ručné kroky. Odchod z časti/na pozadie pauzuje; tréningový časovač sa nemení. Pokojný záver je statický.
 - Tréningy sú trvalo uložené v `trainings.json` na GitHube a nezmiznú vymazaním údajov mobilu. Ďalšie dni pridávaj do tohto zoznamu, staré zachovaj. Samotné otvorenie archívu nič neprepisuje ani nevytvára nový tréning.
 - Rozloženie reaguje na šírku aj výšku obrazovky: mobil má jeden stĺpec, veľký počítač schému vedľa pokynov. Nízka obrazovka na šírku má kompaktnejšie ovládanie a dialógy sa posúvajú vo vlastnom okne.
 - Tlačidlo **Zdieľať** zobrazí odkaz s možnosťou **Skopírovať odkaz**. V podporovanom prehliadači ponúkne aj **Zdieľať cez aplikáciu**. Ak kopírovanie prehliadač nedovolí, odkaz je možné skopírovať manuálne z poľa.
@@ -63,11 +63,11 @@ Spusť v tomto priečinku `python -m http.server 8765` a otvor `http://localhost
 
 ## Moja súkromná časť
 
-1. Otvor **Moje**, zadaj heslo z osobného chatu a klikni **Otvoriť osobný plán**. Netreba nič importovať ani vytvárať ďalšie heslo. Heslo neposielaj kolegovi spolu s verejným odkazom.
+1. Otvor **Moje** pre zvolený tréningový deň alebo vyber **Osobný plán na deň**. Dostupný je utorok 27. 10. a štvrtok 29. 10. 2026, oba pod rovnakým heslom z osobného chatu. Klikni **Otvoriť osobný plán**; netreba import ani nové heslo. Pri dni bez osobného plánu sa zobrazí výber dostupného dňa. Heslo neposielaj kolegovi spolu s verejným odkazom.
 2. Plán zobrazuje vždy jeden bod. **Späť / Ďalší bod** prechádzajú celý obsah; cez **Vyber situáciu** môžeš rovno prejsť na potrebnú tému. **Poznámky a možnosti** sú zbalené.
-3. `personal-plan.enc.json` obsahuje len šifrovaný osobný plán (AES-256-GCM, PBKDF2-SHA256, 250 000 iterácií). Je verejne dostupný na GitHube na základe výslovného súhlasu používateľa z 27. 10. 2026. Heslo a čitateľný osobný zdroj nie sú v repozitári. Heslo sa v aplikácii neukladá.
-4. Rovnaké heslo otvorí pripravený plán aj v inom zariadení. **Uložiť poznámky** ukladá iba do tohto prehliadača a iba šifrovane s novou soľou a nonce. Poznámky sa nesynchronizujú. Staré lokálne záznamy zostávajú zachované a dajú sa otvoriť pôvodným heslom.
-5. **Šifrovaná záloha** uloží poznámky a stiahne šifrovaný súbor. Voliteľne ho obnovíš v zamknutej časti cez **Obnoviť uloženú zálohu**, súbor a jeho heslo. Žiadny import nie je potrebný na bežné otvorenie plánu.
+3. `personal-plan.enc.json` (utorok) a `personal-plan-2026-10-29.enc.json` (štvrtok) obsahujú iba šifrované plány (AES-256-GCM, PBKDF2-SHA256, 250 000 iterácií). Sú verejné na GitHube podľa výslovného súhlasu používateľa. Register `PersonalPlans` v app.js spája dátum, planId a obálku. Heslo a čitateľné osobné zdroje nie sú v repozitári. Heslo sa v aplikácii neukladá.
+4. Rovnaké heslo otvorí plán aj v inom zariadení. **Uložiť poznámky** ukladá iba do tohto prehliadača, šifrovane a oddelene podľa planId/dňa. Utorkový kľúč aj staré lokálne záznamy zostávajú zachované; starý trezor sa otvára v utorkovom dni pôvodným heslom. Poznámky sa nesynchronizujú. Výber iného dňa plán zamkne.
+5. **Šifrovaná záloha** uloží poznámky a stiahne šifrovaný súbor s planId. Obnovíš ho cez **Obnoviť uloženú zálohu** po výbere správneho dňa. Záloha iného dňa sa odmietne bez prepisu. Staršie zálohy bez planId patria do utorkového dňa. Žiadny import nie je potrebný na bežné otvorenie plánu.
 6. **Zamknúť**, odchod z časti alebo prepnutie aplikácie odstráni otvorený obsah a heslo z aplikačného stavu. Neuložené poznámky sa stratia. Vymazanie údajov prehliadača vymaže lokálne poznámky; pripravený plán zostane dostupný s heslom. Pri strate hesla ho aplikácia neobnoví.
 
 Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Zdieľacie tlačidlá neposielajú súkromný obsah ani heslo. Čitateľný osobný súbor ani heslo nikdy nepridávaj do verejného repozitára. Nový osobný plán najprv šifruj mimo repozitára; nepublikuj ho bez poverenia používateľa.
@@ -76,7 +76,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu pri `styles.css?v=6`, `app.js?v=6` a pri zmene modulu aj `football.js?v=1` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu pri `styles.css?v=7`, `app.js?v=7` a pri zmene modulu aj `football.js?v=2` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 

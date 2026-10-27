@@ -7,9 +7,9 @@
   <meta name="description" content="Klikateľný tréning U10 a U11 priamo na ihrisko. Jedna činnosť, schéma, dávka a ďalší krok.">
   <title>Tréningy U10 / U11</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123d35'/%3E%3Crect x='15' y='10' width='34' height='44' rx='2' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M15 32h34' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles.css?v=6">
-  <script src="./football.js?v=1" defer></script>
-  <script src="./app.js?v=6" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=7">
+  <script src="./football.js?v=2" defer></script>
+  <script src="./app.js?v=7" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -58,9 +58,10 @@
       </section>
       <section id="private-view" class="view" hidden aria-labelledby="private-title">
         <p class="eyebrow">Len pre mňa</p><h1 id="private-title">Osobný plán</h1>
+        <label class="step-label" for="private-plan-select">Osobný plán na deň</label><select id="private-plan-select" aria-label="Osobný plán na deň"></select>
         <p id="private-intro" class="muted">Čo povedať, čo si všímať a ako podporiť odvahu.</p>
         <div id="vault-locked" hidden class="private-card">
-          <h2>Plán je pripravený</h2><p>Zadaj heslo, ktoré máš v chate. Nič nemusíš sťahovať ani importovať.</p>
+          <h2 id="private-ready-title">Plán je pripravený</h2><p id="private-ready-text">Zadaj rovnaké heslo z chatu. Nič nemusíš sťahovať ani importovať.</p>
           <form id="unlock-form"><label for="unlock-password">Heslo z chatu</label><input id="unlock-password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required><button class="button" type="submit">Otvoriť osobný plán</button></form>
           <p class="small-note">Rovnaké heslo otvorí plán aj v inom mobile. Svoje poznámky máš uložené iba v tomto prehliadači.</p>
           <details id="backup-options" class="sources"><summary>Obnoviť uloženú zálohu</summary><form id="restore-form">

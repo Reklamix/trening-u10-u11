@@ -119,7 +119,7 @@ for (const row of gameRows) {
   equal(total, Number(row[0]), 'Every child assigned in final games');
 }
 
-const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'trainings.json', 'personal-plan.enc.json', '.nojekyll', 'README.md'];
+const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'trainings.json', 'personal-plan.enc.json', 'personal-plan-2026-10-29.enc.json', '.nojekyll', 'README.md'];
 for (const file of publicFiles) {
   const content = read(file);
   check(!/\uFFFD/.test(content), 'No replacement glyphs');
@@ -140,7 +140,16 @@ const stable = value => Array.isArray(value) ? '[' + value.map(stable).join(', '
 equal(createHash('sha256').update(stable(mon)).digest('hex'), 'ca3903386575776828717369261c0453161a9cedbc37238bce3af1f3c735c188', 'Monday archive unchanged');
 equal(createHash('sha256').update(stable(tue)).digest('hex'), 'c6d977c75d4495f9a13d84644f5df07389ab7fdc7474546409b7772952ce0ee6', 'Tuesday archive unchanged');
 const pure = read('app.js').split('// BROWSER_APP')[0];
-const { TrainingClock, PrivateVault, TrainingArchive, TrainingSchedule } = runInNewContext(pure + '\n({TrainingClock, PrivateVault, TrainingArchive, TrainingSchedule})', { crypto: webcrypto, TextEncoder, TextDecoder, btoa, atob });
+const { TrainingClock, PrivateVault, TrainingArchive, TrainingSchedule, PersonalPlans } = runInNewContext(pure + '\n({TrainingClock, PrivateVault, TrainingArchive, TrainingSchedule, PersonalPlans})', { crypto: webcrypto, TextEncoder, TextDecoder, btoa, atob });
+equal(JSON.stringify(PersonalPlans.map(p=>p.date)),JSON.stringify(['2026-10-27','2026-10-29']),'Personal plans are selected by training date');
+equal(new Set(PersonalPlans.map(p=>'training-private-plan-'+p.id)).size,2,'Each day has a separate notes storage key');
+for(const plan of PersonalPlans){
+  const blob=JSON.parse(read(plan.file.replace('./','')));
+  check(PrivateVault.valid(blob),'Dated personal file is encrypted');
+  equal(blob.planId,plan.id,'Dated envelope matches its registry');
+  equal(Object.keys(blob).sort(),['data','iterations','iv','planId','salt','vaultVersion'],'Dated artifact contains no plaintext sections');
+  await assert.rejects(()=>PrivateVault.decrypt(blob,'qa-wrong-dated-password'));assertions++;
+}
 equal(TrainingSchedule.clock(thu.startTime,75),'19:15','Thursday ends at 19:15');
 equal(TrainingSchedule.clock('23:50',15),'00:05','Clock labels cross midnight correctly');
 equal(JSON.stringify(TrainingArchive.list(data.trainings).map(t => t.date)), JSON.stringify(['2026-10-29','2026-10-27', '2026-10-26']), 'Archive preserves existing dates and adds Thursday');
@@ -177,6 +186,7 @@ equal(Object.keys(hostedPlan).sort(), ['data', 'iterations', 'iv', 'planId', 'sa
 await assert.rejects(() => PrivateVault.decrypt(hostedPlan, 'qa-only-synthetic-password')); assertions++;
 check(!html.includes('id="setup-form"') && !html.includes('id="confirm-password"'), 'No account creation or password confirmation required');
 check(html.includes('id="personal-next"') && html.includes('id="personal-previous"') && html.includes('id="personal-topic"'), 'Private plan has step navigation and topic picker');
+check(html.includes('id="private-plan-select"'),'Private dates can be selected without leaving Moje');
 check(html.includes('<details id="backup-options"') && !html.includes('<details id="backup-options" open'), 'Restore remains optional and collapsed');
 check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No personal file deployed');
 
@@ -206,6 +216,20 @@ for(const size of [4,5,6])for(const key of ['football-pass','football-rondo','fo
   const scene=FootballScenes.build(key,{size});
   equal(scene.nodes.filter(n=>n.kind==='player').length,size,'Local scene has exact selected group size');
   if(key==='football-rondo')equal(scene.nodes.filter(n=>n.team==='B').length,1,'Rondo has one defender');
+  if(['football-pass','football-rondo'].includes(key)){
+    const count=key==='football-pass'?size:size-1;
+    equal(scene.transfers.length,count,'Full animation visits every passing player');
+    equal(scene.transfers[0].from,'p0','Passing cycle starts with first player');
+    equal(scene.transfers.at(-1).to,'p0','Passing cycle returns to its first player');
+    equal(new Set(scene.transfers.map(t=>t.from)).size,count,'Every player passes once in the completed cycle');
+    for(const transfer of scene.transfers){
+      const ball=FootballScenes.sample(scene.tracks.ball,transfer.settled),receiver=FootballScenes.sample(scene.tracks[transfer.to],transfer.settled);
+      check(Math.hypot(ball.x-receiver.x,ball.y-receiver.y)<12,'Each complete-cycle pass finishes at the receiver');
+    }
+    const ball=FootballScenes.sample(scene.tracks.ball,scene.duration),first=FootballScenes.sample(scene.tracks.p0,scene.duration);
+    check(Math.hypot(ball.x-first.x,ball.y-first.y)<12,'Completed cycle holds the ball at its returning receiver');
+    check(scene.duration>=count*4,'Complete playback includes all actions before finishing');
+  }
   if(key==='football-zones'){
     equal(scene.nodes.filter(n=>n.team==='N').length,size-4,'Zone game has correct neutrals');
     const ball=FootballScenes.sample(scene.tracks.ball,6),receiver=FootballScenes.sample(scene.tracks.a2,6);

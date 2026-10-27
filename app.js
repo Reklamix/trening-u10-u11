@@ -48,6 +48,11 @@ const TrainingSchedule = {
   }
 };
 
+const PersonalPlans = [
+  {date:'2026-10-27',id:'u11-2026-10-27-v1',file:'./personal-plan.enc.json'},
+  {date:'2026-10-29',id:'u11-2026-10-29-v1',file:'./personal-plan-2026-10-29.enc.json'}
+];
+
 // BROWSER_APP
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -589,26 +594,26 @@ const TrainingSchedule = {
     }
     if (!initial) window.scrollTo({ top: 0, behavior: 'instant' });
   }
-  const personalPlanId = 'u11-2026-10-27-v1';
-  const personalStorageKey = 'training-private-plan-' + personalPlanId;
-  let personalBundle = null;
+  const personalBundles = new Map();
+  function currentPersonalPlan() { return PersonalPlans.find(plan=>plan.date===state.selected?.id)||null; }
+  function personalStorageKey(plan) { return 'training-private-plan-'+plan.id; }
   let personalIndex = 0;
   function personalSteps() {
     return state.vault.sections.flatMap((section, sectionIndex) => section.items.map((text, itemIndex) => ({ title: section.title, text, sectionIndex, itemIndex, count: section.items.length })));
   }
-  async function loadPersonalBundle() {
-    if (!personalBundle) {
-      const response = await fetch('./personal-plan.enc.json', { cache: 'no-cache' });
+  async function loadPersonalBundle(plan) {
+    if (!personalBundles.has(plan.id)) {
+      const response = await fetch(plan.file, { cache: 'no-cache' });
       if (!response.ok) throw new Error('Plan unavailable');
       const blob = await response.json();
-      if (!PrivateVault.valid(blob) || blob.planId !== personalPlanId) throw new Error('Invalid plan');
-      personalBundle = blob;
+      if (!PrivateVault.valid(blob) || blob.planId !== plan.id) throw new Error('Invalid plan');
+      personalBundles.set(plan.id,blob);
     }
-    return personalBundle;
+    return personalBundles.get(plan.id);
   }
   function lockVault() {
     vaultEpoch++;
-    state.vault = null; state.vaultPassword = null; state.vaultStorageKey = null;
+    state.vault = null; state.vaultPassword = null; state.vaultStorageKey = null; state.vaultPlanId = null;
     personalIndex = 0;
     $('private-notes').value = '';
     $('personal-sections').replaceChildren();
@@ -619,7 +624,15 @@ const TrainingSchedule = {
     if (state.view === 'private') renderVault();
   }
   function renderVault() {
+    const plan=currentPersonalPlan();
+    const options=PersonalPlans.map(p=>{const option=el('option','',dateLabel(p.date)+(p.date==='2026-10-29'?' · 18:00':''));option.value=p.date;return option;});
+    if(!plan){const placeholder=el('option','','Vyber deň osobného plánu');placeholder.value='';placeholder.disabled=true;options.unshift(placeholder);}
+    $('private-plan-select').replaceChildren(...options);$('private-plan-select').value=plan?.date||'';
+    $('unlock-form').hidden=!plan;
+    $('private-ready-title').textContent=plan?'Plán je pripravený':'Vyber deň';
+    $('private-ready-text').textContent=plan?'Zadaj rovnaké heslo z chatu. Nič nemusíš sťahovať ani importovať.':'Pre tento tréning osobný plán zatiaľ nie je. Vyber dostupný deň vyššie.';
     const unlocked = Boolean(state.vault);
+    $('private-view').classList.toggle('is-unlocked',unlocked);
     $('vault-locked').hidden = unlocked;
     $('private-intro').hidden = unlocked;
     $('vault-content').hidden = !unlocked;
@@ -651,7 +664,8 @@ const TrainingSchedule = {
   async function saveVault() {
     const storageKey = state.vaultStorageKey;
     if (!storageKey || !state.vault) throw new Error('Locked');
-    const blob = { ...await PrivateVault.encrypt(state.vault, state.vaultPassword), ...(storageKey === personalStorageKey ? { planId: personalPlanId } : {}) };
+    const planId=state.vaultPlanId;
+    const blob = { ...await PrivateVault.encrypt(state.vault, state.vaultPassword), ...(planId ? { planId } : {}) };
     localStorage.setItem(storageKey, JSON.stringify(blob));
     return blob;
   }
@@ -666,15 +680,19 @@ const TrainingSchedule = {
       const file = $('private-file').files[0];
       if (!file || file.size > 250000) throw new Error('Invalid file');
       const parsed = JSON.parse(await file.text());
+      const plan=currentPersonalPlan();
+      if(!plan || (parsed.planId ? parsed.planId!==plan.id : plan.date!=='2026-10-27'))throw new Error('Backup belongs to another day');
       const content = await PrivateVault.decrypt(parsed, password);
+      if((content.trainingDate&&content.trainingDate!==plan.date)||(plan.date==='2026-10-29'&&content.trainingDate!==plan.date))throw new Error('Content date mismatch');
       if (epoch !== vaultEpoch || document.hidden || state.view !== 'private') return;
-      state.vault = content; state.vaultPassword = password; state.vaultStorageKey = parsed.planId === personalPlanId ? personalStorageKey : storageKeys.vault;
+      state.vault = content; state.vaultPassword = password; state.vaultPlanId=parsed.planId||null; state.vaultStorageKey = parsed.planId ? personalStorageKey(plan) : storageKeys.vault;
       personalIndex = 0;
       await saveVault();
       $('restore-form').reset(); $('backup-options').open = false; renderVault();
     } catch {
+      if(epoch!==vaultEpoch||state.view!=='private')return;
       lockVault();
-      $('private-message').textContent = 'Zálohu sa nepodarilo otvoriť. Skontroluj súbor, heslo a povolené ukladanie. Pôvodné uloženie zostalo zachované.';
+      $('private-message').textContent = 'Zálohu sa nepodarilo otvoriť. Skontroluj súbor, heslo, vybraný deň a povolené ukladanie. Pôvodné uloženie zostalo zachované.';
     } finally { button.disabled = false; }
   }
   async function unlockVault(event) {
@@ -682,19 +700,23 @@ const TrainingSchedule = {
     const epoch = vaultEpoch;
     try {
       const password = $('unlock-password').value;
-      const savedPlan = readLocal(personalStorageKey, null);
-      const legacy = readLocal(storageKeys.vault, null);
+      const plan=currentPersonalPlan();
+      if(!plan)throw new Error('No plan for this day');
+      const key=personalStorageKey(plan);
+      const savedPlan = readLocal(key, null);
+      const legacy = plan.date==='2026-10-27'?readLocal(storageKeys.vault, null):null;
       const candidates = [];
-      if (savedPlan) candidates.push({ blob: savedPlan, key: personalStorageKey });
+      if (savedPlan) candidates.push({ blob: savedPlan, key });
       if (legacy) candidates.push({ blob: legacy, key: storageKeys.vault });
       let opened = null;
       for (const candidate of candidates) {
         try { opened = { content: await PrivateVault.decrypt(candidate.blob, password), key: candidate.key }; break; } catch { /* Preserve saved data while trying another vault. */ }
       }
-      if (!opened && !savedPlan) opened = { content: await PrivateVault.decrypt(await loadPersonalBundle(), password), key: personalStorageKey };
+      if (!opened && !savedPlan) opened = { content: await PrivateVault.decrypt(await loadPersonalBundle(plan), password), key };
       if (!opened) throw new Error('Saved notes could not be opened');
+      if((opened.content.trainingDate&&opened.content.trainingDate!==plan.date)||(plan.date==='2026-10-29'&&opened.content.trainingDate!==plan.date))throw new Error('Content date mismatch');
       if (epoch !== vaultEpoch || document.hidden || state.view !== 'private') return;
-      state.vault = opened.content; state.vaultStorageKey = opened.key; personalIndex = 0;
+      state.vault = opened.content; state.vaultStorageKey = opened.key; state.vaultPlanId=opened.key===key?plan.id:null; personalIndex = 0;
       state.vaultPassword = password; $('unlock-password').value = ''; renderVault();
     } catch { if (epoch === vaultEpoch && state.view === 'private') $('private-message').textContent = 'Plán sa nepodarilo otvoriť. Skopíruj presné heslo z chatu a skontroluj pripojenie. Uložené poznámky zostali zachované.'; }
     finally { button.disabled = false; }
@@ -756,6 +778,7 @@ const TrainingSchedule = {
   $('timer-toggle').addEventListener('click', () => { const clock = currentClock(); if (clock.deadline !== null && clock.remaining() > 0) clock.pause(); else clock.start(); updateTimer(); });
   $('timer-reset').addEventListener('click', () => { currentClock().reset(); updateTimer(); });
   $('restore-form').addEventListener('submit', restoreVault);
+  $('private-plan-select').addEventListener('change',event=>{history.pushState(null,'',linkFor(event.target.value,null,'private'));onRoute();});
   $('personal-previous').addEventListener('click', () => { personalIndex--; renderPersonalStep(); });
   $('personal-next').addEventListener('click', () => { personalIndex++; renderPersonalStep(); });
   $('personal-topic').addEventListener('change', event => { personalIndex = personalSteps().findIndex(step => step.sectionIndex === Number(event.target.value)); renderPersonalStep(); });
