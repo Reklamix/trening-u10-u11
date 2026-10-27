@@ -1,8 +1,16 @@
 'use strict';
 
 class FootballTimeline {
-  constructor(duration) { this.duration=duration; this.value=0; this.origin=null; }
-  time(now=performance.now()) { return Math.min(this.duration, this.value+(this.origin===null?0:(now-this.origin)/1000)); }
+  constructor(duration) { this.duration=duration; this.value=0; this.origin=null; this.rate=1; this.loop=false; }
+  time(now=performance.now()) {
+    const value=this.value+(this.origin===null?0:(now-this.origin)/1000*this.rate);
+    return this.loop&&this.origin!==null&&this.duration>0?value%this.duration:Math.min(this.duration,value);
+  }
+  setRate(rate,now=performance.now()) {
+    if(![.25,.5,1,1.5].includes(rate))throw new RangeError('Unsupported animation rate');
+    this.value=this.time(now);if(this.origin!==null)this.origin=now;this.rate=rate;
+  }
+  setLoop(loop,now=performance.now()) { this.value=this.time(now);if(this.origin!==null)this.origin=now;this.loop=Boolean(loop); }
   play(now=performance.now()) { if(this.time(now)>=this.duration)this.value=0; if(this.origin===null)this.origin=now; }
   pause(now=performance.now()) { this.value=this.time(now); this.origin=null; }
   seek(value) { this.value=Math.max(0,Math.min(this.duration,Number(value)||0)); this.origin=null; }
@@ -131,6 +139,9 @@ const FootballScenes = {
     const progress=html('output','football-progress');progress.setAttribute('aria-live','off');progress.setAttribute('aria-label','Priebeh celej ukážky');
     const controls=html('div','football-controls'),play=html('button','button','Prehrať'),next=html('button','secondary-button','Ďalší krok'),reset=html('button','secondary-button','Od začiatku');
     for(const b of[play,next,reset])b.type='button';controls.append(play,next,reset);
+    const settings=html('div','football-playback-settings'),speedLabel=html('label','football-select-label','Rýchlosť animácie'),speed=html('select');speed.setAttribute('aria-label','Rýchlosť animácie');
+    for(const[value,label]of[[.25,'0,25×'],[.5,'0,5×'],[1,'1×'],[1.5,'1,5×']]){const option=html('option','',label);option.value=value;speed.append(option);}speed.value='1';speedLabel.append(speed);
+    const repeatLabel=html('label','football-repeat'),repeat=html('input');repeat.type='checkbox';repeatLabel.append(repeat,document.createTextNode('Opakovať dokola'));settings.append(speedLabel,repeatLabel);
     const scrub=html('input','football-scrub');scrub.type='range';scrub.min='0';scrub.step='.01';scrub.setAttribute('aria-label','Priebeh animovanej ukážky');
     const note=html('p','small-note','Prehrať spustí celú spomalenú ukážku až do konca. Tréningový časovač sa nemení.');
     const legend=html('details','diagram-help');legend.append(html('summary','','Futbalové značky a celý plán'));
@@ -145,10 +156,11 @@ const FootballScenes = {
     }
     legend.append(caption,list);
     if(/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
-    root.append(selectors,controls,figure,status,progress,scrub,note,legend);parent.append(root);
+    root.append(selectors,controls,settings,figure,status,progress,scrub,note,legend);parent.append(root);
     let actors=new Map(),arrowLayers=[];
     function build() {
       pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      clock.setRate(Number(speed.value));clock.setLoop(repeat.checked);
       const p=scene.pitch;
       if(p){
         svg.append(svgNode('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:'#e5eddd',stroke:'#638268','stroke-width':1.2}));
@@ -177,7 +189,7 @@ const FootballScenes = {
         else g.append(svgNode('text',{x:0,y:.5,'text-anchor':'middle','dominant-baseline':'middle',fill:['N','T'].includes(node.team)?'#173b31':'white','font-size':r===7?7:9,'font-weight':650},node.label));
         svg.append(g);actors.set(node.id,g);
       }
-      caption.textContent=scene.caption;scrub.max=String(scene.duration);controls.hidden=scene.duration===0;scrub.hidden=scene.duration===0;note.hidden=scene.duration===0;progress.hidden=scene.duration===0;
+      caption.textContent=scene.caption;scrub.max=String(scene.duration);controls.hidden=scene.duration===0;settings.hidden=scene.duration===0;scrub.hidden=scene.duration===0;note.hidden=scene.duration===0;progress.hidden=scene.duration===0;
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)note.textContent='Prehrávanie spustíš iba tlačidlom. Pri obmedzenom pohybe môžeš použiť Ďalší krok alebo posuvník.';
       render();
     }
@@ -207,6 +219,8 @@ const FootballScenes = {
     next.addEventListener('click',()=>{pause();const nextStep=scene.steps.find(s=>s.time>clock.time()+.02);clock.seek(nextStep?nextStep.time:scene.duration);render();});
     reset.addEventListener('click',()=>{pause();clock.seek(0);render();});
     scrub.addEventListener('input',()=>{const value=scrub.value;pause();clock.seek(value);render();});
+    speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));render();});
+    repeat.addEventListener('change',()=>{clock.setLoop(repeat.checked);render();});
     active={pause,destroy:()=>{pause();root.remove();if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
   }
   function clear(){active?.destroy();active=null;}

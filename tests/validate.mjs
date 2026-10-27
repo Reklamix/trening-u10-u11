@@ -199,6 +199,31 @@ motion.play(10000);equal(motion.time(12000),5,'Animation resumes without jumping
 motion.pause(12000);motion.seek(2);equal(motion.time(50000),2,'Seeking pauses at exact step');
 motion.play(0);equal(motion.time(50000),8,'Animation clamps to its end');
 motion.pause(50000);motion.play(60000);equal(motion.time(60000),0,'Completed animation restarts');
+for(const rate of [.25,.5,1,1.5]){
+  const paced=new FootballTimeline(8);paced.setRate(rate,0);paced.play(1000);
+  equal(paced.time(3000),2*rate,'Selected playback rate scales elapsed time');
+  paced.pause(3000);equal(paced.time(9000),2*rate,'Pause freezes every playback rate');
+  paced.play(10000);equal(paced.time(11000),3*rate,'Resume keeps selected playback rate');
+}
+const paced=new FootballTimeline(8);paced.play(0);paced.setRate(.5,2000);
+equal(paced.time(2000),2,'Changing running speed preserves position');
+equal(paced.time(6000),4,'New speed applies from change onward');
+paced.pause(6000);paced.setRate(.25,10000);equal(paced.time(20000),4,'Changing paused speed preserves position');
+paced.setLoop(true,20000);paced.play(20000);
+equal(paced.time(40000),1,'Loop wraps with selected slow speed');
+equal(paced.time(104000),1,'Loop spans multiple complete cycles');
+paced.setRate(1.5,104000);equal(paced.time(104000),1,'Speed change in loop preserves cycle position');
+paced.pause(106000);equal(paced.time(200000),4,'Loop pauses without restarting');
+paced.play(200000);paced.setLoop(false,202000);
+equal(paced.time(202000),7,'Disabling loop keeps current cycle position');
+equal(paced.time(204000),8,'Disabled loop finishes normally');
+paced.pause(204000);paced.setLoop(true,204000);paced.seek(8);
+equal(paced.time(205000),8,'Seeking to end while paused holds final frame with loop selected');
+paced.play(206000);equal(paced.time(206000),0,'Playing completed loop restarts');
+paced.pause(207000);paced.seek(0);
+equal(paced.rate,1.5,'Reset preserves selected speed');equal(paced.loop,true,'Reset preserves selected repeat setting');
+const still=new FootballTimeline(0);still.setLoop(true,0);still.play(0);equal(still.time(2000),0,'Static scene never divides by zero in loop');
+let invalidRateRejected=false;try{paced.setRate(0);}catch{invalidRateRejected=true;}check(invalidRateRejected,'Zero playback speed is rejected');
 for(const total of thu.attendanceCases.map(c=>c.total)){
   let players=0,balls=0,matchPlayers=0;
   for(const pitchIndex of [0,1]){
