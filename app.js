@@ -242,6 +242,28 @@ const TrainingArchive = {
     })
   };
 
+  drawings['duel-no-keeper'] = () => ({
+    height:236, body:field()+gate(330,74)+gate(330,157)+player(65,113,'A')+ball(81,114)+player(123,97,'O','opponent')+arrow(81,126,129,151)+arrow(129,151,215,133)+text(180,21,'1 na 1 · dve malé bránky')+text(180,218,'Začiatok s loptou pri nohe'),
+    caption:'Útočník si vyberá jednu z dvoch malých bránok. Obranca sa zapojí po prvom dotyku. Nikto nechytá.'
+  });
+  drawings['two-one-no-keeper'] = () => ({
+    height:246, body:field()+gate(330,74)+gate(330,157)+player(64,152,'1')+ball(80,150)+player(116,65,'2')+player(159,112,'O','opponent')+arrow(80,140,110,78,true)+arrow(131,68,252,85)+arrow(84,159,246,153)+text(180,21,'2 na 1 · dve malé bránky')+text(180,219,'Prihrať alebo využiť voľnú cestu'),
+    caption:'Začína útočník s loptou pri nohe. Šípky ukazujú dve možnosti, nie povinné poradie. Dve malé bránky bez chytania.'
+  });
+  drawings['two-two-no-keeper'] = () => ({
+    height:237, body:field()+gate(30,74)+gate(30,157)+gate(330,74)+gate(330,157)+player(107,75,'1')+player(120,158,'2')+ball(136,158)+player(221,83,'O','opponent')+player(240,155,'O','opponent')+arrow(120,87,160,119)+text(180,21,'2 na 2 · štyri malé bránky')+text(180,218,'Striedanie a oddych v Rotáciách'),
+    caption:'Po zisku sa mení smer útoku. Nikto nestojí trvalo v bráne. Vyber rotáciu pre 4, 5 alebo 6 hráčov podľa svojej skupiny.'
+  });
+  drawings['two-matches-no-keeper'] = () => {
+    let body='';
+    for (const [offset,label] of [[0,'A'],[160,'B']]) {
+      body+=text(180,21+offset,label+' · štyri malé bránky')+field(30,36+offset,300,111)+gate(30,65+offset)+gate(30,115+offset)+gate(330,65+offset)+gate(330,115+offset);
+      [[90,63],[100,121],[165,91]].forEach(([x,y],i)=>{body+=player(x,y+offset,String(i+1));});
+      [[270,63],[260,121],[210,91]].forEach(([x,y],i)=>{body+=player(x,y+offset,String(i+1),'opponent');});
+    }
+    return {height:320,body,caption:'Dva zápasy bez brankárov. Schéma je ilustračná; presné počty a prípadného neutrálneho hráča nájdeš v Rotáciách podľa dnešnej dochádzky.'};
+  };
+
   function addDiagram(parent, key, id, title) {
     const draw = drawings[key]?.();
     if (!draw) return;
@@ -259,6 +281,7 @@ const TrainingArchive = {
     if (key === 'finish' || key === 'sprint-jump') return;
     const legend = el('div', 'diagram-legend');
     [['player', 'Hráč'], ['opponent', 'Súper'], ['keeper', 'Brankár B'], ['pass', 'Prihrávka'], ['move', 'Pohyb / vedenie']].forEach(([kind, label]) => {
+      if (kind === 'keeper' && state.selected?.keepers === 0) return;
       const item = el('span', 'legend-item');
       const symbol = el('span', ['pass', 'move'].includes(kind) ? `legend-line ${kind}` : `legend-dot ${kind}`);
       symbol.setAttribute('aria-hidden', 'true');
@@ -358,10 +381,11 @@ const TrainingArchive = {
   function updateSessionMeta() {
     const training = state.selected;
     const currentCase = attendanceCase();
-    $('session-meta').textContent = training.duration + ' min · ' + (currentCase ? currentCase.total + ' detí · 2 brankári' : training.players);
+    const keepers = training.keepers ?? 2;
+    $('session-meta').textContent = training.duration + ' min · ' + (currentCase ? currentCase.total + ' detí · ' + (keepers === 0 ? 'bez brankárov' : keepers + ' brankári') : training.players);
     const options = currentCase ? [...new Set(currentCase.groups)].sort() : [6];
     if (!options.includes(groupSize)) groupSize = options[0];
-    $('grouping').textContent = currentCase ? 'Štyri skupiny: ' + currentCase.groups.join(' + ') + ' hráčov do poľa. Dvaja brankári zostávajú pri bránach.' : training.players + '. ' + training.coaches + '.';
+    $('grouping').textContent = currentCase ? 'Štyri skupiny: ' + currentCase.groups.join(' + ') + ' hráčov do poľa. ' + (keepers === 0 ? 'Bez brankárov, všetci hrajú nohami.' : 'Brankári zostávajú pri bránach.') : training.players + '. ' + training.coaches + '.';
   }
   function navigate(view, index = state.blockIndex) {
     const training = state.selected;
@@ -450,9 +474,9 @@ const TrainingArchive = {
         if (currentCase && block.id === '5') addTable(panel, { ...table, rows: table.rows.filter(row => Number(row[0]) === state.attendance) });
         else if (currentCase && block.id === '2') addTable(panel, { ...table, rows: table.rows.filter(row => row[0].startsWith(String(groupSize))) });
         else if (currentCase && block.id === '3') {
-          const column = groupSize === 4 ? 1 : 2;
+          const column = table.headers.findIndex(header => header.startsWith(String(groupSize)));
           addTable(panel, { caption: table.caption, headers: ['Akcia', groupSize + ' hráčov: útok / obrana'], rows: table.rows.filter(row => row[column] !== 'Oddych').map(row => [row[0], row[column]]) });
-        } else if (!(currentCase && block.id === '4' && groupSize === 5)) addTable(panel, table);
+        } else if (!(currentCase && block.id === '4') || (table.groupSize ?? 4) === groupSize) addTable(panel, table);
       }
       if (block.variantNotes?.[String(groupSize)]) panel.append(el('p', '', block.variantNotes[String(groupSize)]));
     }

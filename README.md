@@ -35,7 +35,7 @@ node --check app.js
 node tests/validate.mjs
 ```
 
-Kontroly overujú časy, tabuľky, bezpečné odkazy, dnešné počty 19–22 vrátane brankárov, rotácie skupín 4–5, zachovanie pondelka, matematiku časovača a autentizované šifrovanie súkromnej časti. Kryptografické testy používajú syntetický obsah a testovacie heslo; netvoria používateľský trezor. GitHub Pages tieto vlastné kontroly nespúšťa; vykonávajú sa pred commitom.
+Kontroly overujú časy, tabuľky, bezpečné odkazy, dnešné počty 17–22 bez brankárov, rotácie skupín 4–6, zachovanie pondelka, matematiku časovača a autentizované šifrovanie súkromnej časti. Kryptografické testy používajú syntetický obsah a testovacie heslo; netvoria používateľský trezor. GitHub Pages tieto vlastné kontroly nespúšťa; vykonávajú sa pred commitom.
 
 ## Lokálny náhľad
 
@@ -71,12 +71,12 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu pri `styles.css?v=4` a `app.js?v=4` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu pri `styles.css?v=4` a `app.js?v=5` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 
-Klubové tréningy 26. a 27. 10. 2026 nadväzujú na schválené plány U11. Používateľ aktualizoval utorkový počet na 19–22 detí spolu vrátane dvoch brankárov a aspoň dvaja tréneri. V hornej ponuke možno vybrať skutočný počet; dnešné skupiny majú 4–5 hráčov do poľa. V 1 na 1 ostávajú 4 útoky + 4 obrany, v 2 na 1 4 útoky + 2 obrany. V 2 na 2 má štvorčlenná skupina v kole 80 s hry + 40 s oddychu. Pondelkový archív so 14 deťmi je zachovaný.
+Utorkový tréning 27. 10. 2026 je podľa aktuálneho zadania bez brankárov. Predvolene 19 detí = 5+5+5+4; 20 = 5+5+5+5; 21 = 6+5+5+5; 22 = 6+6+5+5. Dostupných je aj 17/18, ak dvaja pôvodne započítaní brankári chýbajú v celkovom počte. Všetci hrajú nohami na malé bránky. Časy a 75 min zostávajú; v 1 na 1 každý 4 útoky + 4 obrany, v 2 na 1 každý 4 + 2. Skupina 6 má vlastné rotácie a v 2 na 2 jednu odpočívajúcu dvojicu (každý 6 min hry). Pondelkový archív aj staršie PDF zostávajú bez zmeny.
 
-Voliteľné `attendanceCases` obsahuje objekty `total` a `groups`; súčet skupín plus dvaja brankári sa musí rovnať celkovému počtu. Voliteľné `variantNotes` v bloku obsahuje dodatočný pokyn pre veľkosť skupiny (napr. kľúče `4`, `5`).
+Voliteľné `attendanceCases` obsahuje objekty `total` a `groups`; súčet skupín plus počet brankárov `keepers` sa rovná celkovému počtu (dnes keepers=0). Voliteľné `variantNotes` má pokyny pre veľkosť skupiny `4`, `5`, `6`; tabuľky 2 na 2 používajú `groupSize`. Schémy pre deň bez brankárov majú príponu `-no-keeper`.
 
 Schémy sú ilustračné; dávky a plné počty sú v texte a tabuľkách. Pôvodné súkromné PDF a čitateľný osobný plán dieťaťa nie sú súčasťou tohto repozitára; osobný plán je iba v šifrovanej obálke.

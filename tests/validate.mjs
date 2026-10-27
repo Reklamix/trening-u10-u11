@@ -8,7 +8,7 @@ import { runInNewContext } from 'node:vm';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const read = name => readFileSync(path.join(root, name), 'utf8');
 const data = JSON.parse(read('trainings.json'));
-const diagrams = new Set(['warmup', 'coordination', 'duel', 'two-one', 'two-two', 'target', 'buildout', 'sprint-jump', 'match', 'two-matches', 'finish']);
+const diagrams = new Set(['warmup', 'coordination', 'duel', 'two-one', 'two-two', 'target', 'buildout', 'sprint-jump', 'match', 'two-matches', 'finish', 'duel-no-keeper', 'two-one-no-keeper', 'two-two-no-keeper', 'two-matches-no-keeper']);
 let assertions = 0;
 const check = (value, message) => { assert.ok(value, message); assertions++; };
 const equal = (actual, expected, message) => { assert.deepEqual(actual, expected, message); assertions++; };
@@ -54,16 +54,18 @@ const tue = data.trainings.find(x => x.id === '2026-10-27');
 const mon = data.trainings.find(x => x.id === '2026-10-26');
 equal(tue.blocks.map(x => [x.start, x.end]), [[0, 10], [10, 24], [24, 36], [36, 52], [52, 72], [72, 75]], 'Tuesday approved timing');
 equal(mon.blocks.map(x => [x.start, x.end]), [[0, 10], [10, 20], [20, 34], [34, 50], [50, 72], [72, 75]], 'Monday approved timing');
-check(tue.players.includes('19–22') && tue.players.includes('2 brankárov'), 'Tuesday current counts');
-for (const entry of tue.attendanceCases) equal(entry.groups.reduce((a, b) => a + b, 2), entry.total, 'All attendees assigned including two keepers');
-equal(tue.attendanceCases.map(x => x.total), [19, 20, 21, 22], 'All requested attendance variants');
+check(tue.players.includes('17–22') && tue.players.includes('bez brankárov') && tue.keepers === 0, 'Tuesday has no goalkeepers');
+for (const entry of tue.attendanceCases) equal(entry.groups.reduce((a, b) => a + b, 0), entry.total, 'All attendees assigned as field players');
+equal(tue.attendanceCases.map(x => x.total), [17,18,19,20,21,22], 'Attendance includes absence of two previous keepers');
+equal(tue.attendanceCases.find(x => x.total === 19).groups, [5,5,5,4], 'Nineteen children all assigned without keepers');
+check(tue.blocks.slice(1,5).every(b=>b.diagram.endsWith('-no-keeper')), 'Tuesday action diagrams match no-keeper plan');
 
 // Use the published rotation text, not a second unconnected fixture.
 const duelRows = tue.blocks[1].tables[0].rows;
-for (const n of [4, 5]) {
+for (const n of [4, 5, 6]) {
   const row = duelRows.find(x => x[0].startsWith(String(n)));
   const pairs = [...row[1].matchAll(/(\d+)→(\d+)/g)].map(m => [Number(m[1]), Number(m[2])]);
-  equal(pairs.length, n === 4 ? 4 : 5, 'Published 1v1 rotation length');
+  equal(pairs.length, n, 'Published 1v1 rotation length');
   const cycle = [...pairs, ...(n === 5 ? [null] : [])];
   const series = [...cycle, ...cycle];
   for (let p = 1; p <= n; p++) {
@@ -71,20 +73,20 @@ for (const n of [4, 5]) {
     equal(series.filter(x => x?.[1] === p).length, 2, `1v1 ${n}: player ${p} defends twice per series`);
     const interval = n === 4 ? 30 : 20;
     const starts = series.flatMap((x, i) => x?.includes(p) ? [i * interval] : []);
-    check(starts.slice(1).every((start, i) => start - starts[i] >= (n === 4 ? 60 : 40)), 'Minimum 1v1 rest interval');
+    check(starts.slice(1).every((start, i) => start - starts[i] >= (n === 5 ? 40 : 60)), 'Minimum 1v1 rest interval');
     check(starts.at(-1) + 8 <= 240, '1v1 series fits four minutes');
   }
 }
 
 const twoOne = tue.blocks[2].tables[0].rows;
-for (const n of [4, 5]) {
-  const actions = twoOne.map(row => row[n === 4 ? 1 : 2]).filter(x => x !== 'Oddych').map(x => x.match(/\d+/g).map(Number));
+for (const n of [4, 5, 6]) {
+  const actions = twoOne.map(row => row[n - 3]).filter(x => x !== 'Oddych').map(x => x.match(/\d+/g).map(Number));
   equal(actions.length, n, '2v1 actions in one series');
   for (let p = 1; p <= n; p++) {
     equal(actions.filter(x => x.slice(0, 2).includes(p)).length, 2, '2v1 two attacks per series');
     equal(actions.filter(x => x[2] === p).length, 1, '2v1 one defence per series');
   }
-  const seconds = n === 4 ? 50 : 40;
+  const seconds = n === 4 ? 50 : n === 5 ? 40 : 35;
   check((actions.length - 1) * seconds + 10 <= 210, '2v1 series fits 3:30 including last action');
 }
 
@@ -94,6 +96,12 @@ for (const pair of ['A', 'B']) {
   equal(pairRounds.filter(row => row[2] === pair).length, 3, '2v2 pair defends three rounds');
 }
 equal(6 * 80, 8 * 60, 'Four-player 2v2 keeps eight minutes per player');
+const sixRounds = tue.blocks[3].tables.find(t=>t.groupSize===6).rows;
+for (const pair of ['A','B','C']) {
+  equal(sixRounds.filter(r=>r[1].includes(pair)).length,4,'Six-player 2v2 each pair plays four rounds');
+  equal(sixRounds.filter(r=>r[2]===pair).length,2,'Six-player 2v2 each pair rests two rounds');
+}
+equal(4*90,6*60,'Six-player 2v2 each child has six minutes play');
 const restOrder = [1,2,3,4,5,1,2,3,4,5,1,2];
 equal([1,2,3,4,5].map(p => 540 - 45 * restOrder.filter(x => x === p).length).sort((a,b) => a-b), [405,405,450,450,450], 'Five-player 2v2 play time and rest');
 const gameRows = tue.blocks[4].tables[0].rows;
