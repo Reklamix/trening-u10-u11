@@ -2,159 +2,656 @@
   "version": 1,
   "trainings": [
     {
-      "id": "2026-10-27", "date": "2026-10-27", "category": "U11",
+      "id": "2026-10-27",
+      "date": "2026-10-27",
+      "category": "U11",
       "title": "Kľučka, odvaha a rozhodnutie",
-      "focus": "Známa kľučka, prvé kroky do voľna a rozhodnutie medzi vedením a prihrávkou. Štyri malé ihriská a dve súbežné záverečné hry.",
+      "focus": "Známa kľučka, prvé kroky do voľna a rozhodnutie medzi vedením a prihrávkou. Štyri skupiny po 4–5 hráčov do poľa; dvaja brankári.",
       "cue": "Pozri, čo nechal obranca voľné.",
-      "duration": 75, "players": "24–26 detí vrátane 2 brankárov", "coaches": "Aspoň 2 tréneri", "surface": "Umelá tráva",
+      "duration": 75,
+      "players": "19–22 detí vrátane 2 brankárov",
+      "coaches": "Aspoň 2 tréneri",
+      "surface": "Umelá tráva",
       "equipment": [
-        {"name": "Lopty", "quantity": "26 + ideálne 4 rezervné", "detail": "Každý vlastná lopta na rozohriatie. Pri každom ihrisku maj náhradné lopty."},
-        {"name": "Detské brány", "quantity": "2 bezpečne upevnené", "detail": "Brankári zostávajú pri bránach. Medzi typmi zakončenia sa striedajú skupiny hráčov."},
-        {"name": "Malé bránky", "quantity": "12, môžu byť kužeľové", "detail": "Pre blok 2 na 2. V rozohriatí priprav 16 kužeľových bránok; méty potom použi znova."},
-        {"name": "Ploché méty a kužele", "quantity": "Približne 60–70", "detail": "Hranice štyroch plôch, malé bránky, deliace čiary a čakacie miesta."},
-        {"name": "Rozlišovačky", "quantity": "4 farby po 7 + 1 odlišná", "detail": "Odlišná farba pre neutrálneho hráča pri nepárnom počte. Brankári jasne odlíšení."},
-        {"name": "Organizácia", "quantity": "Stopky, píšťalka, voda, lekárnička", "detail": "Spoločné signály na začiatok akcií. Každý vlastná voda a vhodná obuv."}
+        {
+          "name": "Lopty",
+          "quantity": "22 + ideálne 4 rezervné",
+          "detail": "Každý vlastná lopta na rozohriatie. Pri každom ihrisku maj náhradné lopty."
+        },
+        {
+          "name": "Detské brány",
+          "quantity": "2 bezpečne upevnené",
+          "detail": "Brankári zostávajú pri bránach. Medzi typmi zakončenia sa striedajú skupiny hráčov."
+        },
+        {
+          "name": "Malé bránky",
+          "quantity": "12, môžu byť kužeľové",
+          "detail": "Pre blok 2 na 2. V rozohriatí priprav 16 kužeľových bránok; méty potom použi znova."
+        },
+        {
+          "name": "Ploché méty a kužele",
+          "quantity": "Približne 60–70",
+          "detail": "Hranice štyroch plôch, malé bránky, deliace čiary a čakacie miesta."
+        },
+        {
+          "name": "Rozlišovačky",
+          "quantity": "4 farby po 7 + 1 odlišná",
+          "detail": "Odlišná farba pre neutrálneho hráča pri nepárnom počte. Brankári jasne odlíšení."
+        },
+        {
+          "name": "Organizácia",
+          "quantity": "Stopky, píšťalka, voda, lekárnička",
+          "detail": "Spoločné signály na začiatok akcií. Každý vlastná voda a vhodná obuv."
+        }
       ],
       "notes": [
-        {"title": "Rozdeľ hráčov do poľa", "text": "24 detí: 6 + 6 + 5 + 5. 25 detí: 6 + 6 + 6 + 5. 26 detí: 6 + 6 + 6 + 6. Dvaja brankári sú mimo týchto počtov. Skupiny vyváž podľa veľkosti a istoty v súboji."},
-        {"title": "Dva susedné priestory na trénera", "text": "Tréner 1 dohliada na ihriská I a III, tréner 2 na II a IV. Medzi plochami nechaj voľný koridor aspoň 3–4 m a rozšír ho podľa smeru striel. Čakajúci aj návraty sú mimo striel."},
-        {"title": "Výmena skupín, brány na mieste", "text": "Brankári zostávajú na I a II. Celé susedné skupiny si vymenia plochy I ↔ III a II ↔ IV v 16:00–18:00, 29:30–30:30 a 44:30–45:00. Zachovajú svoje mená a čísla. Každý si vyskúša oba typy zakončenia."},
-        {"title": "Spoločný spôsob vedenia", "text": "Jedna stručná úloha naraz, konkrétne ocenenie rozhodnutia a priestor na ďalší pokus. Pravidlá kontrolovanej obrany platia pre všetkých. Správnu prihrávku oceň rovnako ako vhodnú kľučku."},
-        {"title": "Pripravenosť a záťaž", "text": "Bez samostatných šprintov a intenzívnych skokov. Po náročnom predchádzajúcom dni môže stačiť jedna séria 1 na 1 alebo kratší herný úsek. Vynechané akcie sa nedorábajú v prestávke."},
-        {"title": "Kontrola a bezpečnosť", "text": "Pred začiatkom skontroluj povrch, osvetlenie a brány. Bez šmýkačiek, strkania a nárazov zozadu. Pri bolesti či krívaní prerušiť. Po tréningu orientačne zisti náročnosť detí; pracovný cieľ je asi 5–6 z 10."}
+        {
+          "title": "Rozdeľ hráčov do poľa",
+          "text": "Vyber aktuálny počet detí v hornej ponuke. Pri 19: 5 + 4 + 4 + 4; pri 20: 5 + 5 + 4 + 4; pri 21: 5 + 5 + 5 + 4; pri 22: 5 + 5 + 5 + 5. Dvaja brankári sú mimo týchto počtov. Skupiny vyváž podľa veľkosti a istoty v súboji."
+        },
+        {
+          "title": "Dva susedné priestory na trénera",
+          "text": "Tréner 1 dohliada na ihriská I a III, tréner 2 na II a IV. Medzi plochami nechaj voľný koridor aspoň 3–4 m a rozšír ho podľa smeru striel. Čakajúci aj návraty sú mimo striel."
+        },
+        {
+          "title": "Výmena skupín, brány na mieste",
+          "text": "Brankári zostávajú na I a II. Celé susedné skupiny si vymenia plochy I ↔ III a II ↔ IV v 16:00–18:00, 29:30–30:30 a 44:30–45:00. Zachovajú svoje mená a čísla. Každý si vyskúša oba typy zakončenia."
+        },
+        {
+          "title": "Spoločný spôsob vedenia",
+          "text": "Jedna stručná úloha naraz, konkrétne ocenenie rozhodnutia a priestor na ďalší pokus. Pravidlá kontrolovanej obrany platia pre všetkých. Správnu prihrávku oceň rovnako ako vhodnú kľučku."
+        },
+        {
+          "title": "Pripravenosť a záťaž",
+          "text": "Bez samostatných šprintov a intenzívnych skokov. Po náročnom predchádzajúcom dni môže stačiť jedna séria 1 na 1 alebo kratší herný úsek. Vynechané akcie sa nedorábajú v prestávke."
+        },
+        {
+          "title": "Kontrola a bezpečnosť",
+          "text": "Pred začiatkom skontroluj povrch, osvetlenie a brány. Bez šmýkačiek, strkania a nárazov zozadu. Pri bolesti či krívaní prerušiť. Po tréningu orientačne zisti náročnosť detí; pracovný cieľ je asi 5–6 z 10."
+        }
       ],
       "sources": [
-        {"label": "Klubový návrh U11: utorok 27. 10. 2026, upravený pre 24–26 detí. Rozmery a dávky sú pracovným návrhom pre túto skupinu."},
-        {"label": "FIFA Training Centre: Developing core skills with Clearwater Chargers U-10", "url": "https://www.fifatrainingcentre.com/en/practice/grassroots/global-grassroots-insights/u-10-clearwater-core-skills-1v1.php"}
+        {
+          "label": "Klubový návrh U11: utorok 27. 10. 2026, aktualizovaný podľa nahlásených 19–22 detí. Rozmery a dávky sú pracovným návrhom pre túto skupinu."
+        },
+        {
+          "label": "FIFA Training Centre: Developing core skills with Clearwater Chargers U-10",
+          "url": "https://www.fifatrainingcentre.com/en/practice/grassroots/global-grassroots-insights/u-10-clearwater-core-skills-1v1.php"
+        }
       ],
       "blocks": [
         {
-          "id": "1", "start": 0, "end": 10, "title": "Známa kľučka a prihrávky", "diagram": "warmup",
+          "id": "1",
+          "start": 0,
+          "end": 10,
+          "title": "Známa kľučka a prihrávky",
+          "diagram": "warmup",
           "summary": "Každý začne technikou, ktorú pozná. Po kľučke dva svižnejšie kroky do voľného miesta.",
           "space": "Dve zóny po 25 × 20 m; v každej 8 kužeľových bránok.",
           "dose": "2 min rozhýbanie + 3 min vlastná kľučka + 4 min prihrávky + 1 min voda a presun.",
-          "steps": ["0:00–2:00: ľahký pohyb a dynamické rozhýbanie členkov, bedier a trupu.", "2:00–5:00: každý s loptou. Známa kľučka, dva svižnejšie kroky do voľna, pokojné vedenie späť. Bez pretekov.", "5:00–9:00: dvojice hľadajú voľnú bránku a prihrávajú cez ňu. 3 × 60 s práce + 2 × 30 s oddych. Brankári pracujú nohami.", "9:00–10:00: voda a presun do očíslovaných skupín."],
-          "cues": ["Vyber si svoju kľučku.", "Po otvorení cesty zrýchli prvé dva kroky."],
-          "adjustments": ["Rozdeľ deti 12 + 12, 12 + 13 alebo 12 + 14. Pri nepárnej skupine vytvor jednu trojicu; po prihrávke hľadá nový uhol bez státia v rade."]
+          "steps": [
+            "0:00–2:00: ľahký pohyb a dynamické rozhýbanie členkov, bedier a trupu.",
+            "2:00–5:00: každý s loptou. Známa kľučka, dva svižnejšie kroky do voľna, pokojné vedenie späť. Bez pretekov.",
+            "5:00–9:00: dvojice hľadajú voľnú bránku a prihrávajú cez ňu. 3 × 60 s práce + 2 × 30 s oddych. Brankári pracujú nohami.",
+            "9:00–10:00: voda a presun do očíslovaných skupín."
+          ],
+          "cues": [
+            "Vyber si svoju kľučku.",
+            "Po otvorení cesty zrýchli prvé dva kroky."
+          ],
+          "adjustments": [
+            "Rozdeľ deti do dvoch zón: 9 + 10, 10 + 10, 10 + 11 alebo 11 + 11. Pri nepárnej skupine jedna trojica namiesto dvojice; po prihrávke hľadá nový uhol. Priprav aspoň o jednu bránku viac ako dvojíc/trojíc v zóne."
+          ]
         },
         {
-          "id": "2", "start": 10, "end": 24, "title": "Kontrolované 1 na 1", "diagram": "duel",
+          "id": "2",
+          "start": 10,
+          "end": 24,
+          "title": "Kontrolované 1 na 1",
+          "diagram": "duel",
           "summary": "Čitateľný odpor a možnosť vybrať si riešenie. Na dvoch plochách zakončenie na brankára, na dvoch do malých bránok.",
           "space": "Štyri plochy po 12 × 16 m. Útočník 10–12 m od cieľa, obranca asi 2 m pred ním, mierne bokom.",
-          "dose": "2 série; v každej každý 2 útoky + 2 obrany. Celkom 4 útoky + 4 obrany. Akcia najviac 6–8 s, nová akcia každých 20 s.",
-          "steps": ["10:00–12:00 ukážka a pomalé skúšobné riešenie.", "12:00–16:00 prvá séria. Brankár začína prihrávkou po zemi; bez brankára začína útočník s loptou pri nohe. Obranca sa zapojí po prvom dotyku.", "Úroveň A: obranca zatvára cestu a blokuje strelu. Nevypichuje ani nestrká. Vyhrá, keď do 8 s nevznikne zakončenie alebo útočník vyjde mimo. Na malej bránke platí aj kontrolované prevedenie lopty cez bránku.", "16:00–18:00 oddych, voda a výmena susedných skupín pri bránach.", "18:00–22:00 druhá séria. Podľa istoty možno vopred oznámiť úroveň B: obranca smie odoberať loptu po prvých dvoch dotykoch útočníka.", "22:00–24:00 voda a príprava 2 na 1."],
-          "cues": ["Keď sa otvorí cesta, zrýchli.", "Keď máš miesto na strelu, zakonči."],
-          "tables": [{"caption": "Jedna 4-minútová séria; prvé číslo útočí", "headers": ["Skupina", "Poradie akcií; slot = 20 s"], "rows": [["6 hráčov", "1→2, 3→4, 5→6, 2→1, 4→3, 6→5; celé poradie zopakuj."], ["5 hráčov", "1→2, 3→4, 5→1, 2→3, 4→5, voľný slot; celé poradie zopakuj."]]}],
-          "adjustments": ["Pri 6 hráčoch tá istá dvojica po 60 s, teda asi 52 s oddych po akcii. Pri 5 hráčoch minimum medzi zapojeniami 40 s, teda aspoň 32 s po 8-sekundovej akcii. Obrana je práca.", "Úroveň A môže zostať celý blok. Pri únave vynechaj druhú sériu; nepridávaj pokusy do prestávok."]
+          "dose": "2 série; každý v sérii 2 útoky + 2 obrany. Celkom 4 útoky + 4 obrany. Akcia 6–8 s. Skupina 4: štart každých 30 s; skupina 5: slot každých 20 s.",
+          "steps": [
+            "10:00–12:00 ukážka a pomalé skúšobné riešenie.",
+            "12:00–16:00 prvá séria. Brankár začne po zemi; bez neho útočník s loptou pri nohe. Obranca sa zapojí po prvom dotyku. Pri 4 hráčoch štart každých 30 s, pri 5 každých 20 s vrátane voľného slotu.",
+            "Úroveň A: obranca zatvára cestu a blokuje strelu. Nevypichuje ani nestrká. Vyhrá, keď do 8 s nevznikne zakončenie alebo útočník vyjde mimo. Na malej bránke platí aj kontrolované prevedenie lopty cez bránku.",
+            "16:00–18:00 oddych, voda a výmena susedných skupín pri bránach.",
+            "18:00–22:00 druhá séria. Podľa istoty možno vopred oznámiť úroveň B: obranca smie odoberať loptu po prvých dvoch dotykoch útočníka.",
+            "22:00–24:00 voda a príprava 2 na 1."
+          ],
+          "cues": [
+            "Keď sa otvorí cesta, zrýchli.",
+            "Keď máš miesto na strelu, zakonči."
+          ],
+          "tables": [
+            {
+              "caption": "Jedna 4-minútová séria; prvé číslo útočí",
+              "headers": [
+                "Skupina",
+                "Poradie akcií"
+              ],
+              "rows": [
+                [
+                  "4 hráči",
+                  "1→2, 3→4, 2→1, 4→3; celé poradie zopakuj. Štart každých 30 s."
+                ],
+                [
+                  "5 hráčov",
+                  "1→2, 3→4, 5→1, 2→3, 4→5, voľný slot; celé poradie zopakuj. Slot každých 20 s."
+                ]
+              ]
+            }
+          ],
+          "adjustments": [
+            "Pri 4 hráčoch tá istá dvojica po 60 s, teda asi 52 s oddychu po akcii. Pri 5 hráčoch minimum medzi zapojeniami 40 s, teda aspoň 32 s po 8-sekundovej akcii. Obrana je práca.",
+            "Úroveň A môže zostať celý blok. Pri únave vynechaj druhú sériu; nepridávaj pokusy do prestávok."
+          ]
         },
         {
-          "id": "3", "start": 24, "end": 36, "title": "Dvaja na jedného", "diagram": "two-one",
+          "id": "3",
+          "start": 24,
+          "end": 36,
+          "title": "Dvaja na jedného",
+          "diagram": "two-one",
           "summary": "Rozhodnutie medzi vedením a prihrávkou. Obe vhodné voľby majú hodnotu; prihrávka nie je povinná.",
           "space": "Štyri plochy po 14 × 18 m. Dvaja útočia, jeden bráni; ostatní oddychujú.",
           "dose": "Dve série. V každej každý 2 útoky + 1 obrana; celkom 4 útoky + 2 obrany. Akcia najviac 8–10 s.",
-          "steps": ["24:00–26:00: ukáž obe riešenia. Brankár začne po zemi; bez neho začne jeden útočník s loptou. Obranca vyštartuje po prvom dotyku.", "26:00–29:30: séria 1. Skupina 6 hráčov má 6 akcií každých 35 s. Skupina 5 hráčov má 5 akcií každých 40 s.", "29:30–30:30: voda, oddych, výmena susedných skupín pri bránach.", "30:30–34:00: séria 2 s rovnakým poradím a intervalmi.", "Po zisku obrancu akciu ukonči a obnov poradie. Bez brankára zakončujte do dvoch malých bránok.", "34:00–36:00: voda a príprava 2 na 2."],
-          "cues": ["Čo ti obranca nechal voľné?", "Ukáž sa tak, aby sa dalo prihrať okolo obrancu."],
-          "tables": [{"caption": "Rotácia v každej sérii: útočníci / obranca", "headers": ["Akcia", "6 hráčov", "5 hráčov"], "rows": [["1", "1, 2 / 3", "1, 2 / 3"], ["2", "4, 5 / 6", "3, 4 / 5"], ["3", "3, 1 / 2", "5, 1 / 2"], ["4", "6, 4 / 5", "2, 3 / 4"], ["5", "2, 3 / 1", "4, 5 / 1"], ["6", "5, 6 / 4", "Oddych"]]}],
-          "adjustments": ["Keď ide obranca po lopte, môže sa otvoriť prihrávka. Keď kryje spoluhráča, môže zostať cesta na vedenie.", "Pri 6 hráčoch tá istá trojica po 70 s; pri 5 hráčoch minimum medzi zapojeniami 40 s. Čísla hráčov medzi sériami nemeníš."]
+          "steps": [
+            "24:00–26:00: ukáž obe riešenia. Brankár začne po zemi; bez neho začne jeden útočník s loptou. Obranca vyštartuje po prvom dotyku.",
+            "26:00–29:30 séria 1: skupina 4 hráčov má 4 akcie so štartom každých 50 s; skupina 5 má 5 akcií každých 40 s. Zvyšok série je oddych.",
+            "29:30–30:30: voda, oddych, výmena susedných skupín pri bránach.",
+            "30:30–34:00: séria 2 s rovnakým poradím a intervalmi.",
+            "Po zisku obrancu akciu ukonči a obnov poradie. Bez brankára zakončujte do dvoch malých bránok.",
+            "34:00–36:00: voda a príprava 2 na 2."
+          ],
+          "cues": [
+            "Čo ti obranca nechal voľné?",
+            "Ukáž sa tak, aby sa dalo prihrať okolo obrancu."
+          ],
+          "tables": [
+            {
+              "caption": "Rotácia v každej sérii: útočníci / obranca",
+              "headers": [
+                "Akcia",
+                "4 hráči",
+                "5 hráčov"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "1, 2 / 3",
+                  "1, 2 / 3"
+                ],
+                [
+                  "2",
+                  "2, 3 / 4",
+                  "3, 4 / 5"
+                ],
+                [
+                  "3",
+                  "3, 4 / 1",
+                  "5, 1 / 2"
+                ],
+                [
+                  "4",
+                  "4, 1 / 2",
+                  "2, 3 / 4"
+                ],
+                [
+                  "5",
+                  "Oddych",
+                  "4, 5 / 1"
+                ]
+              ]
+            }
+          ],
+          "adjustments": [
+            "Keď ide obranca po lopte, môže sa otvoriť prihrávka. Keď kryje spoluhráča, môže zostať cesta na vedenie.",
+            "Pri 4 hráčoch minimum medzi zapojeniami 50 s, pri 5 hráčoch 40 s. Čísla medzi sériami nemeníš. Každý má v jednej sérii dva útoky, jednu obranu a zostávajúci čas oddych."
+          ]
         },
         {
-          "id": "4", "start": 36, "end": 52, "title": "Dvaja na dvoch s oddychom", "diagram": "two-two",
+          "id": "4",
+          "start": 36,
+          "end": 52,
+          "title": "Dvaja na dvoch s oddychom",
+          "diagram": "two-two",
           "summary": "Súhra a viditeľná ponuka proti aktívnemu súperovi. Bežné čisté bránenie, voľný počet dotykov.",
           "space": "Štyri plochy po 22 × 16 m. S brankárom: veľká brána proti dvom malým. Bez neho: dve malé na každom konci.",
-          "dose": "90 s ukážka + 6 × 2 min + 5 × 30 s výmeny = 16 min. Pri 6 hráčoch každý hrá 8 min; pri 5 hráčoch 6:45–7:30 min.",
-          "steps": ["36:00–37:30 ukážka. Brankár pomáha dvojici pri svojej bráne; tá po zisku útočí na malé. Druhá dvojica útočí na veľkú bránu. Bez brankára sa hrá na protiľahlé malé bránky.", "Kolá: 37:30–39:30, 40:00–42:00, 42:30–44:30, 45:00–47:00, 47:30–49:30, 50:00–52:00. Medzi kolami 30 s oddych.", "44:30–45:00 si susedné skupiny vymenia typ ihriska. Brankári aj brány ostávajú na mieste.", "Pri 6 hráčoch vytvor tri stále dvojice A, B, C. Dve hrajú, tretia oddychuje.", "Pri 5 hráčoch v každom kole 90 s hry a potom 30 s spoločný oddych. V hre vymeň odpočívajúceho po 45 s. Poradie oddychu v 12 polúsekoch: 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2. Striedajúci preberie miesto hráča, ktorý odchádza. Ostávajú aj spoločné 30-sekundové prestávky medzi kolami."],
-          "cues": ["Ukáž sa vedľa obrancu.", "Po zisku obráť smer útoku."],
-          "tables": [{"caption": "Skupina 6 hráčov: A, B, C sú stále dvojice", "headers": ["Kolo", "Na veľkú / určený koniec", "Bráni veľkú / opačný koniec", "Oddych"], "rows": [["1", "A", "B", "C"], ["2", "C", "A", "B"], ["3", "B", "C", "A"], ["4", "B", "A", "C"], ["5", "A", "C", "B"], ["6", "C", "B", "A"]]}],
-          "adjustments": ["Pri úvodnej rozohre brankára môže súper ustúpiť k polovici a napádať po prvom dotyku príjemcu. Pri zahltení zväčši šírku.", "Predĺžený oddych päťčlennej skupiny nevyplň ďalšími súbojmi. Lopta mimo: nový začiatok od tímu, ktorému patrí."]
+          "dose": "90 s ukážka + 6 dvojminútových kôl + 5 × 30 s výmeny = 16 min. Pri 4 hráčoch: 80 s hry + 40 s oddych v kole (každý spolu 8 min hry). Pri 5: 90 s hry + 30 s oddych; piaty strieda po 45 s.",
+          "steps": [
+            "36:00–37:30 ukážka. Brankár pomáha dvojici pri svojej bráne; tá po zisku útočí na malé. Druhá dvojica útočí na veľkú bránu. Bez brankára sa hrá na protiľahlé malé bránky.",
+            "Kolá: 37:30–39:30, 40:00–42:00, 42:30–44:30, 45:00–47:00, 47:30–49:30, 50:00–52:00. Medzi kolami 30 s oddych.",
+            "44:30–45:00 si susedné skupiny vymenia typ ihriska. Brankári aj brány ostávajú na mieste.",
+            "Pri 4 hráčoch vytvor dvojice A = 1,2 a B = 3,4. Hraj 80 s, potom 40 s všetci oddychujú. Medzi kolami navyše ostáva 30 s spoločnej prestávky. Útočnú stranu vymeň podľa tabuľky.",
+            "Pri 5 hráčoch v každom kole 90 s hry a potom 30 s spoločný oddych. V hre vymeň odpočívajúceho po 45 s. Poradie oddychu v 12 polúsekoch: 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2. Striedajúci preberie miesto hráča, ktorý odchádza. Ostávajú aj spoločné 30-sekundové prestávky medzi kolami."
+          ],
+          "cues": [
+            "Ukáž sa vedľa obrancu.",
+            "Po zisku obráť smer útoku."
+          ],
+          "tables": [
+            {
+              "caption": "Skupina 4 hráčov: A a B sú stále dvojice",
+              "headers": [
+                "Kolo",
+                "Útočí na veľkú / určený koniec",
+                "Bráni veľkú / opačný koniec"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "A",
+                  "B"
+                ],
+                [
+                  "2",
+                  "B",
+                  "A"
+                ],
+                [
+                  "3",
+                  "A",
+                  "B"
+                ],
+                [
+                  "4",
+                  "B",
+                  "A"
+                ],
+                [
+                  "5",
+                  "A",
+                  "B"
+                ],
+                [
+                  "6",
+                  "B",
+                  "A"
+                ]
+              ]
+            }
+          ],
+          "adjustments": [
+            "Pri úvodnej rozohre brankára môže súper ustúpiť k polovici a napádať po prvom dotyku príjemcu. Pri zahltení zväčši šírku.",
+            "Oddych vo vnútri kola aj medzi kolami dodrž. Nevyplň ho ďalšími súbojmi. Lopta mimo: nový začiatok od tímu, ktorému patrí."
+          ],
+          "variantNotes": {
+            "4": "Hra v každom kole len 80 sekúnd, potom 40 sekúnd všetci oddychujú. Navyše 30 sekúnd medzi kolami. Každý odohrá spolu 8 minút.",
+            "5": "Každé kolo: 90 s hry + 30 s spoločný oddych. Počas hry sa piaty hráč mení po 45 s; poradie oddychu: 1,2,3,4,5,1,2,3,4,5,1,2. Každý hrá spolu 6:45–7:30 min. Navyše 30 s medzi kolami."
+          }
         },
         {
-          "id": "5", "start": 52, "end": 72, "title": "Dva zápasy súčasne", "diagram": "two-matches",
+          "id": "5",
+          "start": 52,
+          "end": 72,
+          "title": "Dva zápasy súčasne",
+          "diagram": "two-matches",
           "summary": "Preniesť riešenia do bežnej hry. Jedno ihrisko s dvoma brankármi, druhé so štyrmi malými bránkami.",
-          "space": "Každé ihrisko približne 36–42 × 26–30 m podľa počtu a dostupného priestoru. Hranice priprav vopred.",
+          "space": "Každé ihrisko približne 32–36 × 24–26 m. Podľa počtu a priebehu uprav šírku; hranice priprav vopred.",
           "dose": "1 min organizácia + 4 × 4 min hry + 3 × 1 min oddych = 20 min.",
-          "steps": ["52:00–53:00: rozdeľ štyri tímy podľa tabuľky. Hráči môžu viesť, prihrať aj strieľať; voľný počet dotykov a bežné skórovanie.", "Herné úseky: 53:00–57:00, 58:00–62:00, 63:00–67:00, 68:00–72:00. Medzi úsekmi jedna minúta na vodu a jednu krátku otázku.", "Pri 25 deťoch neutrálny pomáha tímu s loptou a môže skórovať. Po každom úseku ho vymeň.", "62:00–63:00: celé súbory hráčov do poľa si vymenia ihriská. Brankári zostávajú. Pri 24/25 deťoch sa počet v zápase s brankármi zmení; ponechaj tímy a neutrálneho hráča, podľa potreby uprav šírku.", "Posledné 4 minúty s minimom pokynov. Sleduj vlastnú iniciatívu, využitie priestoru a opätovné zapojenie po chybe."],
-          "cues": ["Kedy sa otvorila prihrávka, keď obranca vystúpil proti lopte?"],
-          "tables": [{"caption": "Počiatočné rozdelenie do dvoch zápasov", "headers": ["Detí spolu", "Ihrisko A: 2 brankári", "Ihrisko B: malé bránky"], "rows": [["24", "5 na 5 + 2 B = 12", "6 na 6 = 12"], ["25", "5 na 5 + 2 B = 12", "6 na 6 + neutrálny = 13"], ["26", "6 na 6 + 2 B = 14", "6 na 6 = 12"]]}],
-          "adjustments": ["Každý hrá; nevytváraj dlhý rad náhradníkov. Pri silnom tlaku na rozohrávku ponechaj známu ochranu prvého prijatia."]
+          "steps": [
+            "52:00–53:00: rozdeľ štyri tímy podľa tabuľky. Hráči môžu viesť, prihrať aj strieľať; voľný počet dotykov a bežné skórovanie.",
+            "Herné úseky: 53:00–57:00, 58:00–62:00, 63:00–67:00, 68:00–72:00. Medzi úsekmi jedna minúta na vodu a jednu krátku otázku.",
+            "Pri 19 alebo 21 deťoch neutrálny pomáha tímu s loptou a môže skórovať. Po každom úseku ho vymeň.",
+            "62:00–63:00 si celé súbory hráčov do poľa vymenia ihriská, brankári zostávajú. Ponechaj tímy aj prípadného neutrálneho hráča; počet v zápase s B sa zmení, podľa potreby uprav šírku.",
+            "Posledné 4 minúty s minimom pokynov. Sleduj vlastnú iniciatívu, využitie priestoru a opätovné zapojenie po chybe."
+          ],
+          "cues": [
+            "Kedy sa otvorila prihrávka, keď obranca vystúpil proti lopte?"
+          ],
+          "tables": [
+            {
+              "caption": "Počiatočné rozdelenie do dvoch zápasov",
+              "headers": [
+                "Detí spolu",
+                "Ihrisko A: 2 brankári",
+                "Ihrisko B: malé bránky"
+              ],
+              "rows": [
+                [
+                  "19",
+                  "4 na 4 + 2 B = 10",
+                  "4 na 4 + neutrálny = 9"
+                ],
+                [
+                  "20",
+                  "4 na 4 + 2 B = 10",
+                  "5 na 5 = 10"
+                ],
+                [
+                  "21",
+                  "5 na 5 + 2 B = 12",
+                  "4 na 4 + neutrálny = 9"
+                ],
+                [
+                  "22",
+                  "5 na 5 + 2 B = 12",
+                  "5 na 5 = 10"
+                ]
+              ]
+            }
+          ],
+          "adjustments": [
+            "Každý hrá; nevytváraj dlhý rad náhradníkov. Pri silnom tlaku na rozohrávku ponechaj známu ochranu prvého prijatia."
+          ]
         },
         {
-          "id": "6", "start": 72, "end": 75, "title": "Pokojné ukončenie", "diagram": "finish",
+          "id": "6",
+          "start": 72,
+          "end": 75,
+          "title": "Pokojné ukončenie",
+          "diagram": "finish",
           "summary": "Chôdza, voda a jedna otázka. Koniec tréningu podporí chuť prísť znova.",
-          "space": "Pokojné miesto pri ihrisku.", "dose": "3 min spolu pre celé mužstvo.",
-          "steps": ["Pokojná chôdza a voda.", "Polož jednu otázku mužstvu a nechaj deti odpovedať.", "Krátko pomenuj konkrétny príklad dobrého rozhodnutia alebo opätovného zapojenia. Na záver sa už nepridávajú súboje či strely až do gólu."],
-          "cues": ["Kedy sa dnes oplatilo ísť s loptou a kedy prihrať?"], "adjustments": []
+          "space": "Pokojné miesto pri ihrisku.",
+          "dose": "3 min spolu pre celé mužstvo.",
+          "steps": [
+            "Pokojná chôdza a voda.",
+            "Polož jednu otázku mužstvu a nechaj deti odpovedať.",
+            "Krátko pomenuj konkrétny príklad dobrého rozhodnutia alebo opätovného zapojenia. Na záver sa už nepridávajú súboje či strely až do gólu."
+          ],
+          "cues": [
+            "Kedy sa dnes oplatilo ísť s loptou a kedy prihrať?"
+          ],
+          "adjustments": []
+        }
+      ],
+      "attendanceCases": [
+        {
+          "total": 19,
+          "groups": [
+            5,
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "total": 20,
+          "groups": [
+            5,
+            5,
+            4,
+            4
+          ]
+        },
+        {
+          "total": 21,
+          "groups": [
+            5,
+            5,
+            5,
+            4
+          ]
+        },
+        {
+          "total": 22,
+          "groups": [
+            5,
+            5,
+            5,
+            5
+          ]
         }
       ]
     },
     {
-      "id": "2026-10-26", "date": "2026-10-26", "category": "U11",
+      "id": "2026-10-26",
+      "date": "2026-10-26",
+      "category": "U11",
       "title": "Prvý krok, rozhľad a ponuka",
       "focus": "Krátke kvalitné štarty a kontrolované dopady, potom viditeľná ponuka a pokojná rozohrávka. Dve skupiny pracujú vedľa seba.",
       "cue": "Ukáž sa tam, kde ťa spoluhráč vidí.",
-      "duration": 75, "players": "14 detí vrátane 2 brankárov", "coaches": "Ideálne 2 tréneri", "surface": "Umelá tráva",
+      "duration": 75,
+      "players": "14 detí vrátane 2 brankárov",
+      "coaches": "Ideálne 2 tréneri",
+      "surface": "Umelá tráva",
       "equipment": [
-        {"name": "Lopty", "quantity": "14 + ideálne 4 rezervné", "detail": "Každý vlastná lopta v rozohriatí; rezervné pri oboch bránach."},
-        {"name": "Detské brány", "quantity": "2 bezpečne upevnené", "detail": "Pre dve stanovištia aj spoločnú záverečnú hru."},
-        {"name": "Ploché méty a kužele", "quantity": "Približne 40", "detail": "Hranice, štyri šprintové dráhy a štyri malé kužeľové bránky."},
-        {"name": "Rozlišovačky", "quantity": "2 farby po 7", "detail": "Brankári musia byť jasne odlíšení."},
-        {"name": "Koordinačné dráhy", "quantity": "3–4 krátke", "detail": "Rebríky možno nahradiť plochými značkami alebo čiarami."},
-        {"name": "Organizácia", "quantity": "Stopky, píšťalka, voda, lekárnička", "detail": "Vytlačený alebo mobilný plán. Každý vlastná voda a vhodná obuv."}
+        {
+          "name": "Lopty",
+          "quantity": "14 + ideálne 4 rezervné",
+          "detail": "Každý vlastná lopta v rozohriatí; rezervné pri oboch bránach."
+        },
+        {
+          "name": "Detské brány",
+          "quantity": "2 bezpečne upevnené",
+          "detail": "Pre dve stanovištia aj spoločnú záverečnú hru."
+        },
+        {
+          "name": "Ploché méty a kužele",
+          "quantity": "Približne 40",
+          "detail": "Hranice, štyri šprintové dráhy a štyri malé kužeľové bránky."
+        },
+        {
+          "name": "Rozlišovačky",
+          "quantity": "2 farby po 7",
+          "detail": "Brankári musia byť jasne odlíšení."
+        },
+        {
+          "name": "Koordinačné dráhy",
+          "quantity": "3–4 krátke",
+          "detail": "Rebríky možno nahradiť plochými značkami alebo čiarami."
+        },
+        {
+          "name": "Organizácia",
+          "quantity": "Stopky, píšťalka, voda, lekárnička",
+          "detail": "Vytlačený alebo mobilný plán. Každý vlastná voda a vhodná obuv."
+        }
       ],
       "notes": [
-        {"title": "Príprava ihriska", "text": "Dve susedné plochy 24 × 18 m a vnútri menšie 18 × 14 m. Na záver uprav na 42 × 30 m. Šprintové dráhy bokom mimo striel a návratov; za cieľom ešte 8–10 m na spomalenie."},
-        {"title": "Úloha hráča bez lopty", "text": "Vytvor použiteľnú možnosť na prihrávku. Keď už stojíš vo voľnom priestore, môžeš ho držať. Ak si za súperom, zmeň uhol. Neustály beh sám osebe nie je cieľ."},
-        {"title": "Práca trénerov", "text": "Dve rovnaké stanovištia po 6 hráčov do poľa a brankárovi. Pri jednom trénerovi majú obe skupiny rovnakú úlohu a ostávajú v jeho dohľade. Časy zahŕňajú ukážky, oddych a presuny."},
-        {"title": "Bezpečnosť a úprava", "text": "Skontroluj osvetlenie, povrch a obuv. Bez šmýkačiek, strkania a nárazov zozadu. Pri bolesti, krívaní či rozpade koordinácie intenzívnu časť prerušiť. Po ťažkom zápase zníž počet štartov a vynechaj skoky."},
-        {"title": "Kontrola záťaže", "text": "4 maximálne štarty na 8 m, 2 prípravné rozbehy a 6 kontrolovaných skokov, ak ich stav detí dovolí. Orientačná náročnosť celého tréningu 5–6 z 10; zisti aj skutočný pocit detí."}
+        {
+          "title": "Príprava ihriska",
+          "text": "Dve susedné plochy 24 × 18 m a vnútri menšie 18 × 14 m. Na záver uprav na 42 × 30 m. Šprintové dráhy bokom mimo striel a návratov; za cieľom ešte 8–10 m na spomalenie."
+        },
+        {
+          "title": "Úloha hráča bez lopty",
+          "text": "Vytvor použiteľnú možnosť na prihrávku. Keď už stojíš vo voľnom priestore, môžeš ho držať. Ak si za súperom, zmeň uhol. Neustály beh sám osebe nie je cieľ."
+        },
+        {
+          "title": "Práca trénerov",
+          "text": "Dve rovnaké stanovištia po 6 hráčov do poľa a brankárovi. Pri jednom trénerovi majú obe skupiny rovnakú úlohu a ostávajú v jeho dohľade. Časy zahŕňajú ukážky, oddych a presuny."
+        },
+        {
+          "title": "Bezpečnosť a úprava",
+          "text": "Skontroluj osvetlenie, povrch a obuv. Bez šmýkačiek, strkania a nárazov zozadu. Pri bolesti, krívaní či rozpade koordinácie intenzívnu časť prerušiť. Po ťažkom zápase zníž počet štartov a vynechaj skoky."
+        },
+        {
+          "title": "Kontrola záťaže",
+          "text": "4 maximálne štarty na 8 m, 2 prípravné rozbehy a 6 kontrolovaných skokov, ak ich stav detí dovolí. Orientačná náročnosť celého tréningu 5–6 z 10; zisti aj skutočný pocit detí."
+        }
       ],
-      "sources": [{"label": "Klubový návrh U11: pondelok 26. 10. 2026. Zachované časy, dávky a pravidlá pôvodného vizuálneho plánu. Rozmery a dávky sú pracovným návrhom pre túto skupinu."}],
+      "sources": [
+        {
+          "label": "Klubový návrh U11: pondelok 26. 10. 2026. Zachované časy, dávky a pravidlá pôvodného vizuálneho plánu. Rozmery a dávky sú pracovným návrhom pre túto skupinu."
+        }
+      ],
       "blocks": [
         {
-          "id": "1", "start": 0, "end": 10, "title": "Lopta a koordinácia", "diagram": "coordination",
-          "summary": "Rozhýbať telo, pozrieť sa pred prevzatím a po prihrávke upraviť uhol.", "space": "Približne 20 × 18 m; 3–4 krátke koordinačné dráhy.",
+          "id": "1",
+          "start": 0,
+          "end": 10,
+          "title": "Lopta a koordinácia",
+          "diagram": "coordination",
+          "summary": "Rozhýbať telo, pozrieť sa pred prevzatím a po prihrávke upraviť uhol.",
+          "space": "Približne 20 × 18 m; 3–4 krátke koordinačné dráhy.",
           "dose": "2 + 2 + 3 + 2 + 1 min. Rebrík: každý asi 4 prechody po 3–5 s, oddych 20–30 s.",
-          "steps": ["0:00–2:00 ľahké vedenie lopty, zmena smeru po rozhliadnutí.", "2:00–4:00 dynamicky členky a bedrá, pohyb bokom, krátke výpady.", "4:00–7:00 rebrík alebo čiary, jednoducho vpred a bokom na obe strany. Medzi prechodmi pokojný návrat.", "7:00–9:00 sedem dvojíc. Prihrávky na 5–7 m, po prihrávke presun do nového užitočného uhla.", "9:00–10:00 dva postupné rozbehy na 8 m. Prvý ľahší, druhý svižnejší; návrat pokojne."],
-          "cues": ["Pozri sa skôr, než dostaneš loptu.", "Po prihrávke si vytvor nový uhol."],
-          "adjustments": ["Nerob z rebríka preteky. Viac dráh zmenší čakanie; prihrávka má ísť pred spoluhráča, nie za chrbát."]
+          "steps": [
+            "0:00–2:00 ľahké vedenie lopty, zmena smeru po rozhliadnutí.",
+            "2:00–4:00 dynamicky členky a bedrá, pohyb bokom, krátke výpady.",
+            "4:00–7:00 rebrík alebo čiary, jednoducho vpred a bokom na obe strany. Medzi prechodmi pokojný návrat.",
+            "7:00–9:00 sedem dvojíc. Prihrávky na 5–7 m, po prihrávke presun do nového užitočného uhla.",
+            "9:00–10:00 dva postupné rozbehy na 8 m. Prvý ľahší, druhý svižnejší; návrat pokojne."
+          ],
+          "cues": [
+            "Pozri sa skôr, než dostaneš loptu.",
+            "Po prihrávke si vytvor nový uhol."
+          ],
+          "adjustments": [
+            "Nerob z rebríka preteky. Viac dráh zmenší čakanie; prihrávka má ísť pred spoluhráča, nie za chrbát."
+          ]
         },
         {
-          "id": "2", "start": 10, "end": 20, "title": "Štarty a kontrolované skoky", "diagram": "sprint-jump",
-          "summary": "Krátke série pri čerstvom pohybe. Oddych je súčasť dávky; počas neho ďalšie odrazy ani rebrík.", "space": "4 dráhy: 8 m naplno + ďalších 8–10 m na spomalenie; návrat bokom.",
+          "id": "2",
+          "start": 10,
+          "end": 20,
+          "title": "Štarty a kontrolované skoky",
+          "diagram": "sprint-jump",
+          "summary": "Krátke série pri čerstvom pohybe. Oddych je súčasť dávky; počas neho ďalšie odrazy ani rebrík.",
+          "space": "4 dráhy: 8 m naplno + ďalších 8–10 m na spomalenie; návrat bokom.",
           "dose": "Každý 4 × 8 m, práca asi 2–3 s a skutočný oddych 60–90 s. Skoky 2 × 3, medzi skokmi 15–20 s, medzi sériami asi 60 s.",
-          "steps": ["10:00–11:00 ukáž štart, cieľ a bezpečný návrat. Štyri dráhy po 3–4 deťoch.", "11:00–15:30 štyri štarty na dieťa. Prvé dva na vlastné rozhodnutie, ďalšie dva na vizuálny signál. Vlny najviac štyroch detí po asi 10 s; nová vlna toho istého dieťaťa po asi 75 s.", "Prvá vlna môže ísť 11:00, 12:15, 13:30, 14:45. Dráha musí byť pred ďalším štartom voľná.", "15:30–16:00 ukážka stabilného dopadu. Každý dopad udržať 2 s.", "16:00–18:30 skoky: napr. 16:00, 16:20, 16:40; druhá séria 17:40, 18:00, 18:20. Dĺžku skoku prispôsob kontrole dopadu.", "18:30–20:00 voda a rozdelenie do dvoch skupín."],
-          "cues": ["Prebehni cieľ a plynulo spomaľ.", "Dopadni tak, aby si zostal stáť."],
-          "adjustments": ["Po náročnom zápase, pri ťažkých nohách alebo neistých dopadoch iba 2–3 štarty; skoky vynechaj. Pri bolesti či krívaní intenzívnu časť prerušiť.", "Časové značky sú organizačná pomôcka. Zmeškané opakovania nedoháňaj skrátením prestávky."]
+          "steps": [
+            "10:00–11:00 ukáž štart, cieľ a bezpečný návrat. Štyri dráhy po 3–4 deťoch.",
+            "11:00–15:30 štyri štarty na dieťa. Prvé dva na vlastné rozhodnutie, ďalšie dva na vizuálny signál. Vlny najviac štyroch detí po asi 10 s; nová vlna toho istého dieťaťa po asi 75 s.",
+            "Prvá vlna môže ísť 11:00, 12:15, 13:30, 14:45. Dráha musí byť pred ďalším štartom voľná.",
+            "15:30–16:00 ukážka stabilného dopadu. Každý dopad udržať 2 s.",
+            "16:00–18:30 skoky: napr. 16:00, 16:20, 16:40; druhá séria 17:40, 18:00, 18:20. Dĺžku skoku prispôsob kontrole dopadu.",
+            "18:30–20:00 voda a rozdelenie do dvoch skupín."
+          ],
+          "cues": [
+            "Prebehni cieľ a plynulo spomaľ.",
+            "Dopadni tak, aby si zostal stáť."
+          ],
+          "adjustments": [
+            "Po náročnom zápase, pri ťažkých nohách alebo neistých dopadoch iba 2–3 štarty; skoky vynechaj. Pri bolesti či krívaní intenzívnu časť prerušiť.",
+            "Časové značky sú organizačná pomôcka. Zmeškané opakovania nedoháňaj skrátením prestávky."
+          ]
         },
         {
-          "id": "3", "start": 20, "end": 34, "title": "Od brankára k cieľovému hráčovi", "diagram": "target",
-          "summary": "Viditeľná ponuka mimo obrancu a kontrolovaná prihrávka na druhú stranu.", "space": "Dve plochy 18 × 14 m. Na každej B + 3 útočníci + 2 obrancovia + cieľový hráč na opačnej čiare.",
+          "id": "3",
+          "start": 20,
+          "end": 34,
+          "title": "Od brankára k cieľovému hráčovi",
+          "diagram": "target",
+          "summary": "Viditeľná ponuka mimo obrancu a kontrolovaná prihrávka na druhú stranu.",
+          "space": "Dve plochy 18 × 14 m. Na každej B + 3 útočníci + 2 obrancovia + cieľový hráč na opačnej čiare.",
           "dose": "2 min ukážka + 6 × (90 s hry + 30 s výmena / oddych) = 14 min.",
-          "steps": ["20:00–22:00 ukážka. Brankár prihrá po zemi. Útočníci získajú bod, keď cieľový hráč kontrolovane prevezme loptu. Ten sa môže pohybovať po koncovej čiare.", "Útočníci môžu hrať späť brankárovi. Obrancovia po zisku získajú bod vyvedením cez bočnú čiaru. Nová akcia po bode alebo lopte mimo od brankára.", "Začiatky hier: 22:00, 24:00, 26:00, 28:00, 30:00, 32:00. Po každej 90 s hre 30 s na výmenu; posledný oddych slúži aj na prechod.", "Brankár zostáva, šesť hráčov rotuje cez všetky úlohy."],
-          "cues": ["Vyjdi spoza obrancu.", "Kto nám zostal na druhej strane?"],
-          "tables": [{"caption": "Rotácia šiestich hráčov do poľa", "headers": ["Kolo", "Útočníci", "Obrancovia", "Cieľ"], "rows": [["1", "1, 2, 3", "4, 5", "6"], ["2", "6, 1, 2", "3, 4", "5"], ["3", "5, 6, 1", "2, 3", "4"], ["4", "4, 5, 6", "1, 2", "3"], ["5", "3, 4, 5", "6, 1", "2"], ["6", "2, 3, 4", "5, 6", "1"]]}],
-          "adjustments": ["Prvé dve kolá môže byť pri B chránené pásmo hlboké asi 2 m. Hráč, ktorý už je voľný, môže priestor držať."]
+          "steps": [
+            "20:00–22:00 ukážka. Brankár prihrá po zemi. Útočníci získajú bod, keď cieľový hráč kontrolovane prevezme loptu. Ten sa môže pohybovať po koncovej čiare.",
+            "Útočníci môžu hrať späť brankárovi. Obrancovia po zisku získajú bod vyvedením cez bočnú čiaru. Nová akcia po bode alebo lopte mimo od brankára.",
+            "Začiatky hier: 22:00, 24:00, 26:00, 28:00, 30:00, 32:00. Po každej 90 s hre 30 s na výmenu; posledný oddych slúži aj na prechod.",
+            "Brankár zostáva, šesť hráčov rotuje cez všetky úlohy."
+          ],
+          "cues": [
+            "Vyjdi spoza obrancu.",
+            "Kto nám zostal na druhej strane?"
+          ],
+          "tables": [
+            {
+              "caption": "Rotácia šiestich hráčov do poľa",
+              "headers": [
+                "Kolo",
+                "Útočníci",
+                "Obrancovia",
+                "Cieľ"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "1, 2, 3",
+                  "4, 5",
+                  "6"
+                ],
+                [
+                  "2",
+                  "6, 1, 2",
+                  "3, 4",
+                  "5"
+                ],
+                [
+                  "3",
+                  "5, 6, 1",
+                  "2, 3",
+                  "4"
+                ],
+                [
+                  "4",
+                  "4, 5, 6",
+                  "1, 2",
+                  "3"
+                ],
+                [
+                  "5",
+                  "3, 4, 5",
+                  "6, 1",
+                  "2"
+                ],
+                [
+                  "6",
+                  "2, 3, 4",
+                  "5, 6",
+                  "1"
+                ]
+              ]
+            }
+          ],
+          "adjustments": [
+            "Prvé dve kolá môže byť pri B chránené pásmo hlboké asi 2 m. Hráč, ktorý už je voľný, môže priestor držať."
+          ]
         },
         {
-          "id": "4", "start": 34, "end": 50, "title": "Rozohrávka do dvoch bránok", "diagram": "buildout",
-          "summary": "Ponúknuť brankárovi aspoň dve viditeľné možnosti v rozdielnych uhloch.", "space": "Dve plochy 24 × 18 m. Veľká brána s B na jednom konci, dve malé bránky široké 1,5–2 m oproti. 3 hráči + B proti 3.",
+          "id": "4",
+          "start": 34,
+          "end": 50,
+          "title": "Rozohrávka do dvoch bránok",
+          "diagram": "buildout",
+          "summary": "Ponúknuť brankárovi aspoň dve viditeľné možnosti v rozdielnych uhloch.",
+          "space": "Dve plochy 24 × 18 m. Veľká brána s B na jednom konci, dve malé bránky široké 1,5–2 m oproti. 3 hráči + B proti 3.",
           "dose": "1 min ukážka + 4 × 3 min hry + 3 × 1 min oddych = 16 min.",
-          "steps": ["34:00–35:00 ukážka. Mužstvo s B boduje vyvedením cez malú bránku alebo prihrávkou cez ňu spoluhráčovi, ktorý loptu prevezme.", "Súperi po zisku útočia na veľkú bránu. Po góle či lopte mimo začína B.", "Herné kolá 35:00–38:00, 39:00–42:00, 43:00–46:00, 47:00–50:00. Medzi nimi vždy 1 min oddych a výmena úloh trojíc.", "Spočiatku pri rozohre súperi za čiarou asi 6 m od brány. Vyštartujú po prvom dotyku príjemcu. Ochranu zmenšuj podľa istoty."],
-          "cues": ["Pozri sa, vyber voľného a potom sa mu znovu ponúkni."],
-          "adjustments": ["Ak spoluhráči stoja za súpermi, pomôž najprv ich ponuke. Rozumný zámer oceň aj pri nepresnom prevedení."]
+          "steps": [
+            "34:00–35:00 ukážka. Mužstvo s B boduje vyvedením cez malú bránku alebo prihrávkou cez ňu spoluhráčovi, ktorý loptu prevezme.",
+            "Súperi po zisku útočia na veľkú bránu. Po góle či lopte mimo začína B.",
+            "Herné kolá 35:00–38:00, 39:00–42:00, 43:00–46:00, 47:00–50:00. Medzi nimi vždy 1 min oddych a výmena úloh trojíc.",
+            "Spočiatku pri rozohre súperi za čiarou asi 6 m od brány. Vyštartujú po prvom dotyku príjemcu. Ochranu zmenšuj podľa istoty."
+          ],
+          "cues": [
+            "Pozri sa, vyber voľného a potom sa mu znovu ponúkni."
+          ],
+          "adjustments": [
+            "Ak spoluhráči stoja za súpermi, pomôž najprv ich ponuke. Rozumný zámer oceň aj pri nepresnom prevedení."
+          ]
         },
         {
-          "id": "5", "start": 50, "end": 72, "title": "Hra 6 na 6 + brankári", "diagram": "match",
-          "summary": "Použiť viditeľnú ponuku v bežnej hre. Hráči si vyberajú medzi prihrávkou, vedením a strelou.", "space": "Približne 42 × 30 m, dva tímy po 6 hráčov + brankár.",
+          "id": "5",
+          "start": 50,
+          "end": 72,
+          "title": "Hra 6 na 6 + brankári",
+          "diagram": "match",
+          "summary": "Použiť viditeľnú ponuku v bežnej hre. Hráči si vyberajú medzi prihrávkou, vedením a strelou.",
+          "space": "Približne 42 × 30 m, dva tímy po 6 hráčov + brankár.",
           "dose": "2 min organizácia + 2 × 9 min hry + 2 min oddych = 22 min.",
-          "steps": ["50:00–52:00 spoj plochy a rozdeľ dva tímy.", "52:00–61:00 prvá hra. Najviac jedno krátke zastavenie na ukážku.", "61:00–63:00 oddych a voda; jeden stručný podnet podľa pozorovania.", "63:00–72:00 druhá hra, viac pozoruj. Voľný počet dotykov a bežné skórovanie.", "Sleduj viditeľnú možnosť na prihrávku, všimnutie spoluhráča pri príchode ďalšieho obrancu a dostupnosť po odovzdaní lopty."],
-          "cues": ["Ukáž sa tam, kde ťa spoluhráč vidí."],
-          "adjustments": ["Pri prehustení mierne rozšír ihrisko. Brankár môže zvoliť aj dlhšiu prihrávku, ak krátka cesta nie je otvorená."]
+          "steps": [
+            "50:00–52:00 spoj plochy a rozdeľ dva tímy.",
+            "52:00–61:00 prvá hra. Najviac jedno krátke zastavenie na ukážku.",
+            "61:00–63:00 oddych a voda; jeden stručný podnet podľa pozorovania.",
+            "63:00–72:00 druhá hra, viac pozoruj. Voľný počet dotykov a bežné skórovanie.",
+            "Sleduj viditeľnú možnosť na prihrávku, všimnutie spoluhráča pri príchode ďalšieho obrancu a dostupnosť po odovzdaní lopty."
+          ],
+          "cues": [
+            "Ukáž sa tam, kde ťa spoluhráč vidí."
+          ],
+          "adjustments": [
+            "Pri prehustení mierne rozšír ihrisko. Brankár môže zvoliť aj dlhšiu prihrávku, ak krátka cesta nie je otvorená."
+          ]
         },
         {
-          "id": "6", "start": 72, "end": 75, "title": "Pokojné ukončenie", "diagram": "finish",
-          "summary": "Chôdza, voda a krátke pomenovanie skúsenosti z tréningu.", "space": "Pokojné miesto pri ihrisku.", "dose": "3 min spolu pre celé mužstvo.",
-          "steps": ["Pokojná chôdza a voda.", "Jedna otázka mužstvu; nechaj priestor na odpovede.", "Pomenuj skutočný príklad ponuky mimo obrancu alebo opätovného zapojenia. Zisti orientačne náročnosť tréningu."],
-          "cues": ["Čo môžeš urobiť, keď spoluhráč má loptu, ale medzi vami stojí súper?"], "adjustments": []
+          "id": "6",
+          "start": 72,
+          "end": 75,
+          "title": "Pokojné ukončenie",
+          "diagram": "finish",
+          "summary": "Chôdza, voda a krátke pomenovanie skúsenosti z tréningu.",
+          "space": "Pokojné miesto pri ihrisku.",
+          "dose": "3 min spolu pre celé mužstvo.",
+          "steps": [
+            "Pokojná chôdza a voda.",
+            "Jedna otázka mužstvu; nechaj priestor na odpovede.",
+            "Pomenuj skutočný príklad ponuky mimo obrancu alebo opätovného zapojenia. Zisti orientačne náročnosť tréningu."
+          ],
+          "cues": [
+            "Čo môžeš urobiť, keď spoluhráč má loptu, ale medzi vami stojí súper?"
+          ],
+          "adjustments": []
         }
       ]
     }

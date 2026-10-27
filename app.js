@@ -1,8 +1,44 @@
 'use strict';
 
+class TrainingClock {
+  constructor(milliseconds) { this.total = milliseconds; this.left = milliseconds; this.deadline = null; this.started = false; }
+  remaining(now = Date.now()) { return this.deadline === null ? this.left : Math.max(0, this.deadline - now); }
+  start(now = Date.now()) { if (this.remaining(now) <= 0) this.reset(); if (this.deadline === null) { this.deadline = now + this.left; this.started = true; } }
+  pause(now = Date.now()) { this.left = this.remaining(now); this.deadline = null; }
+  reset() { this.left = this.total; this.deadline = null; this.started = false; }
+}
+
+const PrivateVault = {
+  iterations: 250000,
+  async key(password, salt, iterations) {
+    const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  },
+  valid(blob) {
+    return blob?.vaultVersion === 1 && blob.iterations === this.iterations && Array.isArray(blob.salt) && blob.salt.length === 16 && Array.isArray(blob.iv) && blob.iv.length === 12 && [...blob.salt, ...blob.iv].every(x => Number.isInteger(x) && x >= 0 && x <= 255) && typeof blob.data === 'string' && blob.data.length < 200000;
+  },
+  async encrypt(value, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await this.key(password, salt, this.iterations);
+    const cipher = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(value))));
+    let binary = ''; for (const byte of cipher) binary += String.fromCharCode(byte);
+    return { vaultVersion: 1, iterations: this.iterations, salt: Array.from(salt), iv: Array.from(iv), data: btoa(binary) };
+  },
+  async decrypt(blob, password) {
+    if (!this.valid(blob)) throw new Error('Invalid backup');
+    const key = await this.key(password, new Uint8Array(blob.salt), blob.iterations);
+    const cipher = Uint8Array.from(atob(blob.data), x => x.charCodeAt(0));
+    const value = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: new Uint8Array(blob.iv) }, key, cipher)));
+    if (value?.version !== 1 || !Array.isArray(value.sections) || value.sections.some(s => typeof s.title !== 'string' || !Array.isArray(s.items) || s.items.some(x => typeof x !== 'string')) || typeof value.notes !== 'string') throw new Error('Invalid personal content');
+    return value;
+  }
+};
+
+// BROWSER_APP
 (() => {
   const $ = (id) => document.getElementById(id);
-  const state = { trainings: [], selected: null, observer: null, loading: false };
+  const state = { trainings: [], selected: null, blockIndex: 0, view: 'field', detail: null, loading: false, attendance: 19, clocks: new Map(), done: {}, gear: {}, vault: null, vaultPassword: null };
   let toastTimeout;
 
   function el(tag, className, content) {
@@ -26,13 +62,14 @@
 
   function route() {
     const params = new URLSearchParams(location.hash.slice(1));
-    return { id: params.get('trening'), block: params.get('blok'), section: params.get('sekcia') };
+    return { id: params.get('trening'), block: params.get('blok'), section: params.get('sekcia'), attendance: Number(params.get('pocet')) };
   }
 
   function linkFor(id, block = null, section = null) {
     const url = new URL(location.href);
     url.search = '';
     const params = new URLSearchParams({ trening: id });
+    if (state.selected?.id === id && state.selected.attendanceCases) params.set('pocet', String(state.attendance));
     if (block) params.set('blok', block);
     if (section) params.set('sekcia', section);
     url.hash = params.toString();
@@ -121,8 +158,8 @@
       body: field() + goal(30, 112) + player(49, 112, 'B', 'keeper') + gate(330, 74) + gate(330, 157)
         + player(107, 75, '1') + player(120, 158, '2') + ball(136, 158)
         + player(221, 83, 'O', 'opponent') + player(240, 155, 'O', 'opponent') + arrow(120, 87, 160, 119)
-        + text(180, 21, '2 na 2 · voľný počet dotykov') + text(180, 218, 'Tretia dvojica oddychuje'),
-      caption: 'Príklad šesťčlennej skupiny s B. Bez neho dve malé bránky na oboch koncoch. Päťčlenná skupina má vlastnú rotáciu a oddych.'
+        + text(180, 21, '2 na 2 · voľný počet dotykov') + text(180, 218, 'Striedanie a oddych v Rotáciách'),
+      caption: 'Príklad s brankárom. Bez neho sú na oboch koncoch malé bránky. Dávku a oddych vyber podľa počtu hráčov v Rotáciách.'
     }),
     target: () => ({
       height: 238,
@@ -192,7 +229,9 @@
       'image/svg+xml'
     );
     doc.querySelector('title').textContent = `Schéma: ${title}`;
-    figure.append(document.importNode(doc.documentElement, true), el('figcaption', '', draw.caption));
+    const help = el('details', 'diagram-help');
+    help.append(el('summary', '', 'Značky a vysvetlenie schémy'), el('p', '', draw.caption));
+    figure.append(document.importNode(doc.documentElement, true), help);
     parent.append(figure);
     if (key === 'finish' || key === 'sprint-jump') return;
     const legend = el('div', 'diagram-legend');
@@ -203,7 +242,7 @@
       item.append(symbol, document.createTextNode(label));
       legend.append(item);
     });
-    parent.append(legend);
+    help.append(legend);
   }
 
   function addList(parent, title, items, className = '') {
@@ -238,132 +277,6 @@
     parent.append(wrap);
   }
 
-  function updateExpandButton() {
-    const allOpen = [...$('blocks').children].every(block => block.open);
-    $('expand-all').textContent = allOpen ? 'Zbaliť všetko' : 'Rozbaliť všetko';
-    $('expand-all').setAttribute('aria-expanded', String(allOpen));
-  }
-
-  function renderBlocks(training) {
-    const root = $('blocks');
-    root.replaceChildren();
-    training.blocks.forEach((block, index) => {
-      const details = el('details', 'block');
-      details.id = `block-${block.id}`;
-      details.open = index === 0;
-      const summary = el('summary');
-      const description = el('span');
-      description.append(el('span', 'block-meta', `${block.start}–${block.end} min · trvanie ${block.end - block.start} min`), el('span', 'block-title', block.title));
-      const arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      arrowSvg.setAttribute('viewBox', '0 0 20 20');
-      arrowSvg.setAttribute('class', 'chevron');
-      arrowSvg.setAttribute('aria-hidden', 'true');
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'm5 8 5 5 5-5');
-      arrowSvg.append(path);
-      summary.append(el('span', 'block-number', String(index + 1)), description, arrowSvg);
-      const body = el('div', 'block-body');
-      body.append(el('p', 'block-description', block.summary), el('p', '', block.space));
-      const dose = el('div', 'dose');
-      dose.append(el('strong', '', 'DÁVKA A ODDYCH'), document.createTextNode(block.dose));
-      body.append(dose);
-      addDiagram(body, block.diagram, `${training.id}-${block.id}`, block.title);
-      addList(body, 'Ako to prebieha', block.steps);
-      block.tables?.forEach(table => addTable(body, table));
-      const cue = el('div', 'cue-box');
-      cue.append(el('h3', '', 'Čo povedať hráčom'), el('p', '', block.cues.map(item => `„${item}“`).join(' ')));
-      body.append(cue);
-      addList(body, 'Čo sledovať a ako upraviť', block.adjustments, 'adjust');
-      const blockShare = el('button', 'block-link', 'Zdieľať tento blok');
-      blockShare.type = 'button';
-      blockShare.addEventListener('click', () => share(linkFor(training.id, block.id)));
-      body.append(blockShare);
-      details.append(summary, body);
-      details.addEventListener('toggle', updateExpandButton);
-      root.append(details);
-    });
-    updateExpandButton();
-  }
-
-  function render(training) {
-    state.selected = training;
-    document.title = `${training.title} · Tréningy U10 / U11`;
-    $('training-select').value = training.id;
-    $('training-date').textContent = `${dateLabel(training.date)} · ${training.category}`;
-    $('training-title').textContent = training.title;
-    $('training-focus').textContent = training.focus;
-    $('training-cue').textContent = `„${training.cue}“`;
-    $('training-meta').replaceChildren(...[
-      `${training.duration} minút`, training.players, training.coaches, training.surface
-    ].map(item => el('span', '', item)));
-    renderBlocks(training);
-    $('equipment-list').replaceChildren(...training.equipment.map(item => {
-      const card = el('div', 'equipment-card');
-      card.append(el('span', '', item.quantity), el('h3', '', item.name), el('p', '', item.detail));
-      return card;
-    }));
-    $('coaching-notes').replaceChildren(...training.notes.map(item => {
-      const card = el('div', 'note-card');
-      card.append(el('h3', '', item.title), el('p', '', item.text));
-      return card;
-    }));
-    $('sources-list').replaceChildren(...training.sources.map(source => {
-      const p = el('p');
-      if (source.url && /^https:\/\//.test(source.url)) {
-        const a = el('a', '', source.label);
-        a.href = source.url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        p.append(a);
-      } else p.textContent = source.label;
-      return p;
-    }));
-    $('training').hidden = false;
-    $('bottom-nav').hidden = false;
-    $('share').disabled = false;
-    state.observer?.disconnect();
-    if ('IntersectionObserver' in window) {
-      state.observer = new IntersectionObserver(entries => {
-        const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible.length) setCurrentSection(visible[0].target.id);
-      }, { rootMargin: '-10% 0px -55% 0px', threshold: 0 });
-      ['plan', 'equipment', 'coaching'].forEach(id => state.observer.observe($(id)));
-    }
-  }
-
-  function setCurrentSection(id) {
-    document.querySelectorAll('[data-section]').forEach(a => {
-      if (a.dataset.section === id) a.setAttribute('aria-current', 'location');
-      else a.removeAttribute('aria-current');
-    });
-  }
-
-  function onRoute(initial = false) {
-    if (!state.trainings.length) return;
-    const current = route();
-    const requested = state.trainings.find(item => item.id === current.id);
-    const training = requested || state.trainings[0];
-    if (!requested) {
-      history.replaceState(null, '', linkFor(training.id));
-      if (current.id) message('Tento tréning sa nenašiel. Zobrazujem najnovší plán.');
-    }
-    const changed = state.selected?.id !== training.id;
-    if (changed) render(training);
-    const targetBlock = current.block && training.blocks.find(item => item.id === current.block);
-    if (targetBlock) {
-      const target = $(`block-${targetBlock.id}`);
-      target.open = true;
-      setCurrentSection('plan');
-      requestAnimationFrame(() => target.scrollIntoView({ behavior: 'instant', block: 'start' }));
-    } else if (['plan', 'equipment', 'coaching'].includes(current.section)) {
-      setCurrentSection(current.section);
-      requestAnimationFrame(() => $(current.section).scrollIntoView({ behavior: 'instant', block: 'start' }));
-    } else if (!initial && changed) {
-      setCurrentSection('plan');
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  }
-
   function validateData(data) {
     if (data?.version !== 1 || !Array.isArray(data.trainings) || !data.trainings.length) throw new Error('Unsupported training data.');
     const ids = new Set();
@@ -395,67 +308,366 @@
     return data;
   }
 
+  const storageKeys = { done: 'training-completed-v2', gear: 'training-equipment-v2', vault: 'training-private-v1' };
+  let groupSize = 4;
+  let vaultEpoch = 0;
+  let lastTimerState = '';
+  function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
+  function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { message('Prehliadač nepovolil uloženie. Údaje po zatvorení nemusia zostať.'); return false; } }
+  function completed() { const value = state.done[state.selected.id]; return Array.isArray(value) ? value : []; }
+  function checkedGear() { const value = state.gear[state.selected.id]; return Array.isArray(value) ? value : []; }
+  function activeBlock() { return state.selected.blocks[state.blockIndex]; }
+  function clockKey() { return state.selected.id + '/' + activeBlock().id; }
+  function currentClock() { const key = clockKey(); if (!state.clocks.has(key)) state.clocks.set(key, new TrainingClock((activeBlock().end - activeBlock().start) * 60000)); return state.clocks.get(key); }
+  function clockText(milliseconds) { const seconds = Math.ceil(milliseconds / 1000); return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }
+  function updateTimer() {
+    if (!state.selected) return;
+    const clock = currentClock();
+    const remaining = clock.remaining();
+    const value = clockText(remaining);
+    $('timer-value').textContent = value;
+    $('timer-preview').textContent = value;
+    const status = remaining === 0 ? 'Čas bloku uplynul' : clock.deadline !== null ? 'Beží' : clock.started ? 'Pozastavený' : 'Pripravený';
+    if (status !== lastTimerState) { $('timer-state').textContent = status; lastTimerState = status; }
+    $('timer-toggle').textContent = clock.deadline !== null && remaining > 0 ? 'Pauza' : remaining === 0 ? 'Spustiť znova' : clock.started ? 'Pokračovať' : 'Spustiť';
+  }
+  function attendanceCase() { return state.selected.attendanceCases?.find(x => x.total === state.attendance); }
+  function updateSessionMeta() {
+    const training = state.selected;
+    const currentCase = attendanceCase();
+    $('session-meta').textContent = training.duration + ' min · ' + (currentCase ? currentCase.total + ' detí · 2 brankári' : training.players);
+    const options = currentCase ? [...new Set(currentCase.groups)].sort() : [6];
+    if (!options.includes(groupSize)) groupSize = options[0];
+    $('grouping').textContent = currentCase ? 'Štyri skupiny: ' + currentCase.groups.join(' + ') + ' hráčov do poľa. Dvaja brankári zostávajú pri bránach.' : training.players + '. ' + training.coaches + '.';
+  }
+  function navigate(view, index = state.blockIndex) {
+    const training = state.selected;
+    const block = training.blocks[index];
+    const section = view === 'field' ? null : view;
+    const url = linkFor(training.id, block.id, section);
+    if (url !== location.href) { history.pushState(null, '', url); onRoute(); }
+    else onRoute();
+  }
+  function renderProgress() {
+    const done = completed();
+    $('completion-count').textContent = 'Dokončené: ' + done.length + ' z ' + state.selected.blocks.length + '. Označenie vidíš iba v tomto prehliadači.';
+    $('block-rail').replaceChildren(...state.selected.blocks.map((block, index) => {
+      const button = el('button', done.includes(block.id) ? 'is-complete' : '', done.includes(block.id) ? '✓ ' + (index + 1) : String(index + 1));
+      button.type = 'button';
+      button.setAttribute('aria-label', 'Blok ' + (index + 1) + ': ' + block.title + (done.includes(block.id) ? ', dokončený' : ''));
+      if (index === state.blockIndex) button.setAttribute('aria-current', 'step');
+      button.addEventListener('click', () => navigate('field', index));
+      return button;
+    }));
+    $('overview-blocks').replaceChildren(...state.selected.blocks.map((block, index) => {
+      const button = el('button', 'overview-item' + (done.includes(block.id) ? ' is-complete' : ''));
+      button.type = 'button';
+      const description = el('span');
+      description.append(el('small', '', block.start + '–' + block.end + ' min · ' + (block.end - block.start) + ' min'), el('strong', '', block.title));
+      button.append(el('span', 'overview-index', done.includes(block.id) ? '✓' : String(index + 1)), description);
+      button.addEventListener('click', () => navigate('field', index));
+      return button;
+    }));
+  }
+  function renderActive() {
+    const block = activeBlock();
+    $('block-meta').textContent = 'Časť ' + (state.blockIndex + 1) + ' zo ' + state.selected.blocks.length + ' · ' + block.start + '–' + block.end + ' min';
+    $('activity-title').textContent = block.title;
+    $('active-dose').textContent = block.dose;
+    $('active-cue').textContent = '„' + block.cues[0] + '“';
+    $('active-diagram').replaceChildren();
+    addDiagram($('active-diagram'), block.diagram, state.selected.id + '-' + block.id, block.title);
+    $('previous-block').disabled = state.blockIndex === 0;
+    const last = state.blockIndex === state.selected.blocks.length - 1;
+    const allDone = completed().length === state.selected.blocks.length;
+    const lastDone = last && completed().includes(block.id);
+    $('complete-block').textContent = last ? lastDone ? 'Posledná časť hotová ✓' : 'Dokončiť tréning ✓' : 'Hotovo → ďalej';
+    $('complete-block').disabled = lastDone;
+    const next = state.selected.blocks[state.blockIndex + 1];
+    $('next-preview').textContent = next ? 'Nasleduje: ' + next.title + ' · ' + (next.end - next.start) + ' min' : 'Posledná časť tréningu.';
+    $('finished').hidden = !lastDone;
+    $('finished').querySelector('h2').textContent = allDone ? 'Tréning je dokončený' : 'Posledná časť je hotová';
+    $('finished').querySelector('p').textContent = allDone ? 'Všetky časti máš označené. Doprajte si vodu a pokojný záver.' : 'V prehľade je označených ' + completed().length + ' z ' + state.selected.blocks.length + ' častí. Ostatné môžeš skontrolovať v prehľade.';
+    document.querySelector('[data-detail="rotations"]').hidden = !block.tables?.length;
+    state.detail = null;
+    renderDetail();
+    renderProgress();
+    lastTimerState = '';
+    updateTimer();
+  }
+  function renderDetail() {
+    const panel = $('detail-panel');
+    document.querySelectorAll('[data-detail]').forEach(button => button.setAttribute('aria-expanded', String(button.dataset.detail === state.detail)));
+    panel.hidden = !state.detail;
+    panel.replaceChildren();
+    if (!state.detail) return;
+    const block = activeBlock();
+    if (state.detail === 'steps') {
+      panel.append(el('h2', '', 'Ako to prebieha'), el('p', 'muted', block.summary), el('p', '', block.space));
+      addList(panel, 'Postup', block.steps);
+    } else if (state.detail === 'cues') {
+      addList(panel, 'Čo povedať hráčom', block.cues.map(x => '„' + x + '“'));
+      addList(panel, 'Čo sledovať a ako upraviť', block.adjustments);
+    } else {
+      panel.append(el('h2', '', 'Striedanie a rotácie'));
+      const currentCase = attendanceCase();
+      if (currentCase && ['2', '3', '4'].includes(block.id)) {
+        const choices = el('div', 'detail-buttons');
+        [...new Set(currentCase.groups)].sort().forEach(size => {
+          const button = el('button', '', 'Skupina ' + size);
+          button.type = 'button';
+          button.setAttribute('aria-pressed', String(groupSize === size));
+          if (groupSize === size) button.style.backgroundColor = 'var(--soft)';
+          button.addEventListener('click', () => { groupSize = size; renderDetail(); });
+          choices.append(button);
+        });
+        panel.append(choices);
+      }
+      for (const table of block.tables || []) {
+        if (currentCase && block.id === '5') addTable(panel, { ...table, rows: table.rows.filter(row => Number(row[0]) === state.attendance) });
+        else if (currentCase && block.id === '2') addTable(panel, { ...table, rows: table.rows.filter(row => row[0].startsWith(String(groupSize))) });
+        else if (currentCase && block.id === '3') {
+          const column = groupSize === 4 ? 1 : 2;
+          addTable(panel, { caption: table.caption, headers: ['Akcia', groupSize + ' hráčov: útok / obrana'], rows: table.rows.filter(row => row[column] !== 'Oddych').map(row => [row[0], row[column]]) });
+        } else if (!(currentCase && block.id === '4' && groupSize === 5)) addTable(panel, table);
+      }
+      if (block.variantNotes?.[String(groupSize)]) panel.append(el('p', '', block.variantNotes[String(groupSize)]));
+    }
+  }
+  function renderEquipment() {
+    const checked = checkedGear();
+    $('equipment-progress').textContent = 'Pripravené: ' + checked.length + ' z ' + state.selected.equipment.length;
+    $('equipment-list').replaceChildren(...state.selected.equipment.map(item => {
+      const label = el('label', 'equipment-card');
+      const input = el('input');
+      input.type = 'checkbox';
+      input.checked = checked.includes(item.name);
+      const content = el('span');
+      content.append(el('strong', '', item.name), el('small', '', item.quantity), el('p', '', item.detail));
+      input.addEventListener('change', () => {
+        const values = new Set(checkedGear());
+        if (input.checked) values.add(item.name); else values.delete(item.name);
+        state.gear[state.selected.id] = [...values];
+        writeLocal(storageKeys.gear, state.gear);
+        $('equipment-progress').textContent = 'Pripravené: ' + values.size + ' z ' + state.selected.equipment.length;
+      });
+      label.append(input, content);
+      return label;
+    }));
+  }
+  function render(training) {
+    state.selected = training;
+    $('training-select').value = training.id;
+    $('training-title').textContent = training.title;
+    $('training-focus').textContent = training.focus;
+    $('training-cue').textContent = '„' + training.cue + '“';
+    document.title = training.title + ' · Tréningy U10 / U11';
+    $('attendance-wrap').hidden = !training.attendanceCases;
+    if (training.attendanceCases) {
+      $('attendance').replaceChildren(...training.attendanceCases.map(item => {
+        const option = el('option', '', String(item.total)); option.value = item.total; return option;
+      }));
+      if (!training.attendanceCases.some(x => x.total === state.attendance)) state.attendance = training.attendanceCases[0].total;
+      $('attendance').value = String(state.attendance);
+    }
+    updateSessionMeta();
+    renderEquipment();
+    $('coaching-notes').replaceChildren(...training.notes.map(item => {
+      const details = el('details', 'note-card');
+      details.append(el('summary', '', item.title), el('p', '', item.text));
+      return details;
+    }));
+    $('sources-list').replaceChildren(...training.sources.map(source => {
+      const p = el('p');
+      if (source.url && /^https:\/\//.test(source.url)) {
+        const a = el('a', '', source.label); a.href = source.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; p.append(a);
+      } else p.textContent = source.label;
+      return p;
+    }));
+    $('training').hidden = false;
+    $('bottom-nav').hidden = false;
+    $('share').disabled = false;
+  }
+  function setView(view) {
+    if (state.view === 'private' && view !== 'private') lockVault();
+    state.view = view;
+    for (const name of ['field', 'overview', 'equipment', 'coaching', 'private']) $(name + '-view').hidden = name !== view;
+    document.querySelectorAll('[data-view]').forEach(a => {
+      if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    if (view === 'private') renderVault();
+  }
+  function onRoute(initial = false) {
+    if (!state.trainings.length) return;
+    const current = route();
+    const training = state.trainings.find(x => x.id === current.id) || state.trainings[0];
+    const index = Math.max(0, training.blocks.findIndex(x => x.id === current.block));
+    const changed = state.selected?.id !== training.id;
+    if (training.attendanceCases?.some(x => x.total === current.attendance)) state.attendance = current.attendance;
+    const blockChanged = changed || state.blockIndex !== index;
+    if (state.selected && blockChanged) currentClock().pause();
+    if (changed) { lockVault(); render(training); }
+    else if (training.attendanceCases) { $('attendance').value = String(state.attendance); updateSessionMeta(); }
+    state.blockIndex = index;
+    if (blockChanged || initial) renderActive();
+    const view = ['overview', 'equipment', 'coaching', 'private'].includes(current.section) ? current.section : 'field';
+    setView(view);
+    if (!current.id || current.id !== training.id) {
+      history.replaceState(null, '', linkFor(training.id, training.blocks[index].id, view === 'field' ? null : view));
+      if (current.id) message('Tento tréning sa nenašiel. Zobrazujem najnovší.');
+    }
+    if (!initial) window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  function vaultBlob() {
+    const blob = readLocal(storageKeys.vault, null);
+    return PrivateVault.valid(blob) ? blob : null;
+  }
+  function lockVault() {
+    vaultEpoch++;
+    state.vault = null; state.vaultPassword = null;
+    $('private-notes').value = '';
+    $('personal-sections').replaceChildren();
+    for (const id of ['setup-password', 'confirm-password', 'unlock-password']) $(id).value = '';
+    $('vault-content').hidden = true;
+    if (state.view === 'private') renderVault();
+  }
+  function renderVault() {
+    const unlocked = Boolean(state.vault);
+    const exists = Boolean(vaultBlob());
+    $('vault-setup').hidden = unlocked || exists;
+    $('vault-locked').hidden = unlocked || !exists;
+    $('vault-content').hidden = !unlocked;
+    $('private-message').textContent = '';
+    if (!unlocked) return;
+    $('personal-sections').replaceChildren(...state.vault.sections.map(section => {
+      const card = el('div', 'personal-section'); const list = el('ul');
+      section.items.forEach(item => list.append(el('li', '', item)));
+      card.append(el('h2', '', section.title), list); return card;
+    }));
+    $('private-notes').value = state.vault.notes;
+  }
+  async function saveVault() {
+    const blob = await PrivateVault.encrypt(state.vault, state.vaultPassword);
+    localStorage.setItem(storageKeys.vault, JSON.stringify(blob));
+    return blob;
+  }
+  async function setupVault(event) {
+    event.preventDefault();
+    const epoch = vaultEpoch;
+    const button = event.submitter;
+    const password = $('setup-password').value;
+    if (password.length < 8 || password !== $('confirm-password').value) { $('private-message').textContent = 'Heslá sa musia zhodovať a mať aspoň 8 znakov.'; return; }
+    button.disabled = true;
+    let content = { version: 1, sections: [], notes: '' };
+    try {
+      if (!crypto.subtle) throw new Error('Secure context required');
+      const file = $('private-file').files[0];
+      if (file) {
+        if (file.size > 250000) throw new Error('Too large');
+        const parsed = JSON.parse(await file.text());
+        if (PrivateVault.valid(parsed)) content = await PrivateVault.decrypt(parsed, password);
+        else {
+          if (file.size > 100000) throw new Error('Personal file too large');
+          if (parsed.version !== 1 || !Array.isArray(parsed.sections) || parsed.sections.some(s => typeof s.title !== 'string' || !Array.isArray(s.items) || s.items.some(x => typeof x !== 'string'))) throw new Error('Invalid personal file');
+          content = { version: 1, sections: parsed.sections, notes: typeof parsed.notes === 'string' ? parsed.notes : '' };
+        }
+      }
+      if (epoch !== vaultEpoch || document.hidden || state.view !== 'private') return;
+      state.vault = content; state.vaultPassword = password;
+      await saveVault();
+      $('setup-form').reset(); renderVault();
+    } catch {
+      lockVault();
+      $('private-message').textContent = 'Časť sa nepodarilo uložiť. Skontroluj súbor, heslo k zálohe a povolené ukladanie v prehliadači. Pôvodné uloženie zostalo zachované.';
+    } finally { button.disabled = false; }
+  }
+  async function unlockVault(event) {
+    event.preventDefault(); const button = event.submitter; button.disabled = true;
+    const epoch = vaultEpoch;
+    try {
+      const password = $('unlock-password').value;
+      const content = await PrivateVault.decrypt(vaultBlob(), password);
+      if (epoch !== vaultEpoch || document.hidden || state.view !== 'private') return;
+      state.vault = content;
+      state.vaultPassword = password; $('unlock-password').value = ''; renderVault();
+    } catch { $('private-message').textContent = 'Heslo nesedí alebo je záloha poškodená.'; }
+    finally { button.disabled = false; }
+  }
   async function load() {
     if (state.loading) return;
     state.loading = true;
-    $('error').hidden = true;
-    $('loading').hidden = false;
-    $('training').hidden = true;
-    $('bottom-nav').hidden = true;
-    $('share').disabled = true;
-    $('training-select').disabled = true;
+    $('error').hidden = true; $('loading').hidden = false; $('training').hidden = true; $('bottom-nav').hidden = true;
+    $('share').disabled = true; $('training-select').disabled = true;
     try {
       const response = await fetch('./trainings.json', { cache: 'no-cache' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) throw new Error('HTTP ' + response.status);
       const data = validateData(await response.json());
       state.trainings = [...data.trainings].sort((a, b) => b.date.localeCompare(a.date));
       state.selected = null;
+      state.done = readLocal(storageKeys.done, {}); state.gear = readLocal(storageKeys.gear, {});
+      if (!state.done || typeof state.done !== 'object' || Array.isArray(state.done)) state.done = {};
+      if (!state.gear || typeof state.gear !== 'object' || Array.isArray(state.gear)) state.gear = {};
       $('training-select').replaceChildren(...state.trainings.map(training => {
-        const option = el('option', '', `${dateLabel(training.date)} · ${training.category}`);
-        option.value = training.id;
-        return option;
+        const option = el('option', '', dateLabel(training.date) + ' · ' + training.category); option.value = training.id; return option;
       }));
-      $('training-select').disabled = false;
-      onRoute(true);
-    } catch {
-      $('error').hidden = false;
-    } finally {
-      state.loading = false;
-      $('loading').hidden = true;
-    }
+      $('training-select').disabled = false; onRoute(true);
+    } catch { $('error').hidden = false; }
+    finally { state.loading = false; $('loading').hidden = true; }
   }
-
-  $('training-select').addEventListener('change', event => { location.hash = new URL(linkFor(event.target.value)).hash; });
+  $('training-select').addEventListener('change', event => {
+    history.pushState(null, '', linkFor(event.target.value)); onRoute();
+  });
+  document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); $('main').focus(); $('main').scrollIntoView({ block: 'start' }); });
+  $('attendance').addEventListener('change', event => {
+    state.attendance = Number(event.target.value); updateSessionMeta();
+    history.replaceState(null, '', linkFor(state.selected.id, activeBlock().id, state.view === 'field' ? null : state.view));
+    if (state.detail === 'rotations') renderDetail();
+  });
   $('share').addEventListener('click', () => share(linkFor(state.selected.id)));
+  $('share-block').addEventListener('click', () => share(linkFor(state.selected.id, activeBlock().id)));
   $('copy-link').addEventListener('click', copyLink);
   $('native-share').addEventListener('click', async () => {
-    try {
-      await navigator.share({ title: `${state.selected.category}: ${state.selected.title}`, url: $('share-url').value });
-    } catch (error) {
-      if (error.name !== 'AbortError') message('Použi tlačidlo Skopírovať odkaz.');
-    }
+    try { await navigator.share({ title: state.selected.title, url: $('share-url').value }); }
+    catch (error) { if (error.name !== 'AbortError') message('Použi Skopírovať odkaz.'); }
   });
   $('retry').addEventListener('click', load);
-  $('expand-all').addEventListener('click', () => {
-    const open = ![...$('blocks').children].every(block => block.open);
-    [...$('blocks').children].forEach(block => { block.open = open; });
-    updateExpandButton();
+  document.querySelectorAll('[data-view]').forEach(a => a.addEventListener('click', event => { event.preventDefault(); if (state.selected) navigate(a.dataset.view); }));
+  document.querySelectorAll('[data-detail]').forEach(button => button.addEventListener('click', () => { state.detail = state.detail === button.dataset.detail ? null : button.dataset.detail; renderDetail(); }));
+  $('previous-block').addEventListener('click', () => navigate('field', Math.max(0, state.blockIndex - 1)));
+  $('complete-block').addEventListener('click', () => {
+    currentClock().pause();
+    state.done[state.selected.id] = [...new Set([...completed(), activeBlock().id])];
+    writeLocal(storageKeys.done, state.done);
+    if (state.blockIndex < state.selected.blocks.length - 1) navigate('field', state.blockIndex + 1); else renderActive();
   });
-  document.querySelectorAll('[data-section]').forEach(a => a.addEventListener('click', event => {
-    if (!state.selected) return;
-    event.preventDefault();
-    const section = a.dataset.section;
-    history.pushState(null, '', linkFor(state.selected.id, null, section));
-    setCurrentSection(section);
-    $(section).scrollIntoView({ block: 'start' });
-  }));
+  $('review-training').addEventListener('click', () => navigate('overview'));
+  $('reset-progress').addEventListener('click', () => { state.done[state.selected.id] = []; writeLocal(storageKeys.done, state.done); renderProgress(); renderActive(); });
+  $('reset-equipment').addEventListener('click', () => { state.gear[state.selected.id] = []; writeLocal(storageKeys.gear, state.gear); renderEquipment(); });
+  $('timer-toggle').addEventListener('click', () => { const clock = currentClock(); if (clock.deadline !== null && clock.remaining() > 0) clock.pause(); else clock.start(); updateTimer(); });
+  $('timer-reset').addEventListener('click', () => { currentClock().reset(); updateTimer(); });
+  $('setup-form').addEventListener('submit', setupVault);
+  $('unlock-form').addEventListener('submit', unlockVault);
+  $('lock-vault').addEventListener('click', lockVault);
+  $('restore-vault').addEventListener('click', () => { $('vault-locked').hidden = true; $('vault-setup').hidden = false; $('private-message').textContent = 'Vyber šifrovanú zálohu. Aktuálne uloženie sa zmení až po úspešnom otvorení.'; });
+  $('private-notes-form').addEventListener('submit', async event => {
+    event.preventDefault(); const button = event.submitter; button.disabled = true;
+    try { state.vault.notes = $('private-notes').value; await saveVault(); $('private-message').textContent = 'Poznámky sú šifrovane uložené v tomto prehliadači.'; }
+    catch { $('private-message').textContent = 'Uloženie sa nepodarilo. Poznámky zatiaľ zostali na obrazovke.'; }
+    finally { button.disabled = false; }
+  });
+  $('export-vault').addEventListener('click', async () => {
+    try {
+      state.vault.notes = $('private-notes').value;
+      const blob = await saveVault();
+      const url = URL.createObjectURL(new Blob([JSON.stringify(blob)], { type: 'application/json' }));
+      const a = el('a'); a.href = url; a.download = 'moj-sifrovany-tahak.json'; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch { $('private-message').textContent = 'Zálohu sa nepodarilo vytvoriť.'; }
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) lockVault(); updateTimer(); });
+  window.addEventListener('pagehide', lockVault);
   window.addEventListener('hashchange', () => onRoute());
   window.addEventListener('popstate', () => onRoute());
-  window.addEventListener('beforeprint', () => {
-    document.querySelectorAll('.block').forEach(block => { block.dataset.wasOpen = String(block.open); block.open = true; });
-  });
-  window.addEventListener('afterprint', () => {
-    document.querySelectorAll('.block').forEach(block => { block.open = block.dataset.wasOpen === 'true'; delete block.dataset.wasOpen; });
-  });
+  setInterval(updateTimer, 250);
   load();
 })();

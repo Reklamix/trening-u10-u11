@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { webcrypto, createHash } from 'node:crypto';
+import { runInNewContext } from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const read = name => readFileSync(path.join(root, name), 'utf8');
@@ -52,42 +54,48 @@ const tue = data.trainings.find(x => x.id === '2026-10-27');
 const mon = data.trainings.find(x => x.id === '2026-10-26');
 equal(tue.blocks.map(x => [x.start, x.end]), [[0, 10], [10, 24], [24, 36], [36, 52], [52, 72], [72, 75]], 'Tuesday approved timing');
 equal(mon.blocks.map(x => [x.start, x.end]), [[0, 10], [10, 20], [20, 34], [34, 50], [50, 72], [72, 75]], 'Monday approved timing');
-check(tue.players.includes('24–26') && tue.players.includes('2 brankárov'), 'Tuesday counts');
+check(tue.players.includes('19–22') && tue.players.includes('2 brankárov'), 'Tuesday current counts');
+for (const entry of tue.attendanceCases) equal(entry.groups.reduce((a, b) => a + b, 2), entry.total, 'All attendees assigned including two keepers');
+equal(tue.attendanceCases.map(x => x.total), [19, 20, 21, 22], 'All requested attendance variants');
 
 // Use the published rotation text, not a second unconnected fixture.
 const duelRows = tue.blocks[1].tables[0].rows;
-for (const n of [5, 6]) {
+for (const n of [4, 5]) {
   const row = duelRows.find(x => x[0].startsWith(String(n)));
   const pairs = [...row[1].matchAll(/(\d+)→(\d+)/g)].map(m => [Number(m[1]), Number(m[2])]);
-  equal(pairs.length, n === 6 ? 6 : 5, 'Published 1v1 rotation length');
+  equal(pairs.length, n === 4 ? 4 : 5, 'Published 1v1 rotation length');
   const cycle = [...pairs, ...(n === 5 ? [null] : [])];
   const series = [...cycle, ...cycle];
   for (let p = 1; p <= n; p++) {
     equal(series.filter(x => x?.[0] === p).length, 2, `1v1 ${n}: player ${p} attacks twice per series`);
     equal(series.filter(x => x?.[1] === p).length, 2, `1v1 ${n}: player ${p} defends twice per series`);
-    const starts = series.flatMap((x, i) => x?.includes(p) ? [i * 20] : []);
-    check(starts.slice(1).every((start, i) => start - starts[i] >= (n === 6 ? 60 : 40)), 'Minimum 1v1 rest interval');
+    const interval = n === 4 ? 30 : 20;
+    const starts = series.flatMap((x, i) => x?.includes(p) ? [i * interval] : []);
+    check(starts.slice(1).every((start, i) => start - starts[i] >= (n === 4 ? 60 : 40)), 'Minimum 1v1 rest interval');
+    check(starts.at(-1) + 8 <= 240, '1v1 series fits four minutes');
   }
 }
 
 const twoOne = tue.blocks[2].tables[0].rows;
-for (const n of [5, 6]) {
-  const actions = twoOne.map(row => row[n === 6 ? 1 : 2]).filter(x => x !== 'Oddych').map(x => x.match(/\d+/g).map(Number));
+for (const n of [4, 5]) {
+  const actions = twoOne.map(row => row[n === 4 ? 1 : 2]).filter(x => x !== 'Oddych').map(x => x.match(/\d+/g).map(Number));
   equal(actions.length, n, '2v1 actions in one series');
   for (let p = 1; p <= n; p++) {
     equal(actions.filter(x => x.slice(0, 2).includes(p)).length, 2, '2v1 two attacks per series');
     equal(actions.filter(x => x[2] === p).length, 1, '2v1 one defence per series');
   }
-  const seconds = n === 6 ? 35 : 40;
+  const seconds = n === 4 ? 50 : 40;
   check((actions.length - 1) * seconds + 10 <= 210, '2v1 series fits 3:30 including last action');
 }
 
 const pairRounds = tue.blocks[3].tables[0].rows;
-for (const pair of ['A', 'B', 'C']) {
-  equal(pairRounds.filter(row => row[1] === pair).length, 2, '2v2 pair attacks twice');
-  equal(pairRounds.filter(row => row[2] === pair).length, 2, '2v2 pair defends twice');
-  equal(pairRounds.filter(row => row[3] === pair).length, 2, '2v2 pair rests twice');
+for (const pair of ['A', 'B']) {
+  equal(pairRounds.filter(row => row[1] === pair).length, 3, '2v2 pair attacks three rounds');
+  equal(pairRounds.filter(row => row[2] === pair).length, 3, '2v2 pair defends three rounds');
 }
+equal(6 * 80, 8 * 60, 'Four-player 2v2 keeps eight minutes per player');
+const restOrder = [1,2,3,4,5,1,2,3,4,5,1,2];
+equal([1,2,3,4,5].map(p => 540 - 45 * restOrder.filter(x => x === p).length).sort((a,b) => a-b), [405,405,450,450,450], 'Five-player 2v2 play time and rest');
 const gameRows = tue.blocks[4].tables[0].rows;
 for (const row of gameRows) {
   const total = row.slice(1).reduce((sum, cell) => sum + Number(cell.split('=').at(-1).trim()), 0);
@@ -104,9 +112,34 @@ check(!/\b(syna|synovi|synov|osobný plán|osobné poznámky)\b/iu.test(read('tr
 check(!readdirSync(root).some(x => /\.pdf$/i.test(x)), 'No private PDFs copied');
 const html = read('index.html');
 check(html.includes('lang="sk"') && html.includes('width=device-width'), 'Slovak responsive HTML');
-for (const match of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)) check(read(match[1]).length > 0, 'Local asset exists');
+for (const match of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)) check(read(match[1].split('?')[0]).length > 0, 'Local asset exists');
 const css = read('styles.css');
 check(css.includes('prefers-reduced-motion') && css.includes(':focus-visible'), 'Reduced motion and visible keyboard focus');
 check(!/innerHTML\s*=|insertAdjacentHTML|eval\(/.test(read('app.js')), 'Content is not interpolated into HTML');
+
+const stable = value => Array.isArray(value) ? '[' + value.map(stable).join(', ') + ']' : value && typeof value === 'object' ? '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ': ' + stable(value[key])).join(', ') + '}' : JSON.stringify(value);
+equal(createHash('sha256').update(stable(mon)).digest('hex'), 'ca3903386575776828717369261c0453161a9cedbc37238bce3af1f3c735c188', 'Monday archive unchanged');
+const pure = read('app.js').split('// BROWSER_APP')[0];
+const { TrainingClock, PrivateVault } = runInNewContext(pure + '\n({TrainingClock, PrivateVault})', { crypto: webcrypto, TextEncoder, TextDecoder, btoa, atob });
+const clock = new TrainingClock(600000);
+clock.start(1000); equal(clock.remaining(31000), 570000, 'Clock accounts for wall time');
+clock.pause(61000); equal(clock.remaining(999000), 540000, 'Pause freezes time');
+clock.start(121000); equal(clock.remaining(181000), 480000, 'Resume continues remaining time');
+equal(clock.remaining(900000), 0, 'Clock never negative after background interval');
+clock.pause(900000); clock.start(901000); equal(clock.remaining(901000), 600000, 'Restart finished block');
+clock.reset(); equal(clock.remaining(999000), 600000, 'Reset restores exact block duration');
+equal(clock.deadline, null, 'Reset does not auto-start');
+// Synthetic cryptography fixture; no real browser vault or user password is created by this test.
+const privateFixture = { version: 1, sections: [{ title: 'QA fixture', items: ['Confidential QA text'] }], notes: 'Test notes only' };
+const encrypted = await PrivateVault.encrypt(privateFixture, 'qa-only-synthetic-password');
+check(!JSON.stringify(encrypted).includes('Confidential QA text'), 'Backup has no plaintext content');
+equal(JSON.stringify(await PrivateVault.decrypt(encrypted, 'qa-only-synthetic-password')), JSON.stringify(privateFixture), 'Encrypted backup round trip');
+await assert.rejects(() => PrivateVault.decrypt(encrypted, 'wrong-synthetic-password')); assertions++;
+const tampered = { ...encrypted, data: (encrypted.data[0] === 'A' ? 'B' : 'A') + encrypted.data.slice(1) };
+await assert.rejects(() => PrivateVault.decrypt(tampered, 'qa-only-synthetic-password')); assertions++;
+const encryptedAgain = await PrivateVault.encrypt(privateFixture, 'qa-only-synthetic-password');
+check(JSON.stringify(encryptedAgain) !== JSON.stringify(encrypted), 'Fresh salt and nonce for each save');
+check(!PrivateVault.valid({ ...encrypted, iterations: 1 }), 'Reject weakened KDF metadata');
+check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No personal file deployed');
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);
