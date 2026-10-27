@@ -43,6 +43,9 @@ Spusť v tomto priečinku `python -m http.server 8765` a otvor `http://localhost
 
 ## Zdieľanie a mobil
 
+- **Archív** v hornej lište otvorí všetky uložené tréningy od najnovšieho. Vyber konkrétny dátum alebo použi **Zobraziť všetky dni**; kliknutím otvoríš pôvodný celý tréning. Každý deň má vlastný trvalý odkaz `#trening=RRRR-MM-DD`.
+- Tréningy sú trvalo uložené v `trainings.json` na GitHube a nezmiznú vymazaním údajov mobilu. Ďalšie dni pridávaj do tohto zoznamu, staré zachovaj. Samotné otvorenie archívu nič neprepisuje ani nevytvára nový tréning.
+- Rozloženie reaguje na šírku aj výšku obrazovky: mobil má jeden stĺpec, veľký počítač schému vedľa pokynov. Nízka obrazovka na šírku má kompaktnejšie ovládanie a dialógy sa posúvajú vo vlastnom okne.
 - Tlačidlo **Zdieľať** zobrazí odkaz s možnosťou **Skopírovať odkaz**. V podporovanom prehliadači ponúkne aj **Zdieľať cez aplikáciu**. Ak kopírovanie prehliadač nedovolí, odkaz je možné skopírovať manuálne z poľa.
 - Ikona odkazu pri názve činnosti zdieľa priamo zvolený blok. Staršie odkazy `#trening=...&blok=...` zostávajú platné.
 - Zvolený počet detí je súčasťou odkazu (`pocet=19` až `pocet=22`), aby kolega otvoril rovnaké rozdelenie.
@@ -68,7 +71,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu pri `styles.css?v=3` a `app.js?v=3` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu pri `styles.css?v=4` a `app.js?v=4` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 

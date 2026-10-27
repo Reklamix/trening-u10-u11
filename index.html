@@ -7,14 +7,14 @@
   <meta name="description" content="Klikateľný tréning U10 a U11 priamo na ihrisko. Jedna činnosť, schéma, dávka a ďalší krok.">
   <title>Tréningy U10 / U11</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123d35'/%3E%3Crect x='15' y='10' width='34' height='44' rx='2' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M15 32h34' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles.css?v=3">
-  <script src="./app.js?v=3" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=4">
+  <script src="./app.js?v=4" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
   <header class="site-header"><div class="header-inner">
     <a class="brand" href="./" aria-label="Tréningy U10 a U11, úvod"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="10" y="5" width="20" height="30" rx="1"/><path d="M10 20h20"/><circle cx="20" cy="20" r="5"/></svg><span>TRÉNINGY <b>U10 / U11</b></span></a>
-    <button id="share" class="header-button" type="button" disabled>Zdieľať</button>
+    <div class="header-actions"><button id="open-archive" class="header-button" type="button" disabled>Archív</button><button id="share" class="header-button" type="button" disabled>Zdieľať</button></div>
   </div></header>
   <main id="main" class="container" tabindex="-1">
     <div class="session-picker">
@@ -91,6 +91,7 @@
     <a href="#private" data-view="private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="12" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg><span>Moje</span></a>
   </nav>
   <p id="status" class="toast" role="status" aria-live="polite" aria-atomic="true"></p>
+  <dialog id="archive-dialog" aria-labelledby="archive-title"><h2 id="archive-title">Archív tréningov</h2><p class="muted">Vyber deň a otvor uložený tréning.</p><label for="archive-date">Dátum tréningu</label><input id="archive-date" type="date"><button id="archive-all" class="text-button" type="button">Zobraziť všetky dni</button><p id="archive-count" class="small-note" role="status"></p><div id="archive-list" class="archive-list"></div><form method="dialog"><button class="secondary-button" type="submit">Zavrieť archív</button></form></dialog>
   <dialog id="share-dialog" aria-labelledby="share-title"><form method="dialog"><h2 id="share-title">Poslať kolegovi</h2><p>Zdieľa sa iba klubový tréning.</p><label for="share-url">Webový odkaz</label><input id="share-url" type="url" readonly><button id="copy-link" class="button" type="button">Skopírovať odkaz</button><button id="native-share" class="secondary-button" type="button" hidden>Zdieľať cez aplikáciu</button><button class="text-button" type="submit">Zavrieť</button></form></dialog>
 </body>
 </html>

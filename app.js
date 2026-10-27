@@ -35,6 +35,12 @@ const PrivateVault = {
   }
 };
 
+const TrainingArchive = {
+  list(trainings, date = '') {
+    return trainings.filter(training => !date || training.date === date).sort((a, b) => b.date.localeCompare(a.date));
+  }
+};
+
 // BROWSER_APP
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -58,6 +64,23 @@ const PrivateVault = {
     return new Intl.DateTimeFormat('sk-SK', {
       weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC'
     }).format(new Date(`${date}T12:00:00Z`));
+  }
+
+  function renderArchive() {
+    const trainings = TrainingArchive.list(state.trainings, $('archive-date').value);
+    $('archive-count').textContent = trainings.length ? 'Uložené tréningy: ' + trainings.length : 'Na tento deň zatiaľ nemáme uložený tréning. Skús Zobraziť všetky dni.';
+    $('archive-list').replaceChildren(...trainings.map(training => {
+      const link = el('a', 'archive-item');
+      link.href = linkFor(training.id);
+      if (state.selected?.id === training.id) link.setAttribute('aria-current', 'date');
+      link.append(el('strong', '', dateLabel(training.date)), el('span', '', training.category + ' · ' + training.title), el('small', '', training.duration + ' min · Otvoriť tréning →'));
+      link.addEventListener('click', event => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault(); $('archive-dialog').close();
+        history.pushState(null, '', link.href); onRoute();
+      });
+      return link;
+    }));
   }
 
   function route() {
@@ -633,12 +656,12 @@ const PrivateVault = {
     if (state.loading) return;
     state.loading = true;
     $('error').hidden = true; $('loading').hidden = false; $('training').hidden = true; $('bottom-nav').hidden = true;
-    $('share').disabled = true; $('training-select').disabled = true;
+    $('share').disabled = true; $('training-select').disabled = true; $('open-archive').disabled = true;
     try {
       const response = await fetch('./trainings.json', { cache: 'no-cache' });
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const data = validateData(await response.json());
-      state.trainings = [...data.trainings].sort((a, b) => b.date.localeCompare(a.date));
+      state.trainings = TrainingArchive.list(data.trainings);
       state.selected = null;
       state.done = readLocal(storageKeys.done, {}); state.gear = readLocal(storageKeys.gear, {});
       if (!state.done || typeof state.done !== 'object' || Array.isArray(state.done)) state.done = {};
@@ -646,13 +669,16 @@ const PrivateVault = {
       $('training-select').replaceChildren(...state.trainings.map(training => {
         const option = el('option', '', dateLabel(training.date) + ' · ' + training.category); option.value = training.id; return option;
       }));
-      $('training-select').disabled = false; onRoute(true);
+      $('training-select').disabled = false; $('open-archive').disabled = false; onRoute(true);
     } catch { $('error').hidden = false; }
     finally { state.loading = false; $('loading').hidden = true; }
   }
   $('training-select').addEventListener('change', event => {
     history.pushState(null, '', linkFor(event.target.value)); onRoute();
   });
+  $('open-archive').addEventListener('click', () => { $('archive-date').value = ''; renderArchive(); $('archive-dialog').showModal(); });
+  $('archive-date').addEventListener('input', renderArchive);
+  $('archive-all').addEventListener('click', () => { $('archive-date').value = ''; renderArchive(); });
   document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); $('main').focus(); $('main').scrollIntoView({ block: 'start' }); });
   $('attendance').addEventListener('change', event => {
     state.attendance = Number(event.target.value); updateSessionMeta();

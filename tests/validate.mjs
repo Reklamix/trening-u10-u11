@@ -120,7 +120,15 @@ check(!/innerHTML\s*=|insertAdjacentHTML|eval\(/.test(read('app.js')), 'Content 
 const stable = value => Array.isArray(value) ? '[' + value.map(stable).join(', ') + ']' : value && typeof value === 'object' ? '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ': ' + stable(value[key])).join(', ') + '}' : JSON.stringify(value);
 equal(createHash('sha256').update(stable(mon)).digest('hex'), 'ca3903386575776828717369261c0453161a9cedbc37238bce3af1f3c735c188', 'Monday archive unchanged');
 const pure = read('app.js').split('// BROWSER_APP')[0];
-const { TrainingClock, PrivateVault } = runInNewContext(pure + '\n({TrainingClock, PrivateVault})', { crypto: webcrypto, TextEncoder, TextDecoder, btoa, atob });
+const { TrainingClock, PrivateVault, TrainingArchive } = runInNewContext(pure + '\n({TrainingClock, PrivateVault, TrainingArchive})', { crypto: webcrypto, TextEncoder, TextDecoder, btoa, atob });
+equal(JSON.stringify(TrainingArchive.list(data.trainings).map(t => t.date)), JSON.stringify(['2026-10-27', '2026-10-26']), 'Archive preserves both existing dates, latest first');
+equal(TrainingArchive.list(data.trainings, '2026-10-26')[0].title, mon.title, 'Archived Monday opens its original content');
+equal(TrainingArchive.list(data.trainings, '2026-10-27')[0].duration, 75, 'Archived Tuesday keeps complete duration');
+equal(TrainingArchive.list(data.trainings, '2026-10-29').length, 0, 'Missing day returns no unrelated training');
+const archiveFixture = [{date:'2026-12-31'}, {date:'2027-01-02'}, {date:'2026-01-01'}];
+const originalOrder = JSON.stringify(archiveFixture);
+equal(JSON.stringify(TrainingArchive.list(archiveFixture).map(t => t.date)), JSON.stringify(['2027-01-02','2026-12-31','2026-01-01']), 'Archive orders dates across years');
+equal(JSON.stringify(archiveFixture), originalOrder, 'Opening archive does not mutate saved data');
 const clock = new TrainingClock(600000);
 clock.start(1000); equal(clock.remaining(31000), 570000, 'Clock accounts for wall time');
 clock.pause(61000); equal(clock.remaining(999000), 540000, 'Pause freezes time');
