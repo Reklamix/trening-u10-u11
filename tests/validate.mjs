@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const read = name => readFileSync(path.join(root, name), 'utf8');
 const data = JSON.parse(read('trainings.json'));
 const diagrams = new Set(['warmup', 'coordination', 'duel', 'two-one', 'two-two', 'target', 'buildout', 'sprint-jump', 'match', 'two-matches', 'finish', 'duel-no-keeper', 'two-one-no-keeper', 'two-two-no-keeper', 'two-matches-no-keeper']);
+for(const key of ['warmup','pass','rondo','zones','matches','finish'])diagrams.add('football-'+key);
 let assertions = 0;
 const check = (value, message) => { assert.ok(value, message); assertions++; };
 const equal = (actual, expected, message) => { assert.deepEqual(actual, expected, message); assertions++; };
@@ -52,6 +53,14 @@ for (const t of data.trainings) {
 
 const tue = data.trainings.find(x => x.id === '2026-10-27');
 const mon = data.trainings.find(x => x.id === '2026-10-26');
+const thu = data.trainings.find(x => x.id === '2026-10-29');
+equal(thu.startTime,'18:00','Thursday starts at 18:00');
+equal(thu.blocks.map(b=>[b.start,b.end]),[[0,10],[10,22],[22,36],[36,52],[52,72],[72,75]],'Thursday approved blocks');
+equal(thu.attendanceCases.map(c=>c.total),[16,17,18,19,20,21,22,23,24],'Thursday selectable counts');
+for(const c of thu.attendanceCases){equal(c.groups.reduce((a,b)=>a+b,0),c.total,'Thursday every child assigned');check(c.groups.every(n=>n>=4&&n<=6),'Thursday groups fit drill rotations');}
+for(const r of thu.blocks[2].rotation){equal(r.size,r.rounds,'Every child defends once in each rondo series');equal(r.rounds*(r.playSeconds+r.restSeconds)+r.bufferSeconds,270,'Rondo fits 4:30');equal(r.playSeconds*2,70,'Each child has two equal defence rounds');}
+for(const row of thu.blocks[4].tables[0].rows)equal(row.slice(1).reduce((n,s)=>n+Number(s.split('=').at(-1).trim()),0),Number(row[0]),'Thursday final games include every selected child');
+for(const p of [1,2,3,4,5,6]){const rounds=thu.blocks[3].tables.find(t=>t.groupSize===6).rows;equal(rounds.filter(r=>r[1].split(', ').map(Number).includes(p)).length*2,2,'Six-player zone game has two neutral rounds per player');}
 equal(tue.blocks.map(x => [x.start, x.end]), [[0, 10], [10, 24], [24, 36], [36, 52], [52, 72], [72, 75]], 'Tuesday approved timing');
 equal(mon.blocks.map(x => [x.start, x.end]), [[0, 10], [10, 20], [20, 34], [34, 50], [50, 72], [72, 75]], 'Monday approved timing');
 check(tue.players.includes('17–22') && tue.players.includes('bez brankárov') && tue.keepers === 0, 'Tuesday has no goalkeepers');
@@ -110,7 +119,7 @@ for (const row of gameRows) {
   equal(total, Number(row[0]), 'Every child assigned in final games');
 }
 
-const publicFiles = ['index.html', 'styles.css', 'app.js', 'trainings.json', 'personal-plan.enc.json', '.nojekyll', 'README.md'];
+const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'trainings.json', 'personal-plan.enc.json', '.nojekyll', 'README.md'];
 for (const file of publicFiles) {
   const content = read(file);
   check(!/\uFFFD/.test(content), 'No replacement glyphs');
@@ -124,15 +133,20 @@ for (const match of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)) check(read(ma
 const css = read('styles.css');
 check(css.includes('prefers-reduced-motion') && css.includes(':focus-visible'), 'Reduced motion and visible keyboard focus');
 check(!/innerHTML\s*=|insertAdjacentHTML|eval\(/.test(read('app.js')), 'Content is not interpolated into HTML');
+check(!/innerHTML\s*=|insertAdjacentHTML|eval\(/.test(read('football.js')), 'Football diagrams use safe DOM construction');
+check(readFileSync(path.join(root,thu.diagramSheet.replace('./',''))).length>0,'Original football sheet is deployed');
 
 const stable = value => Array.isArray(value) ? '[' + value.map(stable).join(', ') + ']' : value && typeof value === 'object' ? '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ': ' + stable(value[key])).join(', ') + '}' : JSON.stringify(value);
 equal(createHash('sha256').update(stable(mon)).digest('hex'), 'ca3903386575776828717369261c0453161a9cedbc37238bce3af1f3c735c188', 'Monday archive unchanged');
+equal(createHash('sha256').update(stable(tue)).digest('hex'), 'c6d977c75d4495f9a13d84644f5df07389ab7fdc7474546409b7772952ce0ee6', 'Tuesday archive unchanged');
 const pure = read('app.js').split('// BROWSER_APP')[0];
-const { TrainingClock, PrivateVault, TrainingArchive } = runInNewContext(pure + '\n({TrainingClock, PrivateVault, TrainingArchive})', { crypto: webcrypto, TextEncoder, TextDecoder, btoa, atob });
-equal(JSON.stringify(TrainingArchive.list(data.trainings).map(t => t.date)), JSON.stringify(['2026-10-27', '2026-10-26']), 'Archive preserves both existing dates, latest first');
+const { TrainingClock, PrivateVault, TrainingArchive, TrainingSchedule } = runInNewContext(pure + '\n({TrainingClock, PrivateVault, TrainingArchive, TrainingSchedule})', { crypto: webcrypto, TextEncoder, TextDecoder, btoa, atob });
+equal(TrainingSchedule.clock(thu.startTime,75),'19:15','Thursday ends at 19:15');
+equal(TrainingSchedule.clock('23:50',15),'00:05','Clock labels cross midnight correctly');
+equal(JSON.stringify(TrainingArchive.list(data.trainings).map(t => t.date)), JSON.stringify(['2026-10-29','2026-10-27', '2026-10-26']), 'Archive preserves existing dates and adds Thursday');
 equal(TrainingArchive.list(data.trainings, '2026-10-26')[0].title, mon.title, 'Archived Monday opens its original content');
 equal(TrainingArchive.list(data.trainings, '2026-10-27')[0].duration, 75, 'Archived Tuesday keeps complete duration');
-equal(TrainingArchive.list(data.trainings, '2026-10-29').length, 0, 'Missing day returns no unrelated training');
+equal(TrainingArchive.list(data.trainings, '2026-10-30').length, 0, 'Missing day returns no unrelated training');
 const archiveFixture = [{date:'2026-12-31'}, {date:'2027-01-02'}, {date:'2026-01-01'}];
 const originalOrder = JSON.stringify(archiveFixture);
 equal(JSON.stringify(TrainingArchive.list(archiveFixture).map(t => t.date)), JSON.stringify(['2027-01-02','2026-12-31','2026-01-01']), 'Archive orders dates across years');
@@ -165,5 +179,43 @@ check(!html.includes('id="setup-form"') && !html.includes('id="confirm-password"
 check(html.includes('id="personal-next"') && html.includes('id="personal-previous"') && html.includes('id="personal-topic"'), 'Private plan has step navigation and topic picker');
 check(html.includes('<details id="backup-options"') && !html.includes('<details id="backup-options" open'), 'Restore remains optional and collapsed');
 check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No personal file deployed');
+
+const footballPure=read('football.js').split('// FOOTBALL_BROWSER')[0];
+const {FootballTimeline,FootballScenes}=runInNewContext(footballPure+'\n({FootballTimeline,FootballScenes})',{performance:{now:()=>0}});
+const motion=new FootballTimeline(8);
+motion.play(1000);equal(motion.time(3500),2.5,'Animation follows elapsed time');
+motion.pause(4000);equal(motion.time(9000),3,'Paused animation stays still');
+motion.play(10000);equal(motion.time(12000),5,'Animation resumes without jumping');
+motion.pause(12000);motion.seek(2);equal(motion.time(50000),2,'Seeking pauses at exact step');
+motion.play(0);equal(motion.time(50000),8,'Animation clamps to its end');
+motion.pause(50000);motion.play(60000);equal(motion.time(60000),0,'Completed animation restarts');
+for(const total of thu.attendanceCases.map(c=>c.total)){
+  let players=0,balls=0,matchPlayers=0;
+  for(const pitchIndex of [0,1]){
+    const warm=FootballScenes.build('football-warmup',{total,pitchIndex});
+    players+=warm.nodes.filter(n=>n.kind==='player').length;balls+=warm.nodes.filter(n=>n.kind==='ball').length;
+    const game=FootballScenes.build('football-matches',{total,pitchIndex});
+    matchPlayers+=game.nodes.filter(n=>n.kind==='player').length;
+    equal(game.nodes.filter(n=>n.team==='N').length,game.localCount%2,'Odd game has one neutral');
+    const shot=FootballScenes.sample(game.tracks.ball,game.duration);
+    check(shot.x>=game.pitch.x+game.pitch.w&&shot.x<=game.pitch.x+game.pitch.w+6,'Shot finishes inside actual miniature goal');
+  }
+  equal(players,total,'Warmup diagram accounts for all selected players');equal(balls,total,'Each warmup player has a ball');equal(matchPlayers,total,'Final diagrams account for all selected players');
+}
+for(const size of [4,5,6])for(const key of ['football-pass','football-rondo','football-zones']){
+  const scene=FootballScenes.build(key,{size});
+  equal(scene.nodes.filter(n=>n.kind==='player').length,size,'Local scene has exact selected group size');
+  if(key==='football-rondo')equal(scene.nodes.filter(n=>n.team==='B').length,1,'Rondo has one defender');
+  if(key==='football-zones'){
+    equal(scene.nodes.filter(n=>n.team==='N').length,size-4,'Zone game has correct neutrals');
+    const ball=FootballScenes.sample(scene.tracks.ball,6),receiver=FootballScenes.sample(scene.tracks.a2,6);
+    check(ball.x>=scene.pitch.x+.9*scene.pitch.w,'Ball finishes in scoring zone');
+    check(Math.hypot(ball.x-receiver.x,ball.y-receiver.y)<12,'Receiving player reaches the ball');
+  }
+  for(const frames of Object.values(scene.tracks)){
+    check(frames.every(f=>f.every(Number.isFinite)),'All animation keyframes are finite');
+    check(frames.every((f,i)=>i===0||f[0]>frames[i-1][0]),'Animation keyframes progress in time');
+  }
+}
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

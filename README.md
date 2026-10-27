@@ -16,13 +16,15 @@ Príklad zadania pre AI: „Pridaj do trainings.json ďalší 75-minútový tré
 
 ### Polia tréningu
 
-`id`, `date`, `category`, `title`, `focus`, `cue`, `duration`, `players`, `coaches`, `surface`, `equipment`, `notes`, `sources`, `blocks`.
+`id`, `date`, `category`, `title`, `focus`, `cue`, `duration`, `players`, `coaches`, `surface`, `equipment`, `notes`, `sources`, `blocks`. Voliteľné `startTime` v tvare `18:00` zobrazí absolútne časy blokov a koniec podľa duration; staršie tréningy bez neho zobrazujú minúty od začiatku.
 
 Každá pomôcka má `name`, `quantity`, `detail`. Organizačná poznámka má `title`, `text`. Zdroj má `label` a voliteľné `url` s HTTPS.
 
 Každý blok má `id` (číselný reťazec), `start`, `end`, `title`, `diagram`, `summary`, `space`, `dose`, polia textov `steps`, `cues`, `adjustments` a voliteľné `tables`.
 
 Schémy: `warmup`, `coordination`, `duel`, `two-one`, `two-two`, `target`, `buildout`, `sprint-jump`, `match`, `two-matches`, `finish`.
+
+Štvrtkové futbalové schémy: `football-warmup`, `football-pass`, `football-rondo`, `football-zones`, `football-matches`, `football-finish`. Modul `football.js` kreslí SVG podľa počtu detí a veľkosti skupiny; pôvodné schémy archívu ostávajú zachované. `diagramSheet` odkazuje na pôvodný prehľad PNG v assets (príklad pre 19 detí).
 
 Tabuľka má `caption`, pole `headers` a pole riadkov `rows`. Každý riadok má rovnaký počet buniek ako hlavička.
 
@@ -32,6 +34,7 @@ V priečinku repozitára:
 
 ```sh
 node --check app.js
+node --check football.js
 node tests/validate.mjs
 ```
 
@@ -44,6 +47,8 @@ Spusť v tomto priečinku `python -m http.server 8765` a otvor `http://localhost
 ## Zdieľanie a mobil
 
 - **Archív** v hornej lište otvorí všetky uložené tréningy od najnovšieho. Vyber konkrétny dátum alebo použi **Zobraziť všetky dni**; kliknutím otvoríš pôvodný celý tréning. Každý deň má vlastný trvalý odkaz `#trening=RRRR-MM-DD`.
+- Štvrtok **29. 10. 2026, 18:00–19:15** má výber 16–24 detí. Počet a brankári ešte nie sú potvrdení; publikovaný je pracovný variant bez brankárov. Zvolený počet sa prenesie do verejného odkazu, rozdelenia skupín, rotácií i schém. Pri 23–24 deťoch sú záverečné plochy zväčšené pre 6-členné tímy.
+- **Prehrať / Pauza / Od začiatku / Ďalší krok** ovládajú spomalenú ukážku akcie. Posuvník umožní presný posun; **Zväčšiť** otvorí schému v samostatnom dialógu. Pri redukovanom pohybe zostáva ručné krokovanie. Animácia sa nespúšťa sama, pozastaví sa pri odchode z časti alebo na pozadie a nemení tréningový časovač. Pokojný záver je statický. Schémy predstavujú jednu možnosť riešenia.
 - Tréningy sú trvalo uložené v `trainings.json` na GitHube a nezmiznú vymazaním údajov mobilu. Ďalšie dni pridávaj do tohto zoznamu, staré zachovaj. Samotné otvorenie archívu nič neprepisuje ani nevytvára nový tréning.
 - Rozloženie reaguje na šírku aj výšku obrazovky: mobil má jeden stĺpec, veľký počítač schému vedľa pokynov. Nízka obrazovka na šírku má kompaktnejšie ovládanie a dialógy sa posúvajú vo vlastnom okne.
 - Tlačidlo **Zdieľať** zobrazí odkaz s možnosťou **Skopírovať odkaz**. V podporovanom prehliadači ponúkne aj **Zdieľať cez aplikáciu**. Ak kopírovanie prehliadač nedovolí, odkaz je možné skopírovať manuálne z poľa.
@@ -71,7 +76,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu pri `styles.css?v=4` a `app.js?v=5` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu pri `styles.css?v=6`, `app.js?v=6` a pri zmene modulu aj `football.js?v=1` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 

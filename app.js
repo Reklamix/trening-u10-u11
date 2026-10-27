@@ -41,6 +41,13 @@ const TrainingArchive = {
   }
 };
 
+const TrainingSchedule = {
+  clock(start, offset) {
+    const [hours,minutes]=start.split(':').map(Number), value=(hours*60+minutes+offset)%1440;
+    return String(Math.floor(value/60)).padStart(2,'0')+':'+String(value%60).padStart(2,'0');
+  }
+};
+
 // BROWSER_APP
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -65,6 +72,9 @@ const TrainingArchive = {
       weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC'
     }).format(new Date(`${date}T12:00:00Z`));
   }
+  function timeRange(training, start=0, end=training.duration) {
+    return training.startTime ? TrainingSchedule.clock(training.startTime,start)+'–'+TrainingSchedule.clock(training.startTime,end) : start+'–'+end+' min';
+  }
 
   function renderArchive() {
     const trainings = TrainingArchive.list(state.trainings, $('archive-date').value);
@@ -73,7 +83,7 @@ const TrainingArchive = {
       const link = el('a', 'archive-item');
       link.href = linkFor(training.id);
       if (state.selected?.id === training.id) link.setAttribute('aria-current', 'date');
-      link.append(el('strong', '', dateLabel(training.date)), el('span', '', training.category + ' · ' + training.title), el('small', '', training.duration + ' min · Otvoriť tréning →'));
+      link.append(el('strong', '', dateLabel(training.date)), el('span', '', training.category + ' · ' + training.title), el('small', '', (training.startTime?timeRange(training)+' · ':'') + training.duration + ' min · Otvoriť tréning →'));
       link.addEventListener('click', event => {
         if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
         event.preventDefault(); $('archive-dialog').close();
@@ -265,6 +275,11 @@ const TrainingArchive = {
   };
 
   function addDiagram(parent, key, id, title) {
+    if (window.FootballBoard?.supports(key)) {
+      const selected=attendanceCase();
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,onGroupChange:size=>{groupSize=size;renderDetail();}});
+      return;
+    }
     const draw = drawings[key]?.();
     if (!draw) return;
     const figure = el('figure', 'diagram');
@@ -330,6 +345,7 @@ const TrainingArchive = {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(training.id) || ids.has(training.id) || training.date !== training.id) throw new Error('Invalid training identifier.');
       ids.add(training.id);
       if (!Number.isFinite(new Date(`${training.date}T12:00:00Z`).getTime())) throw new Error('Invalid date.');
+      if (training.startTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(training.startTime)) throw new Error('Invalid start time.');
       for (const key of ['title', 'focus', 'cue', 'category', 'players', 'coaches', 'surface']) {
         if (typeof training[key] !== 'string' || !training[key].trim()) throw new Error(`Missing ${key}.`);
       }
@@ -338,7 +354,7 @@ const TrainingArchive = {
       const blockIds = new Set();
       for (const block of training.blocks) {
         if (typeof block.id !== 'string' || !/^\d+$/.test(block.id) || blockIds.has(block.id)
-          || block.start !== end || !Number.isFinite(block.end) || block.end <= block.start || !Object.hasOwn(drawings, block.diagram)) throw new Error('Invalid block sequence.');
+          || block.start !== end || !Number.isFinite(block.end) || block.end <= block.start || (!Object.hasOwn(drawings, block.diagram) && !window.FootballBoard?.supports(block.diagram))) throw new Error('Invalid block sequence.');
         blockIds.add(block.id);
         end = block.end;
         for (const key of ['title', 'summary', 'space', 'dose']) if (typeof block[key] !== 'string' || !block[key].trim()) throw new Error('Missing block information.');
@@ -382,7 +398,7 @@ const TrainingArchive = {
     const training = state.selected;
     const currentCase = attendanceCase();
     const keepers = training.keepers ?? 2;
-    $('session-meta').textContent = training.duration + ' min · ' + (currentCase ? currentCase.total + ' detí · ' + (keepers === 0 ? 'bez brankárov' : keepers + ' brankári') : training.players);
+    $('session-meta').textContent = (training.startTime?timeRange(training)+' · ':'') + training.duration + ' min · ' + (currentCase ? currentCase.total + ' detí · ' + (keepers === 0 ? 'bez brankárov' : keepers + ' brankári') : training.players);
     const options = currentCase ? [...new Set(currentCase.groups)].sort() : [6];
     if (!options.includes(groupSize)) groupSize = options[0];
     $('grouping').textContent = currentCase ? 'Štyri skupiny: ' + currentCase.groups.join(' + ') + ' hráčov do poľa. ' + (keepers === 0 ? 'Bez brankárov, všetci hrajú nohami.' : 'Brankári zostávajú pri bránach.') : training.players + '. ' + training.coaches + '.';
@@ -410,20 +426,25 @@ const TrainingArchive = {
       const button = el('button', 'overview-item' + (done.includes(block.id) ? ' is-complete' : ''));
       button.type = 'button';
       const description = el('span');
-      description.append(el('small', '', block.start + '–' + block.end + ' min · ' + (block.end - block.start) + ' min'), el('strong', '', block.title));
+      description.append(el('small', '', timeRange(state.selected,block.start,block.end) + ' · ' + (block.end - block.start) + ' min'), el('strong', '', block.title));
       button.append(el('span', 'overview-index', done.includes(block.id) ? '✓' : String(index + 1)), description);
       button.addEventListener('click', () => navigate('field', index));
       return button;
     }));
   }
+  function renderDiagram() {
+    window.FootballBoard?.clear();
+    $('active-diagram').replaceChildren();
+    const block=activeBlock();
+    addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
+  }
   function renderActive() {
     const block = activeBlock();
-    $('block-meta').textContent = 'Časť ' + (state.blockIndex + 1) + ' zo ' + state.selected.blocks.length + ' · ' + block.start + '–' + block.end + ' min';
+    $('block-meta').textContent = 'Časť ' + (state.blockIndex + 1) + ' zo ' + state.selected.blocks.length + ' · ' + timeRange(state.selected,block.start,block.end);
     $('activity-title').textContent = block.title;
     $('active-dose').textContent = block.dose;
     $('active-cue').textContent = '„' + block.cues[0] + '“';
-    $('active-diagram').replaceChildren();
-    addDiagram($('active-diagram'), block.diagram, state.selected.id + '-' + block.id, block.title);
+    renderDiagram();
     $('previous-block').disabled = state.blockIndex === 0;
     const last = state.blockIndex === state.selected.blocks.length - 1;
     const allDone = completed().length === state.selected.blocks.length;
@@ -465,13 +486,14 @@ const TrainingArchive = {
           button.type = 'button';
           button.setAttribute('aria-pressed', String(groupSize === size));
           if (groupSize === size) button.style.backgroundColor = 'var(--soft)';
-          button.addEventListener('click', () => { groupSize = size; renderDetail(); });
+          button.addEventListener('click', () => { groupSize = size; if(window.FootballBoard?.supports(block.diagram))renderDiagram(); renderDetail(); });
           choices.append(button);
         });
         panel.append(choices);
       }
       for (const table of block.tables || []) {
-        if (currentCase && block.id === '5') addTable(panel, { ...table, rows: table.rows.filter(row => Number(row[0]) === state.attendance) });
+        if(block.rotationType==='thursday') { if(!table.groupSize || table.groupSize===groupSize)addTable(panel,table); }
+        else if (currentCase && block.id === '5') addTable(panel, { ...table, rows: table.rows.filter(row => Number(row[0]) === state.attendance) });
         else if (currentCase && block.id === '2') addTable(panel, { ...table, rows: table.rows.filter(row => row[0].startsWith(String(groupSize))) });
         else if (currentCase && block.id === '3') {
           const column = table.headers.findIndex(header => header.startsWith(String(groupSize)));
@@ -536,6 +558,7 @@ const TrainingArchive = {
     $('share').disabled = false;
   }
   function setView(view) {
+    if(view!=='field')window.FootballBoard?.pause();
     if (state.view === 'private' && view !== 'private') lockVault();
     state.view = view;
     $('main').classList.toggle('private-mode', view === 'private');
@@ -691,7 +714,7 @@ const TrainingArchive = {
       if (!state.done || typeof state.done !== 'object' || Array.isArray(state.done)) state.done = {};
       if (!state.gear || typeof state.gear !== 'object' || Array.isArray(state.gear)) state.gear = {};
       $('training-select').replaceChildren(...state.trainings.map(training => {
-        const option = el('option', '', dateLabel(training.date) + ' · ' + training.category); option.value = training.id; return option;
+        const option = el('option', '', dateLabel(training.date) + ' · ' + training.category + (training.startTime?' · '+training.startTime:'')); option.value = training.id; return option;
       }));
       $('training-select').disabled = false; $('open-archive').disabled = false; onRoute(true);
     } catch { $('error').hidden = false; }
@@ -707,6 +730,7 @@ const TrainingArchive = {
   $('attendance').addEventListener('change', event => {
     state.attendance = Number(event.target.value); updateSessionMeta();
     history.replaceState(null, '', linkFor(state.selected.id, activeBlock().id, state.view === 'field' ? null : state.view));
+    if(window.FootballBoard?.supports(activeBlock().diagram))renderDiagram();
     if (state.detail === 'rotations') renderDetail();
   });
   $('share').addEventListener('click', () => share(linkFor(state.selected.id)));
@@ -752,8 +776,8 @@ const TrainingArchive = {
       setTimeout(() => URL.revokeObjectURL(url), 10000);
     } catch { $('private-message').textContent = 'Zálohu sa nepodarilo vytvoriť.'; }
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) lockVault(); updateTimer(); });
-  window.addEventListener('pagehide', lockVault);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { lockVault(); window.FootballBoard?.pause(); } updateTimer(); });
+  window.addEventListener('pagehide', () => { lockVault(); window.FootballBoard?.pause(); });
   window.addEventListener('hashchange', () => onRoute());
   window.addEventListener('popstate', () => onRoute());
   setInterval(updateTimer, 250);

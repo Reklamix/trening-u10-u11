@@ -738,6 +738,651 @@
           "adjustments": []
         }
       ]
+    },
+    {
+      "id": "2026-10-29",
+      "date": "2026-10-29",
+      "category": "U11",
+      "startTime": "18:00",
+      "title": "Prihraj a znovu sa ponúkni",
+      "focus": "Pred prijatím sa pozrieť, prvým dotykom pripraviť ďalšie riešenie a po prihrávke zmeniť uhol ponuky.",
+      "cue": "Pozri sa, prihraj a ukáž sa znova.",
+      "duration": 75,
+      "players": "Počet zatiaľ nepotvrdený; zvoľ 16–24 detí. Pracovná verzia bez brankárov.",
+      "keepers": 0,
+      "coaches": "Aspoň 2 tréneri",
+      "surface": "Umelá tráva; rozmery prispôsob dostupnej ploche.",
+      "diagramSheet": "./assets/u11-2026-10-29-schemy.png",
+      "equipment": [
+        {
+          "name": "Lopty",
+          "quantity": "Pre každého + 4 rezervné",
+          "detail": "Po rozohriatí jedna do každej skupiny, náhradné na okraji."
+        },
+        {
+          "name": "Méty a kužele",
+          "quantity": "40–60",
+          "detail": "Hranice, pracovné zóny a koncové zóny hlboké 2 m."
+        },
+        {
+          "name": "Malé bránky",
+          "quantity": "8 alebo 16 kužeľov",
+          "detail": "Štyri na každé hlavné ihrisko. V hrách do zón sa bránky nepoužívajú."
+        },
+        {
+          "name": "Rozlišovačky",
+          "quantity": "4 farby po 6 + 2 odlišné",
+          "detail": "Odlišné označenie neutrálnych hráčov."
+        },
+        {
+          "name": "Organizácia",
+          "quantity": "Stopky, píšťalka, voda, lekárnička",
+          "detail": "Spoločný signál na zmenu rolí. Každý vlastná voda."
+        }
+      ],
+      "notes": [
+        {
+          "title": "Dochádzka a brankári",
+          "text": "Počet ešte nie je potvrdený. Hore zvoľ pracovný počet 16–24; je súčasťou odkazu pre trénera. Táto verzia je bez brankárov, ich štvrtková účasť zatiaľ nie je potvrdená."
+        },
+        {
+          "title": "Pripravené plochy",
+          "text": "Dve hlavné ihriská približne 32 × 24 m, medzi nimi aspoň 4 m voľný koridor. Každý tréner dohliada na dve susedné pracovné zóny. Pre techniku a rondo 12 × 12 m, pre hru do zón 20 × 14 m. Konečné hranice a malé bránky pripraviť pred začiatkom."
+        },
+        {
+          "title": "Jedna téma",
+          "text": "Pred prijatím rozhľad, prvý dotyk pre ďalšie riešenie a po prihrávke nový uhol. Oceň aj vhodné vedenie lopty. Počas hry najviac jeden krátky podnet."
+        },
+        {
+          "title": "Animovaná ukážka",
+          "text": "Prehrať ukazuje jednu možnosť akcie. Môžeš ju zastaviť, posunúť cez Ďalší krok alebo potiahnuť priebeh. Animácia nemení tréningový časovač. Pri malých skupinách vyber aj veľkosť skupiny priamo pri schéme."
+        },
+        {
+          "title": "Význam značiek",
+          "text": "Kruhy A/B sú tímy, N neutrálny, D obranca, T tréner. Plná šípka beh, prerušovaná prihrávka, vlnovka vedenie, dvojitá šípka strela. Čísla pri dráhach označujú poradie akcie."
+        }
+      ],
+      "sources": [
+        {
+          "label": "FIFA: Give and go (8–12 rokov)",
+          "url": "https://www.fifatrainingcentre.com/en/practice/grassroots/8-to-12/give-and-go.php"
+        },
+        {
+          "label": "England Football: How to coach passing",
+          "url": "https://www.thefa.com/bootroom/resources/coaching/how-to-coach-passing-in-football"
+        },
+        {
+          "label": "Téma pohybu po prihrávke a pozorovania pred prihrávkou. Časy, rozmery, rotácie a organizácia sú vlastný pracovný návrh, nie prevzatý oficiálny plán FIFA."
+        }
+      ],
+      "blocks": [
+        {
+          "id": "1",
+          "start": 0,
+          "end": 10,
+          "title": "Rozohriatie s loptou",
+          "diagram": "football-warmup",
+          "summary": "Každý s loptou, potom prihrávka a zmena uhla vo dvojici alebo trojici.",
+          "space": "Dve zóny po 25 × 20 m; deti približne na polovicu.",
+          "dose": "2 min rozhýbanie + 3 min vedenie + 4 min prihrávky (3 × 60 s + 2 × 30 s oddych) + 1 min voda.",
+          "steps": [
+            "18:00–18:02 ľahký pohyb, členky, bedrá a zmeny smeru.",
+            "18:02–18:05 každý s loptou: pokojné vedenie, vlastná kľučka, krátke zrýchlenie do voľna a znovu pokojné vedenie.",
+            "18:05–18:09 dvojice prihrávajú a po prihrávke sa posunú do nového uhla. Pri nepárnom počte jedna trojica; žiadny čakajúci rad.",
+            "18:09–18:10 voda a skupiny."
+          ],
+          "cues": [
+            "Pozri sa, prihraj a ukáž sa znova."
+          ],
+          "adjustments": [
+            "Pri nepárnom počte v zóne vytvor trojicu. Nezostáva žiadny čakajúci hráč."
+          ]
+        },
+        {
+          "id": "2",
+          "start": 10,
+          "end": 22,
+          "title": "Prihrávka a nový uhol",
+          "diagram": "football-pass",
+          "summary": "Pozri sa pred prijatím, priprav prvý dotyk a po prihrávke vytvor nový uhol.",
+          "space": "Štyri štvorce 12 × 12 m, skupiny po 4–6 hráčov, jedna lopta v skupine.",
+          "dose": "1 min ukážka + 3 × 3 min práce + 2 × 30 s prestávka + 1 min voda = 12 min.",
+          "steps": [
+            "18:10–18:11 ukážka: číslovanie 1 až počet hráčov, lopta ide v poradí a posledný prihrá prvému.",
+            "Príjemca sa pozrie pred prijatím a postaví tak, aby videl loptu aj ďalšiu možnosť. Prvý dotyk pripraví ďalšiu prihrávku.",
+            "Po prihrávke sa hráč posunie do nového voľného uhla. Nejde stáť za príjemcu ani neobieha celý štvorec.",
+            "Série 18:11–18:14, 18:14:30–18:17:30 a 18:18–18:21. V tretej môže ísť poradie opačne; bez povinného limitu dotykov.",
+            "18:21–18:22 voda."
+          ],
+          "cues": [
+            "Po prihrávke sa neschovaj za spoluhráča."
+          ],
+          "adjustments": [
+            "Bez povinného limitu dotykov; pri nepresnostiach spomaľ alebo zväčši priestor."
+          ],
+          "rotationType": "thursday",
+          "tables": [
+            {
+              "groupSize": 4,
+              "caption": "Skupina 4: poradie prihrávok a pohyb po nich",
+              "headers": [
+                "Poradie",
+                "Po prihrávke"
+              ],
+              "rows": [
+                [
+                  "1 → 2 → 3 → 4 → 1",
+                  "Nový voľný uhol, bez radu za príjemcom."
+                ]
+              ]
+            },
+            {
+              "groupSize": 5,
+              "caption": "Skupina 5: poradie prihrávok a pohyb po nich",
+              "headers": [
+                "Poradie",
+                "Po prihrávke"
+              ],
+              "rows": [
+                [
+                  "1 → 2 → 3 → 4 → 5 → 1",
+                  "Nový voľný uhol, bez radu za príjemcom."
+                ]
+              ]
+            },
+            {
+              "groupSize": 6,
+              "caption": "Skupina 6: poradie prihrávok a pohyb po nich",
+              "headers": [
+                "Poradie",
+                "Po prihrávke"
+              ],
+              "rows": [
+                [
+                  "1 → 2 → 3 → 4 → 5 → 6 → 1",
+                  "Nový voľný uhol, bez radu za príjemcom."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "3",
+          "start": 22,
+          "end": 36,
+          "title": "Rondo: nájdi voľného hráča",
+          "diagram": "football-rondo",
+          "summary": "Ponuka vedľa obrancu a voľba dostupného spoluhráča. Obranca sa mení na signál.",
+          "space": "Štyri štvorce asi 12 × 12 m. Pri 4 hráčoch 3v1, pri 5 4v1, pri 6 5v1.",
+          "dose": "2 min ukážka + 4:30 séria + 1 min voda + 4:30 séria + 2 min voda/presun = 14 min.",
+          "steps": [
+            "18:22–18:24 ukážka. Série 18:24–18:28:30 a 18:29:30–18:34; medzi nimi 1 min voda.",
+            "V každej sérii bráni postupne 1 až počet hráčov, každý presne jedno kolo. Každý má spolu 2 × 35 s obrany.",
+            "Po zisku obranca dostane bod, hra sa obnoví s tou istou rolou. Výmena obrancu až na signál; strata automaticky neposiela dieťa do stredu.",
+            "Držanie lopty odmeň bodom za 3 prihrávky. Hráči sa ponúkajú v rôznych uhloch; dotyky zatiaľ neobmedzuj.",
+            "Ak obranca získava každú loptu, zväčši priestor. Ak sa k lopte nedostáva, trochu ho zmenši. 18:34–18:36 voda a presun."
+          ],
+          "cues": [
+            "Ukáž sa vedľa obrancu, nie za ním."
+          ],
+          "adjustments": [
+            "Pri každej sérii bráni každý presne 35 s. Obranca sa nemení po chybe, ale podľa čísel.",
+            "Ak obranca získava každú loptu, zväčši priestor; ak sa k nej nedostáva, trochu ho zmenši."
+          ],
+          "rotationType": "thursday",
+          "rotation": [
+            {
+              "size": 4,
+              "rounds": 4,
+              "playSeconds": 35,
+              "restSeconds": 25,
+              "bufferSeconds": 30
+            },
+            {
+              "size": 5,
+              "rounds": 5,
+              "playSeconds": 35,
+              "restSeconds": 15,
+              "bufferSeconds": 20
+            },
+            {
+              "size": 6,
+              "rounds": 6,
+              "playSeconds": 35,
+              "restSeconds": 10,
+              "bufferSeconds": 0
+            }
+          ],
+          "tables": [
+            {
+              "groupSize": 4,
+              "caption": "Jedna séria 4:30; po poradí 30 s dodatočný oddych. Obe série rovnako.",
+              "headers": [
+                "Kolo",
+                "Obranca",
+                "Útočia",
+                "Práca / oddych"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "1",
+                  "2, 3, 4",
+                  "35 s / 25 s"
+                ],
+                [
+                  "2",
+                  "2",
+                  "1, 3, 4",
+                  "35 s / 25 s"
+                ],
+                [
+                  "3",
+                  "3",
+                  "1, 2, 4",
+                  "35 s / 25 s"
+                ],
+                [
+                  "4",
+                  "4",
+                  "1, 2, 3",
+                  "35 s / 25 s"
+                ]
+              ]
+            },
+            {
+              "groupSize": 5,
+              "caption": "Jedna séria 4:30; po poradí 20 s dodatočný oddych. Obe série rovnako.",
+              "headers": [
+                "Kolo",
+                "Obranca",
+                "Útočia",
+                "Práca / oddych"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "1",
+                  "2, 3, 4, 5",
+                  "35 s / 15 s"
+                ],
+                [
+                  "2",
+                  "2",
+                  "1, 3, 4, 5",
+                  "35 s / 15 s"
+                ],
+                [
+                  "3",
+                  "3",
+                  "1, 2, 4, 5",
+                  "35 s / 15 s"
+                ],
+                [
+                  "4",
+                  "4",
+                  "1, 2, 3, 5",
+                  "35 s / 15 s"
+                ],
+                [
+                  "5",
+                  "5",
+                  "1, 2, 3, 4",
+                  "35 s / 15 s"
+                ]
+              ]
+            },
+            {
+              "groupSize": 6,
+              "caption": "Jedna séria 4:30; po poradí 0 s dodatočný oddych. Obe série rovnako.",
+              "headers": [
+                "Kolo",
+                "Obranca",
+                "Útočia",
+                "Práca / oddych"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "1",
+                  "2, 3, 4, 5, 6",
+                  "35 s / 10 s"
+                ],
+                [
+                  "2",
+                  "2",
+                  "1, 3, 4, 5, 6",
+                  "35 s / 10 s"
+                ],
+                [
+                  "3",
+                  "3",
+                  "1, 2, 4, 5, 6",
+                  "35 s / 10 s"
+                ],
+                [
+                  "4",
+                  "4",
+                  "1, 2, 3, 5, 6",
+                  "35 s / 10 s"
+                ],
+                [
+                  "5",
+                  "5",
+                  "1, 2, 3, 4, 6",
+                  "35 s / 10 s"
+                ],
+                [
+                  "6",
+                  "6",
+                  "1, 2, 3, 4, 5",
+                  "35 s / 10 s"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "4",
+          "start": 36,
+          "end": 52,
+          "title": "Hra do koncových zón",
+          "diagram": "football-zones",
+          "summary": "Prenes pohyb po prihrávke do hry. Bod za vedenie do zóny alebo prihrávku nabiehajúcemu.",
+          "space": "Štyri plochy 20 × 14 m, na oboch koncoch zóna hlboká 2 m. Skupina 4: 2v2; 5: 2v2+N; 6: 2v2+2N.",
+          "dose": "90 s ukážka + 6 dvojminútových kôl + 5 × 30 s medzi kolami = 16 min. Pri 4 hráčoch 80 s hra + 40 s oddych; pri 5/6 90 s hra + 30 s oddych.",
+          "steps": [
+            "18:36–18:37:30 ukážka. Kolá: 18:37:30–18:39:30; 18:40–18:42; 18:42:30–18:44:30; 18:45–18:47; 18:47:30–18:49:30; 18:50–18:52. Medzi kolami 30 s prestávka.",
+            "Bod za kontrolované vedenie lopty do súperovej koncovej zóny alebo prihrávku spoluhráčovi, ktorý do nej nabieha a loptu prevezme. V zóne sa nečaká natrvalo.",
+            "Neutrálny hráč pomáha tímu s loptou, sám neboduje. Po zmene držania okamžite pomáha druhému tímu.",
+            "Pri 5 hráčoch N v prvých piatich kolách postupne 1 až 5; v šiestom hráč, ktorému pomôže jednoduchšia rola. Pri 6 neutrálne dvojice: 1+2, 3+4, 5+6 a celé poradie zopakovať.",
+            "Pri 4 hráčoch každý spolu 8 min hry; pri 5/6 každý zostáva v hre počas 9 min, neutrálna rola nie je oddych. Žiadne povinné prihrávky pred bodom."
+          ],
+          "cues": [
+            "Prihraj a nájdi si ďalšie miesto."
+          ],
+          "adjustments": [
+            "Neutrálna rola je stále práca. Oddych je vo zvyšku kola a v spoločnej prestávke.",
+            "V zóne sa nečaká natrvalo. Neutrálny pomáha tímu s loptou a neboduje."
+          ],
+          "rotationType": "thursday",
+          "rounds": [
+            "18:37:30–18:39:30",
+            "18:40–18:42",
+            "18:42:30–18:44:30",
+            "18:45–18:47",
+            "18:47:30–18:49:30",
+            "18:50–18:52"
+          ],
+          "tables": [
+            {
+              "groupSize": 4,
+              "caption": "Skupina 4: stále dvojice, 80 s hry + 40 s oddych v kole",
+              "headers": [
+                "Tím A",
+                "Tím B",
+                "Spolu"
+              ],
+              "rows": [
+                [
+                  "1, 2",
+                  "3, 4",
+                  "6 kôl, každý 8 min hry"
+                ]
+              ]
+            },
+            {
+              "groupSize": 5,
+              "caption": "Skupina 5: 90 s hry + 30 s oddych; N je neutrálny",
+              "headers": [
+                "Kolo",
+                "Neutrálny",
+                "Ostatní"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "1",
+                  "Zostávajúci štyria vytvoria dve dvojice."
+                ],
+                [
+                  "2",
+                  "2",
+                  "Zostávajúci štyria vytvoria dve dvojice."
+                ],
+                [
+                  "3",
+                  "3",
+                  "Zostávajúci štyria vytvoria dve dvojice."
+                ],
+                [
+                  "4",
+                  "4",
+                  "Zostávajúci štyria vytvoria dve dvojice."
+                ],
+                [
+                  "5",
+                  "5",
+                  "Zostávajúci štyria vytvoria dve dvojice."
+                ],
+                [
+                  "6",
+                  "Podľa potreby",
+                  "Rolu zjednoduš hráčovi, ktorému pomôže."
+                ]
+              ]
+            },
+            {
+              "groupSize": 6,
+              "caption": "Skupina 6: 90 s hry + 30 s oddych; N zostáva aktívny",
+              "headers": [
+                "Kolá",
+                "Neutrálni",
+                "Dvojice"
+              ],
+              "rows": [
+                [
+                  "1 a 4",
+                  "1, 2",
+                  "3,4 proti 5,6"
+                ],
+                [
+                  "2 a 5",
+                  "3, 4",
+                  "1,2 proti 5,6"
+                ],
+                [
+                  "3 a 6",
+                  "5, 6",
+                  "1,2 proti 3,4"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "5",
+          "start": 52,
+          "end": 72,
+          "title": "Dva zápasy na malé bránky",
+          "diagram": "football-matches",
+          "summary": "Vyber voľnú bránku, po prihrávke pokračuj v ponuke. Posledných osem minút bežná hra.",
+          "space": "Dve hlavné ihriská približne 32 × 24 m, každé so štyrmi malými bránkami; každý tím útočí na dve.",
+          "dose": "1 min organizácia + 4 × 4 min hry + 3 × 1 min oddych = 20 min.",
+          "steps": [
+            "18:52–18:53 organizácia. Úseky: 18:53–18:57; 18:58–19:02; 19:03–19:07; 19:08–19:12. Medzi úsekmi 1 min oddych.",
+            "Bežný gól platí vždy. V prvých dvoch úsekoch môže mať gól po prihrávke a opätovnom zapojení prihrávajúceho 2 body, ostatné góly 1. Posledné dva úseky iba bežná hra.",
+            "Neutrálni sa po každom úseku menia. Po lopte mimo začni prihrávkou alebo vedením, súper približne 3 m od lopty.",
+            "Počas každej minútovej prestávky voda a najviac jeden krátky podnet. V posledných 8 minútach minimum pokynov."
+          ],
+          "cues": [
+            "Kam sa môžeš ponúknuť po prihrávke?"
+          ],
+          "adjustments": [
+            "Pri 23–24 deťoch zväčši hlavné ihriská približne na 36 × 26 m pre šesťčlenné tímy.",
+            "Neutrálneho po úseku vymeň. V posledných 8 minútach minimum pokynov."
+          ],
+          "tables": [
+            {
+              "caption": "Presné rozdelenie zvoleného počtu detí; oba zápasy bez brankárov",
+              "headers": [
+                "Detí spolu",
+                "Ihrisko A",
+                "Ihrisko B"
+              ],
+              "rows": [
+                [
+                  "16",
+                  "4 na 4 = 8",
+                  "4 na 4 = 8"
+                ],
+                [
+                  "17",
+                  "4 na 4 + neutrálny = 9",
+                  "4 na 4 = 8"
+                ],
+                [
+                  "18",
+                  "4 na 4 + neutrálny = 9",
+                  "4 na 4 + neutrálny = 9"
+                ],
+                [
+                  "19",
+                  "5 na 5 = 10",
+                  "4 na 4 + neutrálny = 9"
+                ],
+                [
+                  "20",
+                  "5 na 5 = 10",
+                  "5 na 5 = 10"
+                ],
+                [
+                  "21",
+                  "5 na 5 + neutrálny = 11",
+                  "5 na 5 = 10"
+                ],
+                [
+                  "22",
+                  "5 na 5 + neutrálny = 11",
+                  "5 na 5 + neutrálny = 11"
+                ],
+                [
+                  "23",
+                  "6 na 6 = 12",
+                  "5 na 5 + neutrálny = 11"
+                ],
+                [
+                  "24",
+                  "6 na 6 = 12",
+                  "6 na 6 = 12"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "6",
+          "start": 72,
+          "end": 75,
+          "title": "Pokojný záver",
+          "diagram": "football-finish",
+          "summary": "Chôdza, voda a krátka otázka. Bez dodatočných opakovaní.",
+          "space": "Pokojné miesto pri ihrisku.",
+          "dose": "3 min spolu.",
+          "steps": [
+            "Pokojná chôdza a voda.",
+            "Jedna otázka: Pri ktorej akcii ti pomohlo, že si sa po prihrávke znovu pohol?",
+            "Jedna konkrétna pochvala za viditeľnú ponuku alebo dobré rozhodnutie. Žiadne dodatočné súboje či povinné opakovania."
+          ],
+          "cues": [
+            "Pri ktorej akcii ti pomohol nový pohyb po prihrávke?"
+          ],
+          "adjustments": []
+        }
+      ],
+      "attendanceCases": [
+        {
+          "total": 16,
+          "groups": [
+            4,
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "total": 17,
+          "groups": [
+            5,
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "total": 18,
+          "groups": [
+            5,
+            5,
+            4,
+            4
+          ]
+        },
+        {
+          "total": 19,
+          "groups": [
+            5,
+            5,
+            5,
+            4
+          ]
+        },
+        {
+          "total": 20,
+          "groups": [
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "total": 21,
+          "groups": [
+            6,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "total": 22,
+          "groups": [
+            6,
+            6,
+            5,
+            5
+          ]
+        },
+        {
+          "total": 23,
+          "groups": [
+            6,
+            6,
+            6,
+            5
+          ]
+        },
+        {
+          "total": 24,
+          "groups": [
+            6,
+            6,
+            6,
+            6
+          ]
+        }
+      ]
     }
   ]
 }
