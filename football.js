@@ -105,6 +105,11 @@ const FootballScenes = {
       for(let i=0;i<total;i++){const a=.1*Math.PI+i*1.8*Math.PI/(total-1);scene.nodes.push({id:'p'+i,label:String(i+1),x:180+125*Math.cos(a),y:145+72*Math.sin(a),team:'A',kind:'player'});}
       scene.nodes.push({id:'coach',label:'T',x:180,y:145,team:'T',kind:'coach'});step(0,'Kam si sa pohol po prihrávke?');scene.caption='Pokojná chôdza, voda a jeden konkrétny vydarený príklad.';
     }
+    scene.cones=[];
+    if(scene.pitch){
+      for(const[u,v]of[[0,0],[1,0],[0,1],[1,1]])scene.cones.push({...point(u,v),kind:'corner'});
+      if(scene.pitch.zones)for(const[u,v]of[[.1,0],[.1,1],[.9,0],[.9,1]])scene.cones.push({...point(u,v),kind:'zone'});
+    }
     return scene;
   }
 };
@@ -134,6 +139,7 @@ const FootballScenes = {
     if(['football-pass','football-rondo','football-zones'].includes(block.diagram))choose('Hráčov v tejto skupine',options.groups.map(n=>[n,'Skupina '+n]),options.size,value=>{options.size=value;build();options.onGroupChange(value);});
     const expand=html('button','secondary-button football-expand','Zväčšiť');expand.type='button';expand.setAttribute('aria-label','Zväčšiť schému a animáciu');selectors.append(expand);
     const figure=html('figure','diagram football-figure'),svg=svgNode('svg',{viewBox:'0 0 360 310',role:'img','aria-label':block.title});figure.append(svg);
+    const coneGuide=html('details','football-cone-guide');coneGuide.hidden=!block.coneSetup;
     const caption=html('p','football-caption');
     const status=html('p','football-status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
     const progress=html('output','football-progress');progress.setAttribute('aria-live','off');progress.setAttribute('aria-label','Priebeh celej ukážky');
@@ -150,22 +156,31 @@ const FootballScenes = {
       const item=html('span','football-legend-item'),icon=svgNode('svg',{viewBox:'0 0 36 22','aria-hidden':'true'});
       if(k==='player'||k==='neutral')icon.append(svgNode('circle',{cx:17,cy:11,r:8,fill:k==='neutral'?colors.N:colors.A}));
       else if(k==='ball')icon.append(svgNode('circle',{cx:17,cy:11,r:5,fill:'white',stroke:'#173b31'}),svgNode('circle',{cx:17,cy:11,r:2,fill:'#173b31'}));
-      else if(k==='cone')icon.append(svgNode('path',{d:'M17 3L9 18H25Z',fill:'#dc8d26'}));
+      else if(k==='cone')icon.append(svgNode('path',{d:'M17 2L8 19H26Z',fill:'#f47700',stroke:'#713708','stroke-width':1.5}),svgNode('path',{d:'M13 11H21',stroke:'white','stroke-width':2}));
       else {icon.append(svgNode('path',{d:k==='dribble'?'M2 11L6 6L10 16L14 6L18 16L22 6L26 11L33 11':k==='shot'?'M2 8H30M2 14H30':'M2 11H32',fill:'none',stroke:'#173b31','stroke-width':2,...(k==='pass'?{'stroke-dasharray':'4 3'}:{})}),svgNode('path',{d:'M33 11L27 7V15Z',fill:'#173b31'}));}
       item.append(icon,document.createTextNode(label));list.append(item);
     }
     legend.append(caption,list);
     if(/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
-    root.append(figure,controls,selectors,settings,status,progress,scrub,note,legend);parent.append(root);
+    root.append(figure,controls,coneGuide,selectors,settings,status,progress,scrub,note,legend);parent.append(root);
     let actors=new Map(),arrowLayers=[];
     function build() {
       pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
       clock.setRate(Number(speed.value));clock.setLoop(repeat.checked);
+      if(block.coneSetup){
+        const setup=block.coneSetup,total=setup.perArea*setup.areas;
+        coneGuide.replaceChildren(html('summary','',total?`Kužele: ${setup.perArea} v nákrese · ${total} spolu`:'Kužele: 0 · bez rozkladania'),html('p','',setup.placement));
+        if(setup.extra)coneGuide.append(html('p','small-note',setup.extra));
+      }
       const p=scene.pitch;
       if(p){
         svg.append(svgNode('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:'#e5eddd',stroke:'#638268','stroke-width':1.2}));
         if(p.zones)for(const x of[p.x,p.x+p.w*.9])svg.append(svgNode('rect',{x,y:p.y,width:p.w*.1,height:p.h,fill:'#cfdcbd',stroke:'#638268'}));
-        for(const[x,y]of[[p.x,p.y],[p.x+p.w,p.y],[p.x,p.y+p.h],[p.x+p.w,p.y+p.h]])svg.append(svgNode('path',{d:`M${x} ${y-4}l-4 7h8z`,fill:'#dc8d26'}));
+        for(const cone of scene.cones){
+          const g=svgNode('g',{'data-cone':cone.kind,transform:`translate(${cone.x} ${cone.y})`});
+          const shape='M0 -11L-9 6H9Z';
+          g.append(svgNode('title',{},cone.kind==='zone'?'Méta hranice koncovej zóny, 2 m od konca':'Kužeľ v rohu plochy'),svgNode('path',{d:shape,fill:'#f47700',stroke:'white','stroke-width':5,'stroke-linejoin':'round'}),svgNode('path',{d:shape,fill:'#f47700',stroke:'#713708','stroke-width':1.8,'stroke-linejoin':'round'}),svgNode('path',{d:'M-4 -2H4',stroke:'white','stroke-width':2.5}));svg.append(g);
+        }
         if(p.goals)for(const x of[p.x-6,p.x+p.w])for(const u of[.25,.7]){const y=p.y+p.h*u;svg.append(svgNode('rect',{x,y:y-8,width:6,height:16,fill:'white',stroke:'#173b31'}),svgNode('path',{d:`M${x} ${y-3}h6M${x} ${y+3}h6`,stroke:'#638268'}));}
         svg.append(svgNode('text',{x:180,y:p.y+p.h+22,'text-anchor':'middle',fill:'#596c63','font-size':11},`${p.length} × ${p.width} m${p.zones?' · zóny 2 m':''}`));
       }

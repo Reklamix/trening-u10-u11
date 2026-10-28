@@ -836,7 +836,13 @@
           ],
           "adjustments": [
             "Pri nepárnom počte v zóne vytvor trojicu. Nezostáva žiadny čakajúci hráč."
-          ]
+          ],
+          "coneSetup": {
+            "areas": 2,
+            "perArea": 4,
+            "placement": "Do každého rohu zóny 25 × 20 m polož jednu métu: 4 do zóny A a 4 do zóny B. Medzi zónami nechaj voľný bezpečný koridor.",
+            "extra": "V nákrese je jedna zóna. Počet mét je rovnaký pri každom zvolenom počte detí."
+          }
         },
         {
           "id": "2",
@@ -904,7 +910,13 @@
                 ]
               ]
             }
-          ]
+          ],
+          "coneSetup": {
+            "areas": 4,
+            "perArea": 4,
+            "placement": "Priprav štyri štvorce 12 × 12 m. Každý označ 4 métami v rohoch, spolu 16. Hráči sa pohybujú vo vnútri, méty neurčujú ich pevné miesta.",
+            "extra": "Po prihrávke hľadaj nový voľný uhol; k méte netreba dobiehať. Plochy rozdeľ na dve susedné dvojice pre dvoch trénerov."
+          }
         },
         {
           "id": "3",
@@ -1080,7 +1092,13 @@
                 ]
               ]
             }
-          ]
+          ],
+          "coneSetup": {
+            "areas": 4,
+            "perArea": 4,
+            "placement": "Použi rovnaké štyri štvorce 12 × 12 m a 16 rohových mét z prihrávkového cvičenia. Do stredu žiadny kužeľ nepridávaj: je tam obranca.",
+            "extra": "Prihrávajúci si vytvárajú uhol pri okraji, pohybujú sa podľa lopty a obrancu; nestoja povinne pri métach."
+          }
         },
         {
           "id": "4",
@@ -1198,7 +1216,13 @@
                 ]
               ]
             }
-          ]
+          ],
+          "coneSetup": {
+            "areas": 4,
+            "perArea": 8,
+            "placement": "Na každej zo štyroch plôch 20 × 14 m polož 4 méty do rohov. Ďalšie 4 polož na bočné čiary: po jednej na oboch stranách, 2 m od každej koncovej čiary. Vzniknú dve koncové zóny hlboké 2 m. Spolu 8 na plochu, 32 mét.",
+            "extra": "Štyri vnútorné méty vyznačujú priečne hranice zón. Vo vnútri hracej plochy ani v nábehoch kužele nestoja; bránky sa v tejto hre nepoužívajú."
+          }
         },
         {
           "id": "5",
@@ -1278,7 +1302,13 @@
                 ]
               ]
             }
-          ]
+          ],
+          "coneSetup": {
+            "areas": 2,
+            "perArea": 4,
+            "placement": "Každé z dvoch ihrísk označ 4 rohovými métami: 8 spolu. Rozmer je približne 32 × 24 m; pri 23–24 deťoch 36 × 26 m. Na každú koncovú čiaru patria dve malé bránky, spolu 4 na ihrisko a 8 na obe.",
+            "extra": "Ak chýbajú malé bránky, každú nahraď dvojicou kužeľov s rozostupom približne 2 m: navyše 8 kužeľov na ihrisko, 16 na obe. Vtedy spolu potrebuješ 24 mét/kužeľov vrátane rohov. Nákres zobrazuje variant s malými bránkami."
+          }
         },
         {
           "id": "6",
@@ -1297,7 +1327,13 @@
           "cues": [
             "Pri ktorej akcii ti pomohol nový pohyb po prihrávke?"
           ],
-          "adjustments": []
+          "adjustments": [],
+          "coneSetup": {
+            "areas": 1,
+            "perArea": 0,
+            "placement": "Na pokojný záver netreba žiadne nové kužele ani méty. Zíďte sa pri trénerovi na voľnom mieste mimo prebiehajúcej hry.",
+            "extra": "Použité pomôcky pozbierajte až po zastavení činnosti a na pokyn trénera."
+          }
         }
       ],
       "attendanceCases": [

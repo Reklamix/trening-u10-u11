@@ -192,6 +192,23 @@ check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No pers
 
 const footballPure=read('football.js').split('// FOOTBALL_BROWSER')[0];
 const {FootballTimeline,FootballScenes}=runInNewContext(footballPure+'\n({FootballTimeline,FootballScenes})',{performance:{now:()=>0}});
+for(const[blockIndex,expectedTotal]of[8,16,16,32,8,0].entries()){
+  const block=thu.blocks[blockIndex],setup=block.coneSetup;
+  check(setup&&Number.isInteger(setup.areas)&&setup.areas>0&&Number.isInteger(setup.perArea)&&setup.perArea>=0,'Every Thursday activity has valid cone quantities');
+  equal(setup.areas*setup.perArea,expectedTotal,'Cone total covers every simultaneous area');
+  check(typeof setup.placement==='string'&&setup.placement.trim().length>0,'Every activity explains cone placement');
+  for(const total of thu.attendanceCases.map(c=>c.total)){
+    const scene=FootballScenes.build(block.diagram,{total});
+    equal(scene.cones.length,setup.perArea,'Diagram shows exactly the per-area cone count for every attendance');
+    equal(new Set(scene.cones.map(c=>`${c.x},${c.y}`)).size,scene.cones.length,'Cone positions are distinct');
+    if(scene.pitch){
+      const p=scene.pitch;
+      equal(scene.cones.filter(c=>c.kind==='corner').length,4,'Every marked area has four corner cones');
+      check(scene.cones.every(c=>(c.y===p.y||c.y===p.y+p.h)&&c.x>=p.x&&c.x<=p.x+p.w),'Cones stay on the boundary outside playing routes');
+      for(const cone of scene.cones.filter(c=>c.kind==='zone'))check(Math.abs(Math.min(cone.x-p.x,p.x+p.w-cone.x)/p.w*p.length-2)<1e-9,'Zone cone is exactly two metres from its end line');
+    }
+  }
+}
 const motion=new FootballTimeline(8);
 motion.play(1000);equal(motion.time(3500),2.5,'Animation follows elapsed time');
 motion.pause(4000);equal(motion.time(9000),3,'Paused animation stays still');
