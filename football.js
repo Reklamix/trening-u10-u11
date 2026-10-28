@@ -26,9 +26,10 @@ const FootballScenes = {
     }
     return {x:frames.at(-1)[1],y:frames.at(-1)[2]};
   },
-  build(key,{total=19,size=5,pitchIndex=0}={}) {
+  build(key,{total=19,size=5,pitchIndex=0,area}={}) {
     if(!this.keys.includes(key))throw Error('Unknown football scene');
-    const scene={key,nodes:[],tracks:{},arrows:[],steps:[],duration:6,pitch:{x:72,y:40,w:216,h:216,length:12,width:12},caption:'Jedna ukážková akcia; hráči si v hre vyberajú riešenie.',total,size,pitchIndex};
+    const pitch=(x,y,w,length,width,extra={})=>{length=area?.length??length;width=area?.width??width;return{x,y,w,h:w*width/length,length,width,...extra};};
+    const scene={key,nodes:[],tracks:{},arrows:[],steps:[],duration:6,pitch:pitch(72,40,216,12,12),caption:'Jedna ukážková akcia; hráči si v hre vyberajú riešenie.',total,size,pitchIndex};
     const point=(u,v)=>({x:scene.pitch.x+u*scene.pitch.w,y:scene.pitch.y+v*scene.pitch.h});
     const add=(id,label,u,v,team='A',kind='player')=>{const p=point(u,v);scene.nodes.push({id,label,...p,team,kind});return [u,v];};
     const track=(id,frames)=>{scene.tracks[id]=frames.map(([t,u,v])=>{const p=point(u,v);return[t,p.x,p.y];});};
@@ -60,7 +61,7 @@ const FootballScenes = {
       scene.duration=initial.length*4+1.2;step(initial.length*4,finalText);
     };
     if(key==='football-warmup') {
-      scene.pitch={x:45,y:40,w:270,h:216,length:25,width:20};
+      scene.pitch=pitch(45,40,270,25,20);
       const n=pitchIndex?Math.ceil(total/2):Math.floor(total/2); scene.localCount=n;scene.duration=4;
       const directions=[[.11,.04],[-.1,.06],[-.08,-.05],[.09,-.06],[.06,.07],[-.07,-.07]];
       for(let i=0;i<n;i++){
@@ -84,7 +85,7 @@ const FootballScenes = {
       cycle(pos,Array.from({length:size-1},(_,i)=>String(i+2)),'Lopta je znovu pri hráčovi 2. Obranca sa mení až na signál podľa rotácie.',true);
       scene.localCount=size;scene.caption=`${size-1} na 1: obranca D1 a hráči 2–${size}. Ukážka celého obehu lopty; v hre hráči vyberajú voľnú možnosť.`;
     } else if(key==='football-zones') {
-      scene.pitch={x:40,y:46,w:280,h:196,length:20,width:14,zones:true};
+      scene.pitch=pitch(40,46,280,20,14,{zones:true});
       add('a1','A1',.2,.28);add('a2','A2',.22,.72);add('b1','B1',.6,.25,'B');add('b2','B2',.62,.65,'B');
       if(size>=5)add('n1','N1',.45,.5,'N');if(size===6)add('n2','N2',.4,.89,'N');add('ball','',.23,.3,'A','ball');
       const route=[[.22,.72],[.48,.92],[.76,.92],[.94,.72]];
@@ -95,7 +96,7 @@ const FootballScenes = {
       scene.localCount=size;scene.caption=`2 na 2${size>4?' + '+(size-4)+' N':''}. Zóny hlboké 2 m. Ukážka prihrávky; platí aj kontrolované vedenie do zóny.`;
     } else if(key==='football-matches') {
       const n=pitchIndex?Math.floor(total/2):Math.ceil(total/2),side=Math.floor(n/2),large=total>=23;
-      scene.pitch={x:40,y:40,w:280,h:large?280*26/36:210,length:large?36:32,width:large?26:24,goals:true};
+      scene.pitch=pitch(40,40,280,large?36:32,large?26:24,{goals:true});
       const positions=[[.15,.28],[.15,.72],[.32,.5],[.36,.22],[.36,.88],[.46,.28]];
       for(let i=0;i<side;i++){add('a'+i,'A'+(i+1),...positions[i]);add('b'+i,'B'+(i+1),1-positions[i][0],positions[i][1],'B');}
       if(n%2)add('neutral','N',.5,.58,'N');add('ball','',.18,.3,'A','ball');scene.duration=8;
@@ -113,7 +114,7 @@ const FootballScenes = {
     scene.cones=[];
     if(scene.pitch){
       for(const[u,v]of[[0,0],[1,0],[0,1],[1,1]])scene.cones.push({...point(u,v),kind:'corner'});
-      if(scene.pitch.zones)for(const[u,v]of[[.1,0],[.1,1],[.9,0],[.9,1]])scene.cones.push({...point(u,v),kind:'zone'});
+      if(scene.pitch.zones){const depth=2/scene.pitch.length;for(const[u,v]of[[depth,0],[depth,1],[1-depth,0],[1-depth,1]])scene.cones.push({...point(u,v),kind:'zone'});}
     }
     return scene;
   }
@@ -145,6 +146,14 @@ const FootballScenes = {
     const expand=html('button','secondary-button football-expand','Zväčšiť');expand.type='button';expand.setAttribute('aria-label','Zväčšiť schému a animáciu');selectors.append(expand);
     const figure=html('figure','diagram football-figure'),svg=svgNode('svg',{viewBox:'0 0 360 310',role:'img','aria-label':block.title});figure.append(svg);
     const coneGuide=html('details','football-cone-guide');coneGuide.hidden=!block.coneSetup;
+    const layoutGuide=html('details','football-cone-guide'),layout=options.quarterPitch,stage=layout?.stages?.[block.diagram];layoutGuide.hidden=!stage;
+    if(stage){
+      layoutGuide.append(html('summary','',`Celá 1/4: pracovný rozmer ${layout.width} × ${layout.height} m`),html('p','',layout.assumption));
+      const map=svgNode('svg',{viewBox:`-2 -2 ${layout.width+4} ${layout.height+4}`,role:'img','aria-label':`Rozloženie celej štvrtiny: ${block.title}`,class:'football-layout-map'});
+      map.append(svgNode('rect',{x:0,y:0,width:layout.width,height:layout.height,fill:'#e5eddd',stroke:'#173b31','stroke-width':.3}),svgNode('rect',{x:layout.corridor.x,y:0,width:layout.corridor.width,height:layout.height,fill:'#e7d5b7'}),svgNode('text',{x:layout.corridor.x+layout.corridor.width/2,y:layout.height/2,'text-anchor':'middle','font-size':1.8,fill:'#173b31'},String(layout.corridor.width)+' m'));
+      for(const a of stage.areas){map.append(svgNode('rect',{x:a.x,y:a.y,width:a.w,height:a.h,fill:'#f6f8f1',stroke:'#216a4b','stroke-width':.35}),svgNode('text',{x:a.x+a.w/2,y:a.y+a.h/2-1,'text-anchor':'middle','font-size':2.1,'font-weight':700,fill:'#173b31'},a.label),svgNode('text',{x:a.x+a.w/2,y:a.y+a.h/2+2,'text-anchor':'middle','font-size':1.8,fill:'#173b31'},`${a.length} × ${a.width} m`));}
+      layoutGuide.append(map,html('p','',stage.instructions));
+    }
     const caption=html('p','football-caption');
     const status=html('p','football-status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
     const progress=html('output','football-progress');progress.setAttribute('aria-live','off');progress.setAttribute('aria-label','Priebeh celej ukážky');
@@ -166,11 +175,11 @@ const FootballScenes = {
       item.append(icon,document.createTextNode(label));list.append(item);
     }
     legend.append(caption,list);
-    if(/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
-    root.append(figure,controls,coneGuide,selectors,settings,status,progress,scrub,note,legend);parent.append(root);
+    if(!layout&&/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
+    root.append(figure,controls,coneGuide,layoutGuide,selectors,settings,status,progress,scrub,note,legend);parent.append(root);
     let actors=new Map(),arrowLayers=[];
     function build() {
-      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:stage?.areas[0]});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
       clock.setRate(Number(speed.value));clock.setLoop(repeat.checked);
       if(block.coneSetup){
         const setup=block.coneSetup,total=setup.perArea*setup.areas;
@@ -180,7 +189,7 @@ const FootballScenes = {
       const p=scene.pitch;
       if(p){
         svg.append(svgNode('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:'#e5eddd',stroke:'#638268','stroke-width':1.2}));
-        if(p.zones)for(const x of[p.x,p.x+p.w*.9])svg.append(svgNode('rect',{x,y:p.y,width:p.w*.1,height:p.h,fill:'#cfdcbd',stroke:'#638268'}));
+        if(p.zones){const depth=p.w*2/p.length;for(const x of[p.x,p.x+p.w-depth])svg.append(svgNode('rect',{x,y:p.y,width:depth,height:p.h,fill:'#cfdcbd',stroke:'#638268'}));}
         for(const cone of scene.cones){
           const g=svgNode('g',{'data-cone':cone.kind,transform:`translate(${cone.x} ${cone.y})`});
           const shape='M0 -11L-9 6H9Z';

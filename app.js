@@ -282,7 +282,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,onGroupChange:size=>{groupSize=size;renderDetail();}});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,onGroupChange:size=>{groupSize=size;renderDetail();}});
       return;
     }
     const draw = drawings[key]?.();

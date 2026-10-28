@@ -192,6 +192,28 @@ check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No pers
 
 const footballPure=read('football.js').split('// FOOTBALL_BROWSER')[0];
 const {FootballTimeline,FootballScenes}=runInNewContext(footballPure+'\n({FootballTimeline,FootballScenes})',{performance:{now:()=>0}});
+const quarter=thu.quarterPitch;
+equal([quarter.width,quarter.height],[50,30],'Quarter-pitch working footprint is explicit');
+equal(quarter.assumed,true,'Unconfirmed pitch measurement is labelled as an assumption');
+for(const block of thu.blocks.filter(b=>b.diagram!=='football-finish')){
+  const stage=quarter.stages[block.diagram];check(stage&&stage.areas.length===block.coneSetup.areas,'Full layout includes every simultaneous area');
+  check(stage.areas.every(a=>a.x>=2&&a.y>=2&&a.x+a.w<=quarter.width-2&&a.y+a.h<=quarter.height-2),'Playing areas retain at least two metres of outside space');
+  check(stage.areas.every(a=>a.x+a.w<=quarter.corridor.x||a.x>=quarter.corridor.x+quarter.corridor.width),'Four-metre central corridor stays clear');
+  for(let i=0;i<stage.areas.length;i++)for(const b of stage.areas.slice(i+1)){
+    const a=stage.areas[i],gapX=Math.max(a.x-b.x-b.w,b.x-a.x-a.w),gapY=Math.max(a.y-b.y-b.h,b.y-a.y-a.h);
+    check(gapX>=2||gapY>=2,'Simultaneous activities have at least two metres between their boundaries');
+  }
+  for(const area of stage.areas){
+    equal([area.w,area.h].sort((a,b)=>a-b),[area.length,area.width].sort((a,b)=>a-b),'Physical layout dimensions allow only rotation, not stretching');
+    for(const total of thu.attendanceCases.map(c=>c.total)){
+      const scene=FootballScenes.build(block.diagram,{total,area});
+      equal([scene.pitch.length,scene.pitch.width],[area.length,area.width],'Animated diagram uses dimensions from the quarter-pitch layout for every attendance');
+      check(Math.abs(scene.pitch.w/scene.pitch.h-area.length/area.width)<1e-9,'Animated pitch retains the new physical aspect ratio');
+      if(scene.pitch.goals){const shot=FootballScenes.sample(scene.tracks.ball,scene.duration),p=scene.pitch;check(shot.x>=p.x+p.w&&shot.x<=p.x+p.w+6&&Math.abs(shot.y-(p.y+p.h*.25))<=8,'Shot still ends inside the miniature goal on the reduced pitch');}
+      if(scene.pitch.zones)for(const cone of scene.cones.filter(c=>c.kind==='zone'))check(Math.abs(Math.min(cone.x-scene.pitch.x,scene.pitch.x+scene.pitch.w-cone.x)/scene.pitch.w*scene.pitch.length-2)<1e-9,'Reduced zone diagram still marks exactly two metres');
+    }
+  }
+}
 for(const[blockIndex,expectedTotal]of[8,16,16,32,8,0].entries()){
   const block=thu.blocks[blockIndex],setup=block.coneSetup;
   check(setup&&Number.isInteger(setup.areas)&&setup.areas>0&&Number.isInteger(setup.perArea)&&setup.perArea>=0,'Every Thursday activity has valid cone quantities');
