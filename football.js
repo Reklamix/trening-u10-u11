@@ -62,11 +62,16 @@ const FootballScenes = {
     if(key==='football-warmup') {
       scene.pitch={x:45,y:40,w:270,h:216,length:25,width:20};
       const n=pitchIndex?Math.ceil(total/2):Math.floor(total/2); scene.localCount=n;scene.duration=4;
-      for(let i=0;i<n;i++){const u=.16+(i%3)*.34,v=.14+Math.floor(i/3)*.24;add('p'+i,String(i+1),u,v);add(i===0?'ball':'b'+i,'',u+.035,v+.025,'A','ball');}
-      track('p0',[[0,.16,.14],[2,.28,.23],[4,.24,.29]]);track('ball',[[0,.195,.165],[2,.315,.255],[4,.275,.315]]);
-      line('dribble',1,[[.16,.14],[.28,.23]]);line('dribble',2,[[.28,.23],[.24,.29]]);
-      step(0,'Vedenie lopty pod kontrolou.');step(2,'Zmeň smer a pozri sa do priestoru.');step(4,'Znovu pokojne kontroluj loptu.');
-      scene.caption=`Zóna ${pitchIndex?'B':'A'}: ${n} detí. Obe zóny spolu ${total}. Ukážka úvodného vedenia, potom sa pracuje vo dvojiciach/trojici.`;
+      const directions=[[.11,.04],[-.1,.06],[-.08,-.05],[.09,-.06],[.06,.07],[-.07,-.07]];
+      for(let i=0;i<n;i++){
+        const u=.16+(i%3)*.34,v=.14+Math.floor(i/3)*.24,[dx,dy]=directions[i%directions.length],ballId=i===0?'ball':'b'+i;
+        const route=[[0,u,v],[1,u+dx*.7,v+dy*.2],[2,u+dx,v+dy],[3,u+dx*.15,v+dy*.9],[4,u,v]];
+        add('p'+i,String(i+1),u,v);add(ballId,'',u+.035,v+.025,'A','ball');
+        track('p'+i,route);track(ballId,route.map(([t,x,y])=>[t,x+.035,y+.025]));
+        for(let leg=0;leg<4;leg++)Object.assign(line('dribble',i+1,[route[leg].slice(1),route[leg+1].slice(1)]),{start:leg,end:leg+1,label:false});
+      }
+      step(0,'Všetci súčasne vedú vlastnú loptu a sledujú voľný priestor.');step(1,'Meň smer a vyhni sa spoluhráčom.');step(2,'Krátke dotyky, lopta blízko nohy.');step(3,'Rozhliadni sa a pokračuj do voľna.');step(4,'Vedenie pokračuje; dráhy sú len ukážka.');
+      scene.caption=`Zóna ${pitchIndex?'B':'A'}: ${n} detí. Obe zóny spolu ${total}. Všetci vedú loptu súčasne, každý svoju. Ukážkové dráhy nie sú povinné trasy ani stanovištia. Potom sa pracuje vo dvojiciach/trojici.`;
     } else if(key==='football-pass') {
       const positions=[[.15,.6],[.65,.2],[.9,.65],[.45,.9],[.2,.15],[.8,.9]];
       positions.slice(0,size).forEach(([u,v],i)=>add('p'+i,String(i+1),u,v)); add('ball','',.185,.62,'A','ball');
@@ -192,7 +197,7 @@ const FootballScenes = {
         else layer.append(svgNode('path',{d:path,fill:'none',stroke:'#173b31','stroke-width':1.4,...(a.kind==='pass'?{'stroke-dasharray':'4 3'}:{})}));
         layer.append(svgNode('path',{d:`M${b.x} ${b.y}L${b.x-7*Math.cos(angle-.4)} ${b.y-7*Math.sin(angle-.4)}L${b.x-7*Math.cos(angle+.4)} ${b.y-7*Math.sin(angle+.4)}Z`,fill:'#173b31'}));
         const mid=points[Math.floor((points.length-1)/2)],end=points[Math.ceil((points.length-1)/2)]||mid;
-        layer.append(svgNode('text',{x:(mid.x+end.x)/2+5,y:(mid.y+end.y)/2-5,fill:'#173b31','font-size':9,'font-weight':700,'paint-order':'stroke',stroke:'white','stroke-width':3},String(a.number)));
+        if(a.label!==false)layer.append(svgNode('text',{x:(mid.x+end.x)/2+5,y:(mid.y+end.y)/2-5,fill:'#173b31','font-size':9,'font-weight':700,'paint-order':'stroke',stroke:'white','stroke-width':3},String(a.number)));
         svg.append(layer);arrowLayers.push({element:layer,start:a.start??0,end:a.end??Infinity});
       }
       for(const node of scene.nodes){

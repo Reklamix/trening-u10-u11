@@ -246,6 +246,27 @@ for(const total of thu.attendanceCases.map(c=>c.total)){
   for(const pitchIndex of [0,1]){
     const warm=FootballScenes.build('football-warmup',{total,pitchIndex});
     players+=warm.nodes.filter(n=>n.kind==='player').length;balls+=warm.nodes.filter(n=>n.kind==='ball').length;
+    const dribblers=warm.nodes.filter(n=>n.kind==='player'),p=warm.pitch;
+    check(warm.nodes.every(n=>warm.tracks[n.id]?.length>1),'Every warmup player and their ball has a motion track');
+    check(dribblers.every(n=>{
+      const frames=warm.tracks[n.id];
+      return frames.slice(1).every((f,i)=>Math.hypot(f[1]-frames[i][1],f[2]-frames[i][2])>1);
+    }),'All children move during every leg rather than waiting');
+    check(warm.nodes.every(n=>warm.tracks[n.id].every(([,x,y])=>x>=p.x+(n.kind==='ball'?4:10)&&x<=p.x+p.w-(n.kind==='ball'?4:10)&&y>=p.y+(n.kind==='ball'?4:10)&&y<=p.y+p.h-(n.kind==='ball'?4:10))),'Players and balls stay fully inside the marked area');
+    check(dribblers.every(n=>{
+      const index=Number(n.id.slice(1)),ballTrack=warm.tracks[index===0?'ball':'b'+index];
+      return Array.from({length:9},(_,i)=>i*.5).every(t=>{const player=FootballScenes.sample(warm.tracks[n.id],t),ball=FootballScenes.sample(ballTrack,t);return Math.hypot(player.x-ball.x,player.y-ball.y)<12;});
+    }),'Every ball stays at its own moving player through direction changes');
+    check(warm.nodes.every(n=>{const frames=warm.tracks[n.id];return Math.hypot(frames[0][1]-frames.at(-1)[1],frames[0][2]-frames.at(-1)[2])<1e-9;}),'Repeating warmup joins without a position jump');
+    let separation=Infinity;
+    for(let a=0;a<dribblers.length;a++)for(let b=a+1;b<dribblers.length;b++)for(let leg=0;leg<4;leg++){
+      const first=warm.tracks[dribblers[a].id],second=warm.tracks[dribblers[b].id];
+      const rx=first[leg][1]-second[leg][1],ry=first[leg][2]-second[leg][2],vx=first[leg+1][1]-second[leg+1][1]-rx,vy=first[leg+1][2]-second[leg+1][2]-ry;
+      const u=Math.max(0,Math.min(1,-(rx*vx+ry*vy)/(vx*vx+vy*vy||1)));
+      separation=Math.min(separation,Math.hypot(rx+u*vx,ry+u*vy));
+    }
+    check(separation>24,'Concurrent player paths avoid overlapping icons throughout every segment');
+    check([.5,1.5,2.5,3.5].every(t=>warm.arrows.filter(a=>a.kind==='dribble'&&a.start<=t&&a.end>t).length===dribblers.length),'Each simultaneous dribbler has one visible direction arrow per phase');
     const game=FootballScenes.build('football-matches',{total,pitchIndex});
     matchPlayers+=game.nodes.filter(n=>n.kind==='player').length;
     equal(game.nodes.filter(n=>n.team==='N').length,game.localCount%2,'Odd game has one neutral');
