@@ -282,7 +282,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,onGroupChange:size=>{groupSize=size;renderDetail();}});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,onGroupChange:size=>{groupSize=size;renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -444,6 +444,7 @@ const PersonalPlans = [
     addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
   }
   function renderActive() {
+    window.CoachingGuide?.close();
     const block = activeBlock();
     $('block-meta').textContent = 'Časť ' + (state.blockIndex + 1) + ' zo ' + state.selected.blocks.length + ' · ' + timeRange(state.selected,block.start,block.end);
     $('activity-title').textContent = block.title;
@@ -461,16 +462,29 @@ const PersonalPlans = [
     $('finished').hidden = !lastDone;
     $('finished').querySelector('h2').textContent = allDone ? 'Tréning je dokončený' : 'Posledná časť je hotová';
     $('finished').querySelector('p').textContent = allDone ? 'Všetky časti máš označené. Doprajte si vodu a pokojný záver.' : 'V prehľade je označených ' + completed().length + ' z ' + state.selected.blocks.length + ' častí. Ostatné môžeš skontrolovať v prehľade.';
-    document.querySelector('[data-detail="rotations"]').hidden = !block.tables?.length;
+    const guided = window.CoachingGuide?.supports(block);
+    document.querySelector('[data-detail="steps"]').textContent = guided ? 'Príprava' : 'Priebeh';
+    document.querySelector('[data-detail="rotations"]').textContent = guided ? 'Postup' : 'Rotácie';
+    document.querySelector('[data-detail="cues"]').textContent = guided ? 'Tréner' : 'Pokyny';
+    document.querySelector('[data-detail="rotations"]').hidden = !guided && !block.tables?.length;
     state.detail = null;
     renderDetail();
     renderProgress();
     lastTimerState = '';
     updateTimer();
   }
+  function openCoachingGuide(section) {
+    window.CoachingGuide.open({block:activeBlock(),training:state.selected,attendance:state.attendance,size:groupSize,section,layoutMap:document.querySelector('.football-board .football-layout-map')});
+  }
   function renderDetail() {
     const panel = $('detail-panel');
-    document.querySelectorAll('[data-detail]').forEach(button => button.setAttribute('aria-expanded', String(button.dataset.detail === state.detail)));
+    document.querySelectorAll('[data-detail]').forEach(button => {
+      if(window.CoachingGuide?.supports(activeBlock())) {
+        button.removeAttribute('aria-expanded'); button.removeAttribute('aria-controls'); button.setAttribute('aria-haspopup','dialog');
+      } else {
+        button.setAttribute('aria-expanded', String(button.dataset.detail === state.detail)); button.setAttribute('aria-controls','detail-panel'); button.removeAttribute('aria-haspopup');
+      }
+    });
     panel.hidden = !state.detail;
     panel.replaceChildren();
     if (!state.detail) return;
@@ -764,7 +778,10 @@ const PersonalPlans = [
   });
   $('retry').addEventListener('click', load);
   document.querySelectorAll('[data-view]').forEach(a => a.addEventListener('click', event => { event.preventDefault(); if (state.selected) navigate(a.dataset.view); }));
-  document.querySelectorAll('[data-detail]').forEach(button => button.addEventListener('click', () => { state.detail = state.detail === button.dataset.detail ? null : button.dataset.detail; renderDetail(); }));
+  document.querySelectorAll('[data-detail]').forEach(button => button.addEventListener('click', () => {
+    if(window.CoachingGuide?.supports(activeBlock())) { openCoachingGuide({steps:'prepare',rotations:'steps',cues:'cues'}[button.dataset.detail]); return; }
+    state.detail = state.detail === button.dataset.detail ? null : button.dataset.detail; renderDetail();
+  }));
   $('previous-block').addEventListener('click', () => navigate('field', Math.max(0, state.blockIndex - 1)));
   $('complete-block').addEventListener('click', () => {
     currentClock().pause();

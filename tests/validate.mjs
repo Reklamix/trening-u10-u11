@@ -346,4 +346,28 @@ for(const size of [4,5,6])for(const key of ['football-pass','football-rondo','fo
   }
 }
 
+const guidePure = read('coaching-guide.js').split('// COACHING_BROWSER')[0];
+const guide = runInNewContext(guidePure + '\nCoachingGuideModel');
+const guideTraining = data.trainings.find(training => training.id === '2026-10-29');
+for (const block of guideTraining.blocks) {
+  check(guide.supports(block), 'Each current exercise has a heading for every original instruction');
+  const unchanged = JSON.stringify(block);
+  for (const attendance of guideTraining.attendanceCases) for (const size of new Set(attendance.groups)) {
+    const tables = guide.tables(block, attendance.total, size);
+    check(tables.every(table => !table.groupSize || table.groupSize === size), 'Guide excludes rotations for other group sizes');
+    for (const table of tables) {
+      check(table.rows.length > 0, 'Selected attendance has actionable rotations');
+      if (table.headers[0] === 'Detí spolu') {
+        equal(table.rows.length, 1, 'Mini-games guide shows only selected attendance');
+        equal(Number(table.rows[0][0]), attendance.total, 'Mini-games guide matches selected attendance');
+      } else {
+        const source = block.tables.find(item => item.groupSize === table.groupSize);
+        equal(JSON.stringify(table.rows), JSON.stringify(source.rows), 'Group rotations preserve every original row');
+      }
+    }
+  }
+  equal(JSON.stringify(block), unchanged, 'Guide filtering cannot mutate saved training instructions');
+}
+check(!guide.supports({diagram:'duel-no-keeper',steps:[]}), 'Archived activities retain their existing instruction controls');
+
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

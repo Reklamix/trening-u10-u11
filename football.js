@@ -187,7 +187,14 @@ const FootballScenes = {
     }
     legend.append(caption,list);
     if(!layout&&/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
-    root.append(figure,controls,coneGuide,layoutGuide,selectors,settings,status,progress,scrub,note,legend);parent.append(root);
+    root.append(figure,controls);
+    if(options.onGuide){
+      const guide=html('button','football-guide-entry');guide.type='button';guide.setAttribute('aria-haspopup','dialog');
+      const guideArrow=html('span','','→');guideArrow.setAttribute('aria-hidden','true');guide.append(html('strong','','Ako viesť cvičenie'),guideArrow);
+      guide.addEventListener('click',options.onGuide);root.append(guide);
+      const more=html('details','football-options');more.append(html('summary','','Schéma a nastavenia'),coneGuide,layoutGuide,selectors,settings,status,progress,scrub,note,legend);root.append(more);
+    }else root.append(coneGuide,layoutGuide,selectors,settings,status,progress,scrub,note,legend);
+    parent.append(root);
     let actors=new Map(),arrowLayers=[];
     function build() {
       pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:stage?.areas[0]});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
