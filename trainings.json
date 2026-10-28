@@ -765,14 +765,14 @@
           "detail": "Hranice, pracovné zóny a koncové zóny hlboké 2 m."
         },
         {
-          "name": "Malé bránky",
-          "quantity": "8 alebo 16 kužeľov",
-          "detail": "Štyri na každé hlavné ihrisko. V hrách do zón sa bránky nepoužívajú."
+          "name": "Kužeľové bránky",
+          "quantity": "8 bránok zo 16 pripravených kužeľov",
+          "detail": "Na záver dve 2 m široké bránky na každej zo štyroch plôch. Týchto 16 kužeľov je súčasťou 32 mét/kužeľov na rozloženie, nepripočítavaj ich druhýkrát. Pevné malé bránky netreba."
         },
         {
           "name": "Rozlišovačky",
           "quantity": "4 farby po 6 + 2 odlišné",
-          "detail": "Odlišné označenie neutrálnych hráčov."
+          "detail": "Pri minihre odlíš neutrálneho farbou od oboch tímov v jeho skupine; pri 20 deťoch sú štyria neutrálni naraz. Možno použiť aj voľné rozlišovačky ostatných farieb."
         },
         {
           "name": "Organizácia",
@@ -783,11 +783,11 @@
       "notes": [
         {
           "title": "Dochádzka a brankári",
-          "text": "Odhad na štvrtok je okolo 20 detí, teda 4 skupiny po 5 a dva zápasy 5 na 5. Hore možno zvoliť 16–24; presná účasť ani brankári nie sú potvrdení. Pracovná verzia bez brankárov."
+          "text": "Odhad je okolo 20 detí: 4 skupiny po 5, na záver štyri minihry 2 na 2 + N. Hore možno zvoliť 16–24; skupiny majú 4–6 hráčov a pridaní neutrálni zostávajú v hre. Presná účasť ani brankári nie sú potvrdení; verzia bez brankárov."
         },
         {
           "title": "Pripravené plochy",
-          "text": "Tréning je na jednej štvrtine ihriska. Pracovný predpoklad je voľných 50 × 30 m, rozmery treba overiť. Dve záverečné plochy 26 × 20 m sú otočené dlhšou stranou naprieč 30 m; medzi nimi 4 m voľný koridor, za koncovými čiarami 2 m a zvonka zboku 3 m. Technika/rondo: štyri štvorce 12 × 12 m; hra do zón: štyri plochy 18 × 12 m. Každý tréner vedie jednu dvojicu skupín. Klikni pri nákrese na Celá 1/4 a pozri rozmiestnenie; pôvodné veľké plochy 32 × 24 m sa tu nepoužívajú."
+          "text": "Máme približne 35 × 25 m na jednej štvrtine. Po obvode nechaj 2 m voľna a v strede zvislý 3 m koridor. Rozohriatie: dve zóny 21 × 14 m po 10 pri počte 20. Technika/rondo: štyri plochy 12 × 9 m. Hra do zón a záver: štyri plochy 14 × 9 m s vodorovnou 3 m medzerou. Každý tréner dohliada na svoju dvojicu plôch. Záver sú štyri minihry 2 na 2 + N pri 20 deťoch; skupiny nespájame do dvoch zápasov 5 na 5. Klikni na Celá 1/4 pri nákrese."
         },
         {
           "title": "Jedna téma",
@@ -815,8 +815,12 @@
           "label": "Téma pohybu po prihrávke a pozorovania pred prihrávkou. Časy, rozmery, rotácie a organizácia sú vlastný pracovný návrh, nie prevzatý oficiálny plán FIFA."
         },
         {
-          "label": "England Football: prispôsobenie hracej plochy veku a schopnostiam; rozloženie 1/4 na tomto webe je vlastný pracovný návrh, rozmery ešte nie sú potvrdené.",
+          "label": "England Football: prispôsobenie hracej plochy veku a schopnostiam; rozloženie na približne 35 × 25 m na tomto webe je vlastný organizačný návrh.",
           "url": "https://www.thefa.com/bootroom/resources/coaching/stay-on-the-pitch"
+        },
+        {
+          "label": "NFF: malé hry 2 na 2 s neutrálnou podporou. Rozmery 14 × 9 m, rotácie detí a rozloženie na 35 × 25 m sú vlastný organizačný návrh.",
+          "url": "https://www.fotball.no/trener/Grassroots-Football-Coaching-Course/girls-football-coaching-course/activity_6-8/premade-training-sessions/"
         }
       ],
       "blocks": [
@@ -827,7 +831,7 @@
           "title": "Rozohriatie s loptou",
           "diagram": "football-warmup",
           "summary": "Každý s loptou, potom prihrávka a zmena uhla vo dvojici alebo trojici.",
-          "space": "Dve zóny 25 × 20 m pre približne polovicu detí; pri 20 je to 10 + 10. Otoč ich dlhšou stranou naprieč 30-metrovou stranou pracovnej plochy 50 × 30 m; medzi nimi 4 m voľný koridor.",
+          "space": "Dve zóny 21 × 14 m, pri 20 deťoch 10 + 10. Medzi zónami 3 m voľný koridor; po obvode pracovnej plochy 35 × 25 m zostávajú 2 m.",
           "dose": "2 min rozhýbanie + 3 min vedenie + 4 min prihrávky (3 × 60 s + 2 × 30 s oddych) + 1 min voda.",
           "steps": [
             "18:00–18:02 ľahký pohyb, členky, bedrá a zmeny smeru.",
@@ -844,7 +848,7 @@
           "coneSetup": {
             "areas": 2,
             "perArea": 4,
-            "placement": "Do každého rohu zóny 25 × 20 m polož jednu métu: 4 do A a 4 do B, spolu 8. Zóny otoč podľa nákresu celej štvrtiny; stredný 4 m koridor nechaj bez pomôcok a bez vedenia lopty.",
+            "placement": "Do štyroch rohov každej z dvoch zón 21 × 14 m polož jednu métu: 4 do A a 4 do B, spolu 8. Zóny otoč podľa mapy celej štvrtiny; 3 m koridor a 2 m po obvode zostávajú voľné.",
             "extra": "V nákrese je jedna zóna. Počet mét je rovnaký pri každom zvolenom počte detí."
           }
         },
@@ -855,7 +859,7 @@
           "title": "Prihrávka a nový uhol",
           "diagram": "football-pass",
           "summary": "Pozri sa pred prijatím, priprav prvý dotyk a po prihrávke vytvor nový uhol.",
-          "space": "Štyri štvorce 12 × 12 m, skupiny po 4–6 hráčov, jedna lopta v skupine. Plochy sú dve za sebou v ľavej polovici (A1/A2) a dve v pravej (B1/B2); medzi štvorcami v dvojici 2 m a medzi polovicami voľný 4 m koridor.",
+          "space": "Štyri plochy 12 × 9 m, pri 20 deťoch po 5 hráčov. A1/A2 naľavo, B1/B2 napravo; medzi hornou a dolnou dvojicou 3 m, medzi polovicami 3 m koridor, po obvode 2 m.",
           "dose": "1 min ukážka + 3 × 3 min práce + 2 × 30 s prestávka + 1 min voda = 12 min.",
           "steps": [
             "18:10–18:11 ukážka: číslovanie 1 až počet hráčov, lopta ide v poradí a posledný prihrá prvému.",
@@ -868,7 +872,7 @@
             "Po prihrávke sa neschovaj za spoluhráča."
           ],
           "adjustments": [
-            "Bez povinného limitu dotykov; pri nepresnostiach spomaľ. Priestor zväčšuj iba v rámci vyznačenej polovice, bez zúženia rozostupov a koridoru."
+            "Bez povinného limitu dotykov; pri nepresnostiach spomaľ. Náročnosť uprav rýchlosťou a tlakom, bez rozširovania do koridorov."
           ],
           "rotationType": "thursday",
           "tables": [
@@ -918,8 +922,8 @@
           "coneSetup": {
             "areas": 4,
             "perArea": 4,
-            "placement": "Priprav štyri štvorce 12 × 12 m. Každý označ 4 métami v rohoch, spolu 16. Hráči sa pohybujú vo vnútri, méty neurčujú ich pevné miesta.",
-            "extra": "Po prihrávke hľadaj nový voľný uhol; k méte netreba dobiehať. Plochy rozdeľ na dve susedné dvojice pre dvoch trénerov. Zachovaj 2 m odstup medzi susednými štvorcami a stredný 4 m koridor."
+            "placement": "Každú zo štyroch plôch 12 × 9 m označ 4 rohovými métami, spolu 16. Rozlož ich podľa mapy celej štvrtiny.",
+            "extra": "Pri 20 deťoch je v každej skupine 5. Méty označujú hranice, nie povinné miesta hráčov. Koridory ostávajú voľné; každý tréner dohliada na dve susedné plochy."
           }
         },
         {
@@ -929,21 +933,21 @@
           "title": "Rondo: nájdi voľného hráča",
           "diagram": "football-rondo",
           "summary": "Ponuka vedľa obrancu a voľba dostupného spoluhráča. Obranca sa mení na signál.",
-          "space": "Štyri štvorce asi 12 × 12 m. Pri 4 hráčoch 3v1, pri 5 4v1, pri 6 5v1. Plochy sú dve za sebou v ľavej polovici (A1/A2) a dve v pravej (B1/B2); medzi štvorcami v dvojici 2 m a medzi polovicami voľný 4 m koridor.",
+          "space": "Štyri plochy 12 × 9 m, pri 20 deťoch po 5 hráčov. A1/A2 naľavo, B1/B2 napravo; medzi hornou a dolnou dvojicou 3 m, medzi polovicami 3 m koridor, po obvode 2 m.",
           "dose": "2 min ukážka + 4:30 séria + 1 min voda + 4:30 séria + 2 min voda/presun = 14 min.",
           "steps": [
             "18:22–18:24 ukážka. Série 18:24–18:28:30 a 18:29:30–18:34; medzi nimi 1 min voda.",
             "V každej sérii bráni postupne 1 až počet hráčov, každý presne jedno kolo. Každý má spolu 2 × 35 s obrany.",
             "Po zisku obranca dostane bod, hra sa obnoví s tou istou rolou. Výmena obrancu až na signál; strata automaticky neposiela dieťa do stredu.",
             "Držanie lopty odmeň bodom za 3 prihrávky. Hráči sa ponúkajú v rôznych uhloch; dotyky zatiaľ neobmedzuj.",
-            "Ak obranca získava každú loptu, zníž jeho tlak alebo daj prihrávajúcim viac času; priestor zväčši len v rámci vyznačenej polovice. Ak sa k lopte nedostáva, štvorec trochu zmenši. 18:34–18:36 voda a presun."
+            "Ak obranca získava každú loptu, zníž jeho tlak alebo daj prihrávajúcim viac času. Plochu do koridorov nerozširuj. Ak sa k lopte nedostáva, trochu ju zmenši. 18:34–18:36 voda a presun."
           ],
           "cues": [
             "Ukáž sa vedľa obrancu, nie za ním."
           ],
           "adjustments": [
             "Pri každej sérii bráni každý presne 35 s. Obranca sa nemení po chybe, ale podľa čísel.",
-            "Ak obranca získava každú loptu, najprv zníž tlak. Rozmery upravuj iba v rámci dostupnej polovice; koridor a medzery medzi skupinami zostávajú voľné."
+            "Ak obranca získava každú loptu, najprv zníž tlak. Plochu možno zmenšiť, do koridorov ju nerozširuj."
           ],
           "rotationType": "thursday",
           "rotation": [
@@ -1100,8 +1104,8 @@
           "coneSetup": {
             "areas": 4,
             "perArea": 4,
-            "placement": "Použi rovnaké štyri štvorce 12 × 12 m a 16 rohových mét z prihrávkového cvičenia. Do stredu žiadny kužeľ nepridávaj: je tam obranca.",
-            "extra": "Prihrávajúci si vytvárajú uhol pri okraji, pohybujú sa podľa lopty a obrancu; nestoja povinne pri métach. Zachovaj 2 m odstup medzi susednými štvorcami a stredný 4 m koridor."
+            "placement": "Použi tie isté štyri plochy 12 × 9 m a 16 rohových mét z prihrávok. Do stredu žiadny kužeľ nepridávaj; je tam obranca.",
+            "extra": "Pri 20 deťoch je v každej skupine 5. Méty označujú hranice, nie povinné miesta hráčov. Koridory ostávajú voľné; každý tréner dohliada na dve susedné plochy."
           }
         },
         {
@@ -1111,7 +1115,7 @@
           "title": "Hra do koncových zón",
           "diagram": "football-zones",
           "summary": "Prenes pohyb po prihrávke do hry. Bod za vedenie do zóny alebo prihrávku nabiehajúcemu.",
-          "space": "Štyri plochy 18 × 12 m na jednej štvrtine; dve naľavo, dve napravo, v dvojiciach 2 m odstup a stredný 4 m koridor. Na oboch koncoch zóna hlboká 2 m. Skupina 4: 2v2; 5: 2v2+N; 6: 2v2+2N.",
+          "space": "Štyri plochy 14 × 9 m; dve naľavo a dve napravo. Medzi hrami 3 m koridory a po obvode 2 m. Na koncoch zóny hlboké 2 m. Skupina 4: 2v2; 5: 2v2+N; 6: 2v2+2N.",
           "dose": "90 s ukážka + 6 dvojminútových kôl + 5 × 30 s medzi kolami = 16 min. Pri 4 hráčoch 80 s hra + 40 s oddych; pri 5/6 90 s hra + 30 s oddych.",
           "steps": [
             "18:36–18:37:30 ukážka. Kolá: 18:37:30–18:39:30; 18:40–18:42; 18:42:30–18:44:30; 18:45–18:47; 18:47:30–18:49:30; 18:50–18:52. Medzi kolami 30 s prestávka.",
@@ -1224,7 +1228,7 @@
           "coneSetup": {
             "areas": 4,
             "perArea": 8,
-            "placement": "Na každej zo štyroch plôch 18 × 12 m polož 4 méty do rohov. Ďalšie 4 polož na bočné čiary: po jednej na oboch stranách, 2 m od každej koncovej čiary. Spolu 8 na plochu, 32 mét. Rozlož ich dve za sebou naľavo a dve napravo podľa nákresu celej štvrtiny.",
+            "placement": "Na každú zo štyroch plôch 14 × 9 m polož 4 méty do rohov a ďalšie 4 na bočné čiary: 2 m od každého konca po oboch stranách. Spolu 8 na plochu, 32 mét. Stredná časť medzi koncovými zónami má 10 × 9 m.",
             "extra": "Štyri vnútorné méty vyznačujú priečne hranice zón. Vo vnútri hracej plochy ani v nábehoch kužele nestoja; bránky sa v tejto hre nepoužívajú."
           }
         },
@@ -1232,86 +1236,109 @@
           "id": "5",
           "start": 52,
           "end": 72,
-          "title": "Dva zápasy na malé bránky",
-          "diagram": "football-matches",
-          "summary": "Vyber voľnú bránku, po prihrávke pokračuj v ponuke. Posledných osem minút bežná hra.",
-          "space": "Dve ihriská 26 × 20 m v rámci pracovnej štvrtiny 50 × 30 m, každé so štyrmi malými bránkami. Dlhšia strana 26 m ide naprieč 30-metrovou stranou celej plochy. Medzi ihriskami 4 m koridor; pri 20 deťoch dva zápasy 5 na 5.",
+          "title": "Štyri minihry na kužeľové bránky",
+          "diagram": "football-mini-games",
+          "summary": "2 na 2 s neutrálnou podporou podľa veľkosti skupiny. Prihrávka, nový uhol a presné zakončenie po zemi; posledné dva úseky voľná hra.",
+          "space": "Štyri plochy 14 × 9 m zostávajú ako pri hre do zón, skupiny nespájame. Pri 20 deťoch na každej 2 na 2 + N. Pri skupine 4 bez N, pri 6 s dvomi N. Koridory 3 m, po obvode 2 m; na každej ploche dve kužeľové bránky široké 2 m.",
           "dose": "1 min organizácia + 4 × 4 min hry + 3 × 1 min oddych = 20 min.",
           "steps": [
-            "18:52–18:53 organizácia. Úseky: 18:53–18:57; 18:58–19:02; 19:03–19:07; 19:08–19:12. Medzi úsekmi 1 min oddych. Skupiny A1/A2 hrajú na ľavom ihrisku a B1/B2 na pravom. Odstráň vnútorné méty; koridor ostáva voľný.",
-            "Bežný gól platí vždy. V prvých dvoch úsekoch môže mať gól po prihrávke a opätovnom zapojení prihrávajúceho 2 body, ostatné góly 1. Posledné dva úseky iba bežná hra.",
-            "Neutrálni sa po každom úseku menia. Po lopte mimo začni prihrávkou alebo vedením, súper približne 3 m od lopty.",
-            "Počas každej minútovej prestávky voda a najviac jeden krátky podnet. V posledných 8 minútach minimum pokynov."
+            "18:52–18:53 organizácia. Úseky 18:53–18:57, 18:58–19:02, 19:03–19:07 a 19:08–19:12; medzi nimi 1 min oddych. Skupiny A1/A2/B1/B2 zostávajú na svojich plochách 14 × 9 m.",
+            "Ponechaj 4 rohové méty. Štyri méty z hraníc koncových zón presuň do dvojíc v strede koncových čiar: jedna 2 m široká kužeľová bránka na každom konci. Žiadne pevné bránky v koridoroch.",
+            "Hrá sa 2 na 2, pri 5 deťoch + jeden neutrálny, pri 6 + dvaja. Neutrálny pomáha tímu s loptou a sám neboduje. Gól platí po presnej prízemnej prihrávke cez súperovu kužeľovú bránku. Netreba strieľať silou.",
+            "Pri 5 hráčoch meň N po 2 minútach hry: poradím 1,2,3,4,5 a znovu od 1. V každom štvorminútovom úseku sú dva dvojminútové intervaly. Pri 6 striedaj neutrálne dvojice 1+2,3+4,5+6; pri 4 neutrálni nie sú. Neutrálna rola je práca, všetci absolvujú 16 min hry.",
+            "V prvých dvoch úsekoch môže byť gól po prihrávke a opätovnom zapojení prihrávajúceho za 2 body, ostatné za 1. Posledné dva úseky bežné skórovanie a minimum pokynov.",
+            "Po lopte mimo začni prihrávkou alebo vedením, súper približne 2 m od lopty. Cudziu loptu v koridore zastaví tréner; deti nevybiehajú do susednej hry. Počas minútovej prestávky voda a najviac jeden krátky podnet."
           ],
           "cues": [
             "Kam sa môžeš ponúknuť po prihrávke?"
           ],
           "adjustments": [
-            "Ihriská zostávajú 26 × 20 m aj pri vyššom počte; mimo pridelenej štvrtiny ich nezväčšuj. Pracovný plán je pre približne 20 detí. Pri 23–24 bude hra hustejšia: zachovaj prestávky a sleduj, či deti majú priestor na rozhodovanie.",
-            "Neutrálneho po úseku vymeň. V posledných 8 minútach minimum pokynov."
+            "Všetky štyri plochy zostávajú 14 × 9 m pri každej dochádzke. Skupiny nespájaj do dvoch zápasov 5 na 5 na tejto štvrtine.",
+            "Neutrálni zostávajú aktívni a nebodujú. Po 2 minútach výmena; oddych je v spoločnej minútovej prestávke.",
+            "Pri častých stratách nechaj viac času na prijatie a neobmedzuj dotyky. Zakončenie po zemi, koridory zostávajú voľné."
           ],
           "tables": [
             {
-              "caption": "Presné rozdelenie zvoleného počtu detí; oba zápasy bez brankárov",
+              "caption": "Štyri súčasné minihry bez brankárov; N je neutrálny a stále aktívny",
               "headers": [
                 "Detí spolu",
-                "Ihrisko A",
-                "Ihrisko B"
+                "A1",
+                "A2",
+                "B1",
+                "B2"
               ],
               "rows": [
                 [
                   "16",
-                  "4 na 4 = 8",
-                  "4 na 4 = 8"
+                  "2 na 2 = 4",
+                  "2 na 2 = 4",
+                  "2 na 2 = 4",
+                  "2 na 2 = 4"
                 ],
                 [
                   "17",
-                  "4 na 4 + neutrálny = 9",
-                  "4 na 4 = 8"
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 = 4",
+                  "2 na 2 = 4",
+                  "2 na 2 = 4"
                 ],
                 [
                   "18",
-                  "4 na 4 + neutrálny = 9",
-                  "4 na 4 + neutrálny = 9"
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 = 4",
+                  "2 na 2 = 4"
                 ],
                 [
                   "19",
-                  "5 na 5 = 10",
-                  "4 na 4 + neutrálny = 9"
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 = 4"
                 ],
                 [
                   "20",
-                  "5 na 5 = 10",
-                  "5 na 5 = 10"
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5"
                 ],
                 [
                   "21",
-                  "5 na 5 + neutrálny = 11",
-                  "5 na 5 = 10"
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5"
                 ],
                 [
                   "22",
-                  "5 na 5 + neutrálny = 11",
-                  "5 na 5 + neutrálny = 11"
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 1 N = 5",
+                  "2 na 2 + 1 N = 5"
                 ],
                 [
                   "23",
-                  "6 na 6 = 12",
-                  "5 na 5 + neutrálny = 11"
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 1 N = 5"
                 ],
                 [
                   "24",
-                  "6 na 6 = 12",
-                  "6 na 6 = 12"
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 2 N = 6",
+                  "2 na 2 + 2 N = 6"
                 ]
               ]
             }
           ],
           "coneSetup": {
-            "areas": 2,
-            "perArea": 4,
-            "placement": "Každé z dvoch ihrísk 26 × 20 m označ 4 rohovými métami: 8 spolu. Otoč ich podľa nákresu celej štvrtiny. Na každú koncovú čiaru patria dve malé bránky, spolu 8 bránok. Medzi ihriskami ostáva 4 m koridor; za koncovými čiarami 2 m voľného priestoru a zvonka zboku 3 m.",
-            "extra": "Ak chýbajú malé bránky, každú nahraď dvojicou kužeľov s rozostupom približne 2 m: navyše 8 kužeľov na ihrisko, 16 na obe. Vtedy spolu potrebuješ 24 mét/kužeľov vrátane rohov. Nákres zobrazuje variant s malými bránkami."
+            "areas": 4,
+            "perArea": 8,
+            "placement": "Na každej ploche 14 × 9 m nechaj 4 rohové méty. Ďalšie 4 tvoria dve bránky: v strede každej koncovej čiary dvojica kužeľov s rozostupom 2 m. Spolu 8 na plochu, 32 na všetky štyri.",
+            "extra": "Použi 32 mét z predchádzajúcej hry do zón: štyri vnútorné presuň na bránky. Pevné bránky netreba. Zakončenie je presná prízemná prihrávka; 3 m koridory a 2 m po obvode ostávajú voľné."
           }
         },
         {
@@ -1424,185 +1451,204 @@
         }
       ],
       "quarterPitch": {
-        "width": 50,
-        "height": 30,
-        "assumed": true,
-        "assumption": "Rozmery štvrtiny ešte nie sú potvrdené. Toto rozloženie počíta s voľnou plochou aspoň 50 × 30 m; pred tréningom ju zmeraj. Ak je menšia, treba zmenšiť plochy a upraviť organizáciu hry.",
+        "width": 35,
+        "height": 25,
+        "assumed": false,
+        "assumption": "Rozloženie pre približne 35 × 25 m podľa dostupnej štvrtiny. Medzi pracovnými plochami nechaj voľné 3 m koridory a po obvode 2 m. Koridory slúžia na presun a zachytenie lôpt, nie na ďalšie cvičenie.",
         "corridor": {
-          "x": 23,
-          "width": 4
+          "x": 16,
+          "width": 3
         },
         "stages": {
           "football-warmup": {
             "areas": [
               {
                 "label": "A",
-                "x": 3,
-                "y": 2.5,
-                "w": 20,
-                "h": 25,
-                "length": 25,
-                "width": 20
+                "x": 2,
+                "y": 2,
+                "w": 14,
+                "h": 21,
+                "length": 21,
+                "width": 14
               },
               {
                 "label": "B",
-                "x": 27,
-                "y": 2.5,
-                "w": 20,
-                "h": 25,
-                "length": 25,
-                "width": 20
+                "x": 19,
+                "y": 2,
+                "w": 14,
+                "h": 21,
+                "length": 21,
+                "width": 14
               }
             ],
-            "instructions": "Dve zóny 25 × 20 m otoč dlhšou stranou naprieč 30-metrovou stranou celej plochy. Tréner 1 vedie A, tréner 2 B. Stredný 4 m koridor ostáva voľný; pri krajoch zostáva 3 m zboku a 2,5 m za zónami."
+            "instructions": "Dve zóny 21 × 14 m sú otočené dlhšou stranou naprieč 25-metrovou stranou celej plochy. Pri 20 deťoch je v každej 10 hráčov s vlastnou loptou. Tréner 1 vedie A, tréner 2 B; medzi zónami 3 m, po obvode 2 m voľna."
           },
           "football-pass": {
             "areas": [
               {
                 "label": "A1",
-                "x": 7,
+                "x": 3,
                 "y": 2,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               },
               {
                 "label": "A2",
-                "x": 7,
-                "y": 16,
+                "x": 3,
+                "y": 14,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               },
               {
                 "label": "B1",
-                "x": 31,
+                "x": 20,
                 "y": 2,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               },
               {
                 "label": "B2",
-                "x": 31,
-                "y": 16,
+                "x": 20,
+                "y": 14,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               }
             ],
-            "instructions": "Štyri štvorce po 12 × 12 m: dva za sebou naľavo (A1/A2) a dva napravo (B1/B2). Medzi štvorcami v každej dvojici nechaj 2 m, medzi ľavou a pravou polovicou 4 m koridor. Každý tréner dohliada na svoju dvojicu; pri 20 deťoch je všade 5 hráčov."
+            "instructions": "Štyri obdĺžniky 12 × 9 m: A1/A2 naľavo a B1/B2 napravo. Každý je v strede svojej 14 m širokej polovice. Medzi hornou a dolnou dvojicou zostávajú 3 m a medzi polovicami 3 m koridor. Pri 20 deťoch je v každej skupine 5; každý tréner dohliada na dve susedné plochy."
           },
           "football-rondo": {
             "areas": [
               {
                 "label": "A1",
-                "x": 7,
+                "x": 3,
                 "y": 2,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               },
               {
                 "label": "A2",
-                "x": 7,
-                "y": 16,
+                "x": 3,
+                "y": 14,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               },
               {
                 "label": "B1",
-                "x": 31,
+                "x": 20,
                 "y": 2,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               },
               {
                 "label": "B2",
-                "x": 31,
-                "y": 16,
+                "x": 20,
+                "y": 14,
                 "w": 12,
-                "h": 12,
+                "h": 9,
                 "length": 12,
-                "width": 12
+                "width": 9
               }
             ],
-            "instructions": "Použi tie isté štyri štvorce ako pri prihrávkach. Pri 20 deťoch hrá každá skupina 4 na 1. Medzery aj stredný koridor ponechaj voľné; pri úprave náročnosti nezasahuj do susednej skupiny."
+            "instructions": "Rondo zostáva na tých istých štyroch plochách 12 × 9 m. Pri 20 deťoch všade 4 na 1. Rozostupy ani koridory nezapĺňaj; náročnosť uprav tlakom obrancu a časom na prijatie, bez rozširovania mimo vlastnej plochy."
           },
           "football-zones": {
             "areas": [
               {
                 "label": "A1",
-                "x": 4,
+                "x": 2,
                 "y": 2,
-                "w": 18,
-                "h": 12,
-                "length": 18,
-                "width": 12
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
               },
               {
                 "label": "A2",
-                "x": 4,
-                "y": 16,
-                "w": 18,
-                "h": 12,
-                "length": 18,
-                "width": 12
+                "x": 2,
+                "y": 14,
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
               },
               {
                 "label": "B1",
-                "x": 28,
+                "x": 19,
                 "y": 2,
-                "w": 18,
-                "h": 12,
-                "length": 18,
-                "width": 12
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
               },
               {
                 "label": "B2",
-                "x": 28,
-                "y": 16,
-                "w": 18,
-                "h": 12,
-                "length": 18,
-                "width": 12
+                "x": 19,
+                "y": 14,
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
               }
             ],
-            "instructions": "Štyri plochy 18 × 12 m, dve naľavo a dve napravo. Oproti štvorcom rozšír každú plochu do bokov; rozostupy 2 m medzi dvojicami a stredný 4 m koridor zostanú. Koncové zóny sú stále hlboké 2 m. Pri 20 deťoch hrá všade 2 na 2 + N."
+            "instructions": "Štyri plochy 14 × 9 m; oproti prihrávkam každú rozšír o 1 m doľava a doprava. Medzi hornou a dolnou dvojicou aj medzi polovicami ostávajú 3 m koridory, po obvode 2 m. Koncové zóny sú hlboké 2 m, stredná časť má 10 × 9 m. Pri 20 deťoch všade 2 na 2 + N."
           },
-          "football-matches": {
+          "football-mini-games": {
             "areas": [
               {
-                "label": "A",
-                "x": 3,
+                "label": "A1",
+                "x": 2,
                 "y": 2,
-                "w": 20,
-                "h": 26,
-                "length": 26,
-                "width": 20
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
               },
               {
-                "label": "B",
-                "x": 27,
+                "label": "A2",
+                "x": 2,
+                "y": 14,
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
+              },
+              {
+                "label": "B1",
+                "x": 19,
                 "y": 2,
-                "w": 20,
-                "h": 26,
-                "length": 26,
-                "width": 20
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
+              },
+              {
+                "label": "B2",
+                "x": 19,
+                "y": 14,
+                "w": 14,
+                "h": 9,
+                "length": 14,
+                "width": 9
               }
             ],
-            "instructions": "Skupiny A1 a A2 vytvoria zápas naľavo, B1 a B2 napravo. Dve ihriská 26 × 20 m sú otočené dlhšou stranou naprieč 30-metrovou stranou celej plochy. Medzi nimi 4 m voľný koridor; z vonkajších bokov 3 m a za koncovými čiarami 2 m voľného priestoru. Bránky ani rezervné lopty nepatria do koridoru."
+            "instructions": "Štyri minihry zostanú na plochách 14 × 9 m; skupiny nespájaj do 5 na 5. Každá má jednu kužeľovú bránku v strede ľavej a jednu v strede pravej koncovej čiary. Pri 20 deťoch všade 2 na 2 + N. Zakončenie po zemi; pevné bránky nezužujú koridory. Po obvode zostáva 2 m, medzi hrami 3 m voľna."
           }
-        }
+        },
+        "approximate": true
       }
     }
   ]

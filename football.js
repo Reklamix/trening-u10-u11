@@ -17,7 +17,7 @@ class FootballTimeline {
 }
 
 const FootballScenes = {
-  keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-finish'],
+  keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-mini-games','football-finish'],
   sample(frames,time) {
     if(time<=frames[0][0])return {x:frames[0][1],y:frames[0][2]};
     for(let i=1;i<frames.length;i++)if(time<=frames[i][0]){
@@ -94,6 +94,16 @@ const FootballScenes = {
       else {track('ball',[[0,.23,.3],[4,.23,.3],[6,.96,.74]]);line('pass',3,[[.2,.28],[.94,.72]]);}
       line('run',2,route);step(0,size>=5?'1. Prihrávka neutrálnemu hráčovi.':'1. Hráč s loptou si pripraví prihrávku.');step(2,'2. A2 nabieha okolo obrancu do voľnej zóny.');step(4,'3. Prihrávka do nábehu, príjem v koncovej zóne.');step(6,'Bod získava A2. Neutrálny sám neboduje.');
       scene.localCount=size;scene.caption=`2 na 2${size>4?' + '+(size-4)+' N':''}. Zóny hlboké 2 m. Ukážka prihrávky; platí aj kontrolované vedenie do zóny.`;
+    } else if(key==='football-mini-games') {
+      const n=Math.floor(total/4)+(pitchIndex<total%4?1:0);
+      scene.pitch=pitch(40,46,280,14,9,{goals:true,goalGates:true});scene.localCount=n;scene.duration=8;
+      add('a0','A1',.18,.32);add('a1','A2',.33,.7);add('b0','B1',.7,.12,'B');add('b1','B2',.65,.7,'B');
+      if(n>=5)add('n1','N1',.36,.38,'N');if(n===6)add('n2','N2',.45,.86,'N');add('ball','',.21,.34,'A','ball');
+      track('a0',[[0,.18,.32],[2,.18,.32],[3,.28,.1],[4,.53,.12],[6,.53,.12],[7,.81,.48],[8,.81,.48]]);
+      track('ball',[[0,.21,.34],[2,.36,.72],[4,.36,.72],[6,.56,.14],[7,.84,.5],[8,1.015,.5]]);
+      line('pass',1,[[.18,.32],[.33,.7]]);line('run',2,[[.18,.32],[.28,.1],[.53,.12]]);line('pass',3,[[.33,.7],[.53,.12]]);line('dribble',4,[[.53,.12],[.81,.48]]);line('pass',5,[[.81,.48],[1.015,.5]]);
+      step(0,n>4?'1. Prihraj spoluhráčovi; neutrálny pomáha tímu s loptou.':'1. Prihraj spoluhráčovi.');step(2,'2. Znovu sa ponúkni do voľného priestoru.');step(4,'3. Spoluhráč vráti loptu do nábehu.');step(6,'4. Priprav si presné zakončenie.');step(7,'5. Pošli loptu po zemi cez kužeľovú bránku.');step(8,n>4?'Príklad jednej akcie. Neutrálny sám neboduje; v hre hráči rozhodujú sami.':'Príklad jednej akcie; v hre hráči rozhodujú sami.');
+      scene.caption=`Ihrisko ${['A1','A2','B1','B2'][pitchIndex]}: 2 na 2${n>4?' + '+(n-4)+' N':''} = ${n} detí. Všetky štyri ihriská spolu ${total}. Dve kužeľové bránky široké 2 m; zakončenie po zemi.`;
     } else if(key==='football-matches') {
       const n=pitchIndex?Math.floor(total/2):Math.ceil(total/2),side=Math.floor(n/2),large=total>=23;
       scene.pitch=pitch(40,40,280,large?36:32,large?26:24,{goals:true});
@@ -115,6 +125,7 @@ const FootballScenes = {
     if(scene.pitch){
       for(const[u,v]of[[0,0],[1,0],[0,1],[1,1]])scene.cones.push({...point(u,v),kind:'corner'});
       if(scene.pitch.zones){const depth=2/scene.pitch.length;for(const[u,v]of[[depth,0],[depth,1],[1-depth,0],[1-depth,1]])scene.cones.push({...point(u,v),kind:'zone'});}
+      if(scene.pitch.goalGates){const half=1/scene.pitch.width;for(const[u,v]of[[0,.5-half],[0,.5+half],[1,.5-half],[1,.5+half]])scene.cones.push({...point(u,v),kind:'gate'});}
     }
     return scene;
   }
@@ -141,14 +152,14 @@ const FootballScenes = {
     const root=html('div','football-board');
     const selectors=html('div','football-selectors');
     const choose=(label,values,selected,callback)=>{const wrap=html('label','football-select-label',label),select=html('select');select.setAttribute('aria-label',label);values.forEach(([value,text])=>{const option=html('option','',text);option.value=value;select.append(option);});select.value=selected;select.addEventListener('change',()=>callback(Number(select.value)));wrap.append(select);selectors.append(wrap);};
-    if(['football-warmup','football-matches'].includes(block.diagram))choose(block.diagram==='football-warmup'?'Zobrazená zóna':'Zobrazené ihrisko',[[0,'A'],[1,'B']],0,value=>{pitchIndex=value;build();});
+    if(['football-warmup','football-matches','football-mini-games'].includes(block.diagram))choose(block.diagram==='football-warmup'?'Zobrazená zóna':'Zobrazené ihrisko',block.diagram==='football-mini-games'?[[0,'A1'],[1,'A2'],[2,'B1'],[3,'B2']]:[[0,'A'],[1,'B']],0,value=>{pitchIndex=value;build();});
     if(['football-pass','football-rondo','football-zones'].includes(block.diagram))choose('Hráčov v tejto skupine',options.groups.map(n=>[n,'Skupina '+n]),options.size,value=>{options.size=value;build();options.onGroupChange(value);});
     const expand=html('button','secondary-button football-expand','Zväčšiť');expand.type='button';expand.setAttribute('aria-label','Zväčšiť schému a animáciu');selectors.append(expand);
     const figure=html('figure','diagram football-figure'),svg=svgNode('svg',{viewBox:'0 0 360 310',role:'img','aria-label':block.title});figure.append(svg);
     const coneGuide=html('details','football-cone-guide');coneGuide.hidden=!block.coneSetup;
     const layoutGuide=html('details','football-cone-guide'),layout=options.quarterPitch,stage=layout?.stages?.[block.diagram];layoutGuide.hidden=!stage;
     if(stage){
-      layoutGuide.append(html('summary','',`Celá 1/4: pracovný rozmer ${layout.width} × ${layout.height} m`),html('p','',layout.assumption));
+      layoutGuide.append(html('summary','',`Celá 1/4: ${layout.assumed?'pracovný rozmer':'približne'} ${layout.width} × ${layout.height} m`),html('p','',layout.assumption));
       const map=svgNode('svg',{viewBox:`-2 -2 ${layout.width+4} ${layout.height+4}`,role:'img','aria-label':`Rozloženie celej štvrtiny: ${block.title}`,class:'football-layout-map'});
       map.append(svgNode('rect',{x:0,y:0,width:layout.width,height:layout.height,fill:'#e5eddd',stroke:'#173b31','stroke-width':.3}),svgNode('rect',{x:layout.corridor.x,y:0,width:layout.corridor.width,height:layout.height,fill:'#e7d5b7'}),svgNode('text',{x:layout.corridor.x+layout.corridor.width/2,y:layout.height/2,'text-anchor':'middle','font-size':1.8,fill:'#173b31'},String(layout.corridor.width)+' m'));
       for(const a of stage.areas){map.append(svgNode('rect',{x:a.x,y:a.y,width:a.w,height:a.h,fill:'#f6f8f1',stroke:'#216a4b','stroke-width':.35}),svgNode('text',{x:a.x+a.w/2,y:a.y+a.h/2-1,'text-anchor':'middle','font-size':2.1,'font-weight':700,fill:'#173b31'},a.label),svgNode('text',{x:a.x+a.w/2,y:a.y+a.h/2+2,'text-anchor':'middle','font-size':1.8,fill:'#173b31'},`${a.length} × ${a.width} m`));}
@@ -193,9 +204,9 @@ const FootballScenes = {
         for(const cone of scene.cones){
           const g=svgNode('g',{'data-cone':cone.kind,transform:`translate(${cone.x} ${cone.y})`});
           const shape='M0 -11L-9 6H9Z';
-          g.append(svgNode('title',{},cone.kind==='zone'?'Méta hranice koncovej zóny, 2 m od konca':'Kužeľ v rohu plochy'),svgNode('path',{d:shape,fill:'#f47700',stroke:'white','stroke-width':5,'stroke-linejoin':'round'}),svgNode('path',{d:shape,fill:'#f47700',stroke:'#713708','stroke-width':1.8,'stroke-linejoin':'round'}),svgNode('path',{d:'M-4 -2H4',stroke:'white','stroke-width':2.5}));svg.append(g);
+          g.append(svgNode('title',{},cone.kind==='zone'?'Méta hranice koncovej zóny, 2 m od konca':cone.kind==='gate'?'Kužeľ dvojmetrovej bránky':'Kužeľ v rohu plochy'),svgNode('path',{d:shape,fill:'#f47700',stroke:'white','stroke-width':5,'stroke-linejoin':'round'}),svgNode('path',{d:shape,fill:'#f47700',stroke:'#713708','stroke-width':1.8,'stroke-linejoin':'round'}),svgNode('path',{d:'M-4 -2H4',stroke:'white','stroke-width':2.5}));svg.append(g);
         }
-        if(p.goals)for(const x of[p.x-6,p.x+p.w])for(const u of[.25,.7]){const y=p.y+p.h*u;svg.append(svgNode('rect',{x,y:y-8,width:6,height:16,fill:'white',stroke:'#173b31'}),svgNode('path',{d:`M${x} ${y-3}h6M${x} ${y+3}h6`,stroke:'#638268'}));}
+        if(p.goals&&!p.goalGates)for(const x of[p.x-6,p.x+p.w])for(const u of[.25,.7]){const y=p.y+p.h*u;svg.append(svgNode('rect',{x,y:y-8,width:6,height:16,fill:'white',stroke:'#173b31'}),svgNode('path',{d:`M${x} ${y-3}h6M${x} ${y+3}h6`,stroke:'#638268'}));}
         svg.append(svgNode('text',{x:180,y:p.y+p.h+22,'text-anchor':'middle',fill:'#596c63','font-size':11},`${p.length} × ${p.width} m${p.zones?' · zóny 2 m':''}`));
       }
       for(const a of scene.arrows){

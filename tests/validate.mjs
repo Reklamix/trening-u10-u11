@@ -9,7 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const read = name => readFileSync(path.join(root, name), 'utf8');
 const data = JSON.parse(read('trainings.json'));
 const diagrams = new Set(['warmup', 'coordination', 'duel', 'two-one', 'two-two', 'target', 'buildout', 'sprint-jump', 'match', 'two-matches', 'finish', 'duel-no-keeper', 'two-one-no-keeper', 'two-two-no-keeper', 'two-matches-no-keeper']);
-for(const key of ['warmup','pass','rondo','zones','matches','finish'])diagrams.add('football-'+key);
+for(const key of ['warmup','pass','rondo','zones','matches','mini-games','finish'])diagrams.add('football-'+key);
 let assertions = 0;
 const check = (value, message) => { assert.ok(value, message); assertions++; };
 const equal = (actual, expected, message) => { assert.deepEqual(actual, expected, message); assertions++; };
@@ -193,15 +193,15 @@ check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No pers
 const footballPure=read('football.js').split('// FOOTBALL_BROWSER')[0];
 const {FootballTimeline,FootballScenes}=runInNewContext(footballPure+'\n({FootballTimeline,FootballScenes})',{performance:{now:()=>0}});
 const quarter=thu.quarterPitch;
-equal([quarter.width,quarter.height],[50,30],'Quarter-pitch working footprint is explicit');
-equal(quarter.assumed,true,'Unconfirmed pitch measurement is labelled as an assumption');
+equal([quarter.width,quarter.height],[35,25],'Quarter-pitch footprint matches the user-provided dimensions');
+equal(quarter.assumed,false,'User-provided footprint replaces the earlier assumption');equal(quarter.approximate,true,'Approximate measurement is not presented as an exact survey');
 for(const block of thu.blocks.filter(b=>b.diagram!=='football-finish')){
   const stage=quarter.stages[block.diagram];check(stage&&stage.areas.length===block.coneSetup.areas,'Full layout includes every simultaneous area');
   check(stage.areas.every(a=>a.x>=2&&a.y>=2&&a.x+a.w<=quarter.width-2&&a.y+a.h<=quarter.height-2),'Playing areas retain at least two metres of outside space');
-  check(stage.areas.every(a=>a.x+a.w<=quarter.corridor.x||a.x>=quarter.corridor.x+quarter.corridor.width),'Four-metre central corridor stays clear');
+  check(stage.areas.every(a=>a.x+a.w<=quarter.corridor.x||a.x>=quarter.corridor.x+quarter.corridor.width),'Central corridor stays clear');
   for(let i=0;i<stage.areas.length;i++)for(const b of stage.areas.slice(i+1)){
     const a=stage.areas[i],gapX=Math.max(a.x-b.x-b.w,b.x-a.x-a.w),gapY=Math.max(a.y-b.y-b.h,b.y-a.y-a.h);
-    check(gapX>=2||gapY>=2,'Simultaneous activities have at least two metres between their boundaries');
+    check(gapX>=3||gapY>=3,'Simultaneous activities have at least three metres between their boundaries');
   }
   for(const area of stage.areas){
     equal([area.w,area.h].sort((a,b)=>a-b),[area.length,area.width].sort((a,b)=>a-b),'Physical layout dimensions allow only rotation, not stretching');
@@ -209,12 +209,13 @@ for(const block of thu.blocks.filter(b=>b.diagram!=='football-finish')){
       const scene=FootballScenes.build(block.diagram,{total,area});
       equal([scene.pitch.length,scene.pitch.width],[area.length,area.width],'Animated diagram uses dimensions from the quarter-pitch layout for every attendance');
       check(Math.abs(scene.pitch.w/scene.pitch.h-area.length/area.width)<1e-9,'Animated pitch retains the new physical aspect ratio');
-      if(scene.pitch.goals){const shot=FootballScenes.sample(scene.tracks.ball,scene.duration),p=scene.pitch;check(shot.x>=p.x+p.w&&shot.x<=p.x+p.w+6&&Math.abs(shot.y-(p.y+p.h*.25))<=8,'Shot still ends inside the miniature goal on the reduced pitch');}
+      if(scene.pitch.goals){const shot=FootballScenes.sample(scene.tracks.ball,scene.duration),p=scene.pitch,centre=p.goalGates?.5:.25,half=p.goalGates?p.h/p.width:8;check(shot.x>=p.x+p.w&&shot.x<=p.x+p.w+6&&Math.abs(shot.y-(p.y+p.h*centre))<=half,'Ball still finishes inside the actual goal opening on the reduced pitch');}
+      if(block.diagram==='football-warmup')check(scene.nodes.every(n=>scene.tracks[n.id].every(([,x,y])=>x>=scene.pitch.x+(n.kind==='ball'?4:10)&&x<=scene.pitch.x+scene.pitch.w-(n.kind==='ball'?4:10)&&y>=scene.pitch.y+(n.kind==='ball'?4:10)&&y<=scene.pitch.y+scene.pitch.h-(n.kind==='ball'?4:10))),'Every warmup actor stays fully within the smaller footprint');
       if(scene.pitch.zones)for(const cone of scene.cones.filter(c=>c.kind==='zone'))check(Math.abs(Math.min(cone.x-scene.pitch.x,scene.pitch.x+scene.pitch.w-cone.x)/scene.pitch.w*scene.pitch.length-2)<1e-9,'Reduced zone diagram still marks exactly two metres');
     }
   }
 }
-for(const[blockIndex,expectedTotal]of[8,16,16,32,8,0].entries()){
+for(const[blockIndex,expectedTotal]of[8,16,16,32,32,0].entries()){
   const block=thu.blocks[blockIndex],setup=block.coneSetup;
   check(setup&&Number.isInteger(setup.areas)&&setup.areas>0&&Number.isInteger(setup.perArea)&&setup.perArea>=0,'Every Thursday activity has valid cone quantities');
   equal(setup.areas*setup.perArea,expectedTotal,'Cone total covers every simultaneous area');
@@ -226,10 +227,28 @@ for(const[blockIndex,expectedTotal]of[8,16,16,32,8,0].entries()){
     if(scene.pitch){
       const p=scene.pitch;
       equal(scene.cones.filter(c=>c.kind==='corner').length,4,'Every marked area has four corner cones');
-      check(scene.cones.every(c=>(c.y===p.y||c.y===p.y+p.h)&&c.x>=p.x&&c.x<=p.x+p.w),'Cones stay on the boundary outside playing routes');
+      check(scene.cones.every(c=>((c.y===p.y||c.y===p.y+p.h)&&c.x>=p.x&&c.x<=p.x+p.w)||((c.x===p.x||c.x===p.x+p.w)&&c.y>=p.y&&c.y<=p.y+p.h)),'All cones, including goal gates, stay on a field boundary');
       for(const cone of scene.cones.filter(c=>c.kind==='zone'))check(Math.abs(Math.min(cone.x-p.x,p.x+p.w-cone.x)/p.w*p.length-2)<1e-9,'Zone cone is exactly two metres from its end line');
     }
   }
+}
+equal(thu.blocks[4].diagram,'football-mini-games','Final block uses four compact games rather than two full matches');
+for(const entry of thu.attendanceCases){
+  let count=0;
+  for(let index=0;index<4;index++){
+    const scene=FootballScenes.build('football-mini-games',{total:entry.total,pitchIndex:index,area:quarter.stages['football-mini-games'].areas[index]});
+    count+=scene.localCount;equal(scene.localCount,entry.groups[index],'Each mini-game has the actual size of its selected group');
+    equal(scene.nodes.filter(n=>n.team==='A'&&n.kind==='player').length,2,'Each mini-game has two attackers');
+    equal(scene.nodes.filter(n=>n.team==='B'&&n.kind==='player').length,2,'Each mini-game has two opponents');
+    equal(scene.nodes.filter(n=>n.team==='N').length,entry.groups[index]-4,'Every extra child remains active as a neutral');
+    equal(scene.cones.filter(c=>c.kind==='gate').length,4,'Two cone gates use four cones per game');
+    for(const side of[scene.pitch.x,scene.pitch.x+scene.pitch.w]){
+      const gate=scene.cones.filter(c=>c.kind==='gate'&&c.x===side);
+      check(Math.abs(Math.abs(gate[0].y-gate[1].y)/scene.pitch.h*scene.pitch.width-2)<1e-9,'Every cone goal is physically two metres wide');
+    }
+    const receiver=FootballScenes.sample(scene.tracks.ball,2),a2=scene.nodes.find(n=>n.id==='a1');check(Math.hypot(receiver.x-a2.x,receiver.y-a2.y)<12,'Opening pass reaches a real teammate in the compact game');
+  }
+  equal(count,entry.total,'All selected children participate across the four games');
 }
 const motion=new FootballTimeline(8);
 motion.play(1000);equal(motion.time(3500),2.5,'Animation follows elapsed time');
