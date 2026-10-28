@@ -18,6 +18,14 @@ class FootballTimeline {
 
 const FootballScenes = {
   keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-mini-games','football-finish'],
+  groups(key,total,layout) {
+    const areas=layout?.stages?.[key]?.areas||[];
+    return areas.map((area,index)=>({...area,index,count:key==='football-warmup'?(index?Math.ceil(total/2):Math.floor(total/2)):Math.floor(total/areas.length)+(index<total%areas.length?1:0)}));
+  },
+  mapPoint(area,pitch,point) {
+    const u=(point.x-pitch.x)/pitch.w,v=(point.y-pitch.y)/pitch.h;
+    return area.w===area.length?{x:area.x+u*area.w,y:area.y+v*area.h}:{x:area.x+v*area.w,y:area.y+u*area.h};
+  },
   sample(frames,time) {
     if(time<=frames[0][0])return {x:frames[0][1],y:frames[0][2]};
     for(let i=1;i<frames.length;i++)if(time<=frames[i][0]){
@@ -148,21 +156,33 @@ const FootballScenes = {
   }
   function mount(parent,block,options) {
     clear();
-    let pitchIndex=0,scene,clock,frame=null,lastStep=-1,lastComplete=false,focusDialog=null;
+    const layout=options.quarterPitch,stage=layout?.stages?.[block.diagram],areas=FootballScenes.groups(block.diagram,options.total,layout);
+    let pitchIndex=Math.min(options.areaIndex||0,Math.max(0,areas.length-1)),scene,clock,frame=null,lastStep=-1,lastComplete=false,focusDialog=null,layoutDialog=null;
+    if(areas.length)options.size=areas[pitchIndex].count;
     const root=html('div','football-board');
     const selectors=html('div','football-selectors');
     const choose=(label,values,selected,callback)=>{const wrap=html('label','football-select-label',label),select=html('select');select.setAttribute('aria-label',label);values.forEach(([value,text])=>{const option=html('option','',text);option.value=value;select.append(option);});select.value=selected;select.addEventListener('change',()=>callback(Number(select.value)));wrap.append(select);selectors.append(wrap);};
-    if(['football-warmup','football-matches','football-mini-games'].includes(block.diagram))choose(block.diagram==='football-warmup'?'Zobrazená zóna':'Zobrazené ihrisko',block.diagram==='football-mini-games'?[[0,'A1'],[1,'A2'],[2,'B1'],[3,'B2']]:[[0,'A'],[1,'B']],0,value=>{pitchIndex=value;build();});
-    if(['football-pass','football-rondo','football-zones'].includes(block.diagram))choose('Hráčov v tejto skupine',options.groups.map(n=>[n,'Skupina '+n]),options.size,value=>{options.size=value;build();options.onGroupChange(value);});
+    const areaTools=html('div','football-area-tools');
+    let areaSelect;
+    const areaLabel=area=>`${area.label} · ${area.count} ${area.count<5?'hráči':'hráčov'}`;
+    if(areas.length){
+      const label=html('label','football-select-label',block.diagram==='football-warmup'?'Zobrazená zóna':'Zobrazená skupina');
+      areaSelect=html('select');areaSelect.setAttribute('aria-label',block.diagram==='football-warmup'?'Zobrazená zóna':'Zobrazená skupina');
+      for(const area of areas){const option=html('option','',areaLabel(area));option.value=area.index;areaSelect.append(option);}
+      areaSelect.value=String(pitchIndex);areaSelect.addEventListener('change',()=>selectArea(Number(areaSelect.value)));label.append(areaSelect);areaTools.append(label);
+      const mapButton=html('button','secondary-button','Rozmiestnenie');mapButton.type='button';mapButton.setAttribute('aria-haspopup','dialog');mapButton.addEventListener('click',openLayout);areaTools.append(mapButton);
+    }else{
+      if(['football-warmup','football-matches','football-mini-games'].includes(block.diagram))choose(block.diagram==='football-warmup'?'Zobrazená zóna':'Zobrazené ihrisko',[[0,'A'],[1,'B']],0,value=>{pitchIndex=value;build();});
+      if(['football-pass','football-rondo','football-zones'].includes(block.diagram))choose('Hráčov v tejto skupine',options.groups.map(n=>[n,'Skupina '+n]),options.size,value=>{options.size=value;build();options.onGroupChange(value);});
+    }
     const expand=html('button','secondary-button football-expand','Zväčšiť');expand.type='button';expand.setAttribute('aria-label','Zväčšiť schému a animáciu');selectors.append(expand);
     const figure=html('figure','diagram football-figure'),svg=svgNode('svg',{viewBox:'0 0 360 310',role:'img','aria-label':block.title});figure.append(svg);
     const coneGuide=html('details','football-cone-guide');coneGuide.hidden=!block.coneSetup;
-    const layoutGuide=html('details','football-cone-guide'),layout=options.quarterPitch,stage=layout?.stages?.[block.diagram];layoutGuide.hidden=!stage;
+    const layoutGuide=html('details','football-cone-guide');layoutGuide.hidden=!stage;
+    let map;
     if(stage){
       layoutGuide.append(html('summary','',`Celá 1/4: ${layout.assumed?'pracovný rozmer':'približne'} ${layout.width} × ${layout.height} m`),html('p','',layout.assumption));
-      const map=svgNode('svg',{viewBox:`-2 -2 ${layout.width+4} ${layout.height+4}`,role:'img','aria-label':`Rozloženie celej štvrtiny: ${block.title}`,class:'football-layout-map'});
-      map.append(svgNode('rect',{x:0,y:0,width:layout.width,height:layout.height,fill:'#e5eddd',stroke:'#173b31','stroke-width':.3}),svgNode('rect',{x:layout.corridor.x,y:0,width:layout.corridor.width,height:layout.height,fill:'#e7d5b7'}),svgNode('text',{x:layout.corridor.x+layout.corridor.width/2,y:layout.height/2,'text-anchor':'middle','font-size':1.8,fill:'#173b31'},String(layout.corridor.width)+' m'));
-      for(const a of stage.areas){map.append(svgNode('rect',{x:a.x,y:a.y,width:a.w,height:a.h,fill:'#f6f8f1',stroke:'#216a4b','stroke-width':.35}),svgNode('text',{x:a.x+a.w/2,y:a.y+a.h/2-1,'text-anchor':'middle','font-size':2.1,'font-weight':700,fill:'#173b31'},a.label),svgNode('text',{x:a.x+a.w/2,y:a.y+a.h/2+2,'text-anchor':'middle','font-size':1.8,fill:'#173b31'},`${a.length} × ${a.width} m`));}
+      map=svgNode('svg',{viewBox:`-3 -4 ${layout.width+6} ${layout.height+7}`,role:'img','aria-label':`Rozloženie celej štvrtiny: ${block.title}`,class:'football-layout-map'});
       layoutGuide.append(map,html('p','',stage.instructions));
     }
     const caption=html('p','football-caption');
@@ -187,6 +207,7 @@ const FootballScenes = {
     }
     legend.append(caption,list);
     if(!layout&&/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
+    if(areas.length)root.append(areaTools);
     root.append(figure,controls);
     if(options.onGuide){
       const guide=html('button','football-guide-entry');guide.type='button';guide.setAttribute('aria-haspopup','dialog');
@@ -196,8 +217,37 @@ const FootballScenes = {
     }else root.append(coneGuide,layoutGuide,selectors,settings,status,progress,scrub,note,legend);
     parent.append(root);
     let actors=new Map(),arrowLayers=[];
+    function selection(){return{index:pitchIndex,count:options.size,label:areas[pitchIndex]?.label,areas};}
+    function selectArea(index){
+      if(!Number.isInteger(index)||!areas[index])return;
+      pitchIndex=index;options.size=areas[index].count;areaSelect.value=String(index);build();options.onGroupChange(options.size,index);
+    }
+    function renderMap(){
+      if(!map)return;
+      map.replaceChildren(svgNode('rect',{x:0,y:0,width:layout.width,height:layout.height,fill:'#e5eddd',stroke:'#173b31','stroke-width':.3}),svgNode('rect',{x:layout.corridor.x,y:0,width:layout.corridor.width,height:layout.height,fill:'#e7d5b7'}),svgNode('text',{x:layout.width/2,y:-1.5,'text-anchor':'middle','font-size':1.5,fill:'#173b31'},`${layout.width} m`),svgNode('text',{x:-1.5,y:layout.height/2,'text-anchor':'middle','font-size':1.5,fill:'#173b31',transform:`rotate(-90 -1.5 ${layout.height/2})`},`${layout.height} m`),svgNode('text',{x:layout.corridor.x+layout.corridor.width/2,y:layout.height/2,'text-anchor':'middle','font-size':1.4,fill:'#173b31'},String(layout.corridor.width)+' m'));
+      for(const area of areas){
+        map.append(svgNode('rect',{'data-map-area':area.label,x:area.x,y:area.y,width:area.w,height:area.h,fill:area.index===pitchIndex?'#d8eea4':'#f6f8f1',stroke:'#216a4b','stroke-width':area.index===pitchIndex?.5:.25}));
+        const local=FootballScenes.build(block.diagram,{total:options.total,size:area.count,pitchIndex:area.index,area});
+        for(const player of local.nodes.filter(n=>n.kind==='player')){const p=FootballScenes.mapPoint(area,local.pitch,player);map.append(svgNode('circle',{'data-map-player':area.label,cx:p.x,cy:p.y,r:.42,fill:colors[player.team],stroke:'white','stroke-width':.12}));}
+        for(const cone of local.cones){const p=FootballScenes.mapPoint(area,local.pitch,cone);map.append(svgNode('path',{'data-map-cone':area.label,d:`M${p.x} ${p.y-.65}l-.55 1h1.1Z`,fill:'#f47700',stroke:'#713708','stroke-width':.12}));}
+        for(const[text,dy,font]of[[areaLabel(area),-.5,1.65],[`${area.length} × ${area.width} m`,1.5,1.35]])map.append(svgNode('text',{x:area.x+area.w/2,y:area.y+area.h/2+dy,'text-anchor':'middle','font-size':font,'font-weight':650,fill:'#173b31','paint-order':'stroke',stroke:'white','stroke-width':.55},text));
+      }
+    }
+    function openLayout(){
+      pause();
+      const dialog=html('dialog','football-layout-dialog');dialog.setAttribute('aria-label','Rozmiestnenie celého tréningu');
+      const head=html('header','layout-header');head.append(html('h2','',`Rozmiestnenie · ${layout.width} × ${layout.height} m`));
+      const close=html('button','secondary-button','Späť na cvičenie');close.type='button';close.addEventListener('click',()=>dialog.close());
+      const content=html('div','layout-body');content.append(map.cloneNode(true),html('p','layout-legend','Oranžové trojuholníky = kužele. Body = hráči, zelená plocha = zobrazená skupina. Postavenie hráčov je orientačné.'));
+      const choices=html('div','layout-choices');
+      for(const area of areas){const button=html('button','secondary-button',areaLabel(area));button.type='button';button.setAttribute('aria-pressed',String(area.index===pitchIndex));button.addEventListener('click',()=>{selectArea(area.index);content.querySelector('svg').replaceWith(map.cloneNode(true));choices.querySelectorAll('button').forEach((b,index)=>b.setAttribute('aria-pressed',String(index===pitchIndex)));});choices.append(button);}
+      content.append(choices,html('p','',stage.instructions),html('p','',`Kužele: ${block.coneSetup.perArea} na jednu plochu · ${block.coneSetup.perArea*block.coneSetup.areas} spolu.`),html('p','',block.coneSetup.placement));
+      const footer=html('footer','layout-footer');footer.append(close);dialog.append(head,content,footer);document.body.append(dialog);layoutDialog=dialog;
+      dialog.addEventListener('close',()=>{dialog.remove();if(layoutDialog===dialog)layoutDialog=null;areaTools.querySelector('button').focus();},{once:true});dialog.showModal();
+    }
     function build() {
-      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:stage?.areas[0]});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      svg.setAttribute('aria-label',block.title+(areas.length?' · '+areaLabel(areas[pitchIndex]):''));renderMap();
       clock.setRate(Number(speed.value));clock.setLoop(repeat.checked);
       if(block.coneSetup){
         const setup=block.coneSetup,total=setup.perArea*setup.areas;
@@ -268,8 +318,8 @@ const FootballScenes = {
     scrub.addEventListener('input',()=>{const value=scrub.value;pause();clock.seek(value);render();});
     speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));render();});
     repeat.addEventListener('change',()=>{clock.setLoop(repeat.checked);render();});
-    active={pause,destroy:()=>{pause();root.remove();if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
+    active={pause,selection,selectArea,destroy:()=>{pause();root.remove();if(layoutDialog){const dialog=layoutDialog;layoutDialog=null;dialog.close();dialog.remove();}if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
   }
   function clear(){active?.destroy();active=null;}
-  window.FootballBoard={supports:key=>FootballScenes.keys.includes(key),mount,pause:()=>active?.pause(),clear};
+  window.FootballBoard={supports:key=>FootballScenes.keys.includes(key),mount,pause:()=>active?.pause(),selection:()=>active?.selection(),selectArea:index=>active?.selectArea(index),clear};
 })();

@@ -282,7 +282,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,onGroupChange:size=>{groupSize=size;renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -377,6 +377,7 @@ const PersonalPlans = [
 
   const storageKeys = { done: 'training-completed-v2', gear: 'training-equipment-v2', vault: 'training-private-v1' };
   let groupSize = 4;
+  let areaIndex = 0;
   let vaultEpoch = 0;
   let lastTimerState = '';
   function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
@@ -474,7 +475,7 @@ const PersonalPlans = [
     updateTimer();
   }
   function openCoachingGuide(section) {
-    window.CoachingGuide.open({block:activeBlock(),training:state.selected,attendance:state.attendance,size:groupSize,section,layoutMap:document.querySelector('.football-board .football-layout-map')});
+    window.CoachingGuide.open({block:activeBlock(),training:state.selected,attendance:state.attendance,size:groupSize,section,selection:window.FootballBoard?.selection(),onAreaChange:index=>window.FootballBoard.selectArea(index),layoutMap:document.querySelector('.football-board .football-layout-map')});
   }
   function renderDetail() {
     const panel = $('detail-panel');

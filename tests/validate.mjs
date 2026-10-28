@@ -193,6 +193,25 @@ check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No pers
 const footballPure=read('football.js').split('// FOOTBALL_BROWSER')[0];
 const {FootballTimeline,FootballScenes}=runInNewContext(footballPure+'\n({FootballTimeline,FootballScenes})',{performance:{now:()=>0}});
 const quarter=thu.quarterPitch;
+for(const attendance of thu.attendanceCases)for(const block of thu.blocks.filter(b=>b.diagram!=='football-finish')){
+  const groups=FootballScenes.groups(block.diagram,attendance.total,quarter);
+  equal(groups.reduce((sum,area)=>sum+area.count,0),attendance.total,'Map assigns every child to exactly one real area');
+  if(block.diagram!=='football-warmup')equal(JSON.stringify(groups.map(area=>area.count)),JSON.stringify(attendance.groups),'Named areas use saved attendance distribution');
+  for(const area of groups){
+    const scene=FootballScenes.build(block.diagram,{total:attendance.total,size:area.count,pitchIndex:area.index,area});
+    equal(scene.nodes.filter(n=>n.kind==='player').length,area.count,'Selected area count matches all animated players including defenders and neutrals');
+    for(const actor of [...scene.cones,...scene.nodes.filter(n=>n.kind==='player')]){
+      const point=FootballScenes.mapPoint(area,scene.pitch,actor);
+      check(point.x>=area.x-1e-8&&point.x<=area.x+area.w+1e-8&&point.y>=area.y-1e-8&&point.y<=area.y+area.h+1e-8,'Map places every cone and child within its actual area, including rotated warmup');
+    }
+    const start=FootballScenes.mapPoint(area,scene.pitch,{x:scene.pitch.x,y:scene.pitch.y});
+    const end=FootballScenes.mapPoint(area,scene.pitch,{x:scene.pitch.x+scene.pitch.w,y:scene.pitch.y+scene.pitch.h});
+    equal(start.x,area.x,'Map starts at actual area x');equal(start.y,area.y,'Map starts at actual area y');
+    equal(end.x,area.x+area.w,'Map ends at actual area x boundary');equal(end.y,area.y+area.h,'Map ends at actual area y boundary');
+  }
+}
+equal(FootballScenes.groups('football-pass',19,quarter)[0].count,5,'Fresh 19-child example opens A1 with five players');
+equal(FootballScenes.groups('football-pass',19,quarter)[3].count,4,'Only B2 has four players at 19 children');
 equal([quarter.width,quarter.height],[35,25],'Quarter-pitch footprint matches the user-provided dimensions');
 equal(quarter.assumed,false,'User-provided footprint replaces the earlier assumption');equal(quarter.approximate,true,'Approximate measurement is not presented as an exact survey');
 for(const block of thu.blocks.filter(b=>b.diagram!=='football-finish')){

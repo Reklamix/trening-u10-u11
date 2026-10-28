@@ -29,10 +29,13 @@ const CoachingGuideModel = {
   };
   let active = null;
   function close() { if (active?.open) active.close(); }
-  function open({ block, training, attendance, size, section = 'prepare', layoutMap }) {
+  function open({ block, training, attendance, size, section = 'prepare', layoutMap, selection, onAreaChange }) {
     close();
     const returnFocus = document.activeElement;
     const groups = training.attendanceCases.find(item => item.total === attendance)?.groups || [];
+    let areaIndex = selection?.index || 0;
+    const areas = selection?.areas || [];
+    if (areas.length) size = areas[areaIndex].count;
     const dialog = node('dialog', 'coaching-guide');
     dialog.setAttribute('aria-labelledby', 'guide-title');
     const header = node('header', 'guide-header');
@@ -61,11 +64,12 @@ const CoachingGuideModel = {
     function render() {
       nav.querySelectorAll('button').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.guideSection === section)));
       body.replaceChildren(); footer.replaceChildren(); body.scrollTop = 0;
+      if (areas.length) body.append(node('p', 'guide-selected', 'Schéma a návod: ' + areas[areaIndex].label + ' · ' + size + ' ' + (size<5?'hráči':'hráčov')));
       if (section === 'prepare') {
         body.append(node('p', 'guide-intro', block.summary));
         const facts = node('div', 'guide-facts'), stage = training.quarterPitch?.stages?.[block.diagram];
         facts.append(card('Detí spolu', String(attendance)));
-        if (block.diagram === 'football-warmup') facts.append(card('Zóny A + B', Math.ceil(attendance / 2) + ' + ' + Math.floor(attendance / 2)));
+        if (block.diagram === 'football-warmup') facts.append(card('Zóny A + B', areas.length ? areas.map(area=>area.count).join(' + ') : Math.floor(attendance / 2) + ' + ' + Math.ceil(attendance / 2)));
         else if (stage) facts.append(card('Skupiny', groups.join(' + ')));
         else facts.append(card('Organizácia', 'Celé mužstvo'));
         if (stage) facts.append(card('Jedna plocha', `${stage.areas[0].length} × ${stage.areas[0].width} m`));
@@ -76,7 +80,7 @@ const CoachingGuideModel = {
           if (block.coneSetup.extra) body.append(details('Ďalšie pokyny ku kužeľom', block.coneSetup.extra));
         }
         if (layoutMap) {
-          const map = node('details', 'guide-disclosure'); map.append(node('summary', '', 'Mapa celej 1/4 ihriska'), layoutMap.cloneNode(true));
+          const map = node('details', 'guide-disclosure'); map.open = true; map.append(node('summary', '', 'Mapa celej 1/4 ihriska'), layoutMap.cloneNode(true));
           if (stage) map.append(node('p', '', stage.instructions)); body.append(map);
         }
         body.append(details('Podrobné rozloženie', block.space));
@@ -89,8 +93,13 @@ const CoachingGuideModel = {
         if ((block.tables || []).some(table => table.groupSize)) {
           const label = node('label', 'guide-group', 'Skupina, ktorú práve vedieš');
           const select = node('select'); select.setAttribute('aria-label', 'Skupina v návode');
-          [...new Set(groups)].sort().forEach(value => { const option = node('option', '', 'Skupina ' + value); option.value = value; select.append(option); });
-          select.value = String(size); select.addEventListener('change', () => { size = Number(select.value); render(); body.querySelector('select').focus(); });
+          if (areas.length) {
+            for (const area of areas) { const option = node('option', '', area.label + ' · ' + area.count + ' ' + (area.count<5?'hráči':'hráčov')); option.value = area.index; select.append(option); }
+            select.value = String(areaIndex); select.addEventListener('change', () => { areaIndex = Number(select.value); size = areas[areaIndex].count; onAreaChange(areaIndex); render(); body.querySelector('select').focus(); });
+          } else {
+            [...new Set(groups)].sort().forEach(value => { const option = node('option', '', 'Skupina ' + value); option.value = value; select.append(option); });
+            select.value = String(size); select.addEventListener('change', () => { size = Number(select.value); render(); body.querySelector('select').focus(); });
+          }
           label.append(select); body.append(label);
         }
         const tables = CoachingGuideModel.tables(block, attendance, size);

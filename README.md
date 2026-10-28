@@ -6,6 +6,8 @@ Web: https://reklamix.github.io/trening-u10-u11/
 
 Štvrtkový tréning má pod prehrávaním vstup **Ako viesť cvičenie**: Príprava / Postup / Striedanie / Tréner. Postup zobrazuje jeden pôvodný bod naraz s tlačidlami Späť a Ďalší bod. Striedanie ukazuje iba zvolenú veľkosť skupiny alebo dochádzku v zvislých kartách. Čas a prestávky sú dostupné v každej časti návodu. Návod má vlastné posúvanie a stále viditeľnú navigáciu, pri otvorení pozastaví animáciu a nemení tréningový časovač ani dokončenie bloku. Schéma a nastavenia zostávajú zbalené pod týmto vstupom. Staršie dni používajú pôvodné ovládanie.
 
+Nad štvrtkovým nákresom vyberáš skutočnú skupinu A1/A2/B1/B2 aj s počtom hráčov (rozohriatie má zóny A/B). Predvolene je prvá skupina, pri 19 deťoch A1 s 5 hráčmi; B2 má 4. Výber v návode Striedanie sa prenáša do animácie a naopak. **Rozmiestnenie** otvorí celú plochu 35 × 25 m s rozmermi jednotlivých ihrísk, hráčmi a kužeľmi; zvýraznená je zvolená skupina. Kliknutie na označenie skupiny v mape ju vyberie aj pre animáciu. Postavenie hráčov je orientačné, hranice a kužele vychádzajú zo schváleného rozloženia.
+
 ## Pridanie ďalšieho tréningu
 
 1. Otvor súbor [trainings.json](./trainings.json) v tomto repozitári a klikni na ceruzku **Edit**.
