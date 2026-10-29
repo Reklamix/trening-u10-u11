@@ -389,4 +389,31 @@ for (const block of guideTraining.blocks) {
 }
 check(!guide.supports({diagram:'duel-no-keeper',steps:[]}), 'Archived activities retain their existing instruction controls');
 
+const setupPure = read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0];
+const setup = runInNewContext(footballPure + '\n' + setupPure + '\nPitchSetupPlan');
+const originalTraining = JSON.stringify(thu);
+const setupPlan = setup.build(thu);
+equal(JSON.stringify(thu), originalTraining, 'Setup plan never mutates saved training or activity geometry');
+equal(JSON.stringify(setupPlan.steps.map(step=>step.total)), JSON.stringify([8,16,16,32,32]), 'Five setup steps use the agreed quantities');
+equal(JSON.stringify(setupPlan.steps.map(step=>step.added.length)), JSON.stringify([8,8,0,16,0]), 'Only 32 distinct cones are introduced across the full preparation');
+equal(JSON.stringify(setupPlan.steps.map(step=>step.moves.length)), JSON.stringify([0,8,16,0,16]), 'Setup separates moved cones from newly added cones');
+const pointKey = point => `${point.x.toFixed(6)},${point.y.toFixed(6)}`;
+let previousSetup = [];
+for (const [index,step] of setupPlan.steps.entries()) {
+  equal(step.total+step.stored,32,'Every setup step conserves the full 32-cone inventory');
+  equal(step.kept.length+step.moves.length,previousSetup.length,'Every previously laid cone is kept or moved exactly once');
+  const destinations=[...step.kept,...step.added,...step.moves.map(move=>move.to)];
+  equal(new Set(destinations.map(pointKey)).size,step.total,'No two setup cones overlap');
+  equal(JSON.stringify(destinations.map(pointKey).sort()),JSON.stringify(step.map.cones.map(pointKey).sort()),'Movement destinations reproduce the complete next layout');
+  for (const move of step.moves) {
+    check(previousSetup.some(point=>pointKey(point)===pointKey(move.from)),'Every arrow starts at a cone that was actually laid');
+    if(index===1||index===2) check(Math.abs(Math.hypot(move.to.x-move.from.x,move.to.y-move.from.y)-1)<1e-8,'Narrowing/widening moves each corner by exactly one metre');
+  }
+  for(const point of step.map.cones) check(step.map.areas.some(area=>point.area===area.label&&point.x>=area.x-1e-8&&point.x<=area.x+area.w+1e-8&&point.y>=area.y-1e-8&&point.y<=area.y+area.h+1e-8),'Setup cones stay within their assigned approved area');
+  previousSetup=step.map.cones;
+}
+equal(setupPlan.steps.at(-1).kept.length,16,'Converting zones to goals retains all sixteen corner cones');
+equal(setupPlan.steps.at(-1).added.length,0,'Eight final goals reuse existing cones');
+check(data.trainings.filter(training=>training.id!=='2026-10-29').every(training=>!setup.supports(training)),'Existing archive does not show an unrelated setup plan');
+
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

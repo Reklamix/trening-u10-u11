@@ -445,6 +445,7 @@ const PersonalPlans = [
     addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
   }
   function renderActive() {
+    window.PitchSetup?.close();
     window.CoachingGuide?.close();
     const block = activeBlock();
     $('block-meta').textContent = 'Časť ' + (state.blockIndex + 1) + ' zo ' + state.selected.blocks.length + ' · ' + timeRange(state.selected,block.start,block.end);
@@ -581,6 +582,7 @@ const PersonalPlans = [
     if(view!=='field')window.FootballBoard?.pause();
     if (state.view === 'private' && view !== 'private') lockVault();
     state.view = view;
+    $('open-pitch-setup').hidden = view === 'private' || !window.PitchSetup?.supports(state.selected);
     $('main').classList.toggle('private-mode', view === 'private');
     for (const name of ['field', 'overview', 'equipment', 'coaching', 'private']) $(name + '-view').hidden = name !== view;
     document.querySelectorAll('[data-view]').forEach(a => {
@@ -771,6 +773,7 @@ const PersonalPlans = [
     if (state.detail === 'rotations') renderDetail();
   });
   $('share').addEventListener('click', () => share(linkFor(state.selected.id)));
+  $('open-pitch-setup').addEventListener('click', () => window.PitchSetup.open(state.selected));
   $('share-block').addEventListener('click', () => share(linkFor(state.selected.id, activeBlock().id)));
   $('copy-link').addEventListener('click', copyLink);
   $('native-share').addEventListener('click', async () => {
