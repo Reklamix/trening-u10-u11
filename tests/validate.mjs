@@ -561,5 +561,24 @@ for(const sizes of[[5,7,6,6],[7,6,6,6],[5,6,6,6],[3,3,4,4],[8,8,7,7],[3,8,3,8]])
 }
 for(const invalid of[[3,3,3,3],[8,8,8,7],[2,7,7,8],[9,5,5,5],[5.5,6.5,6,6],[6,6,6],null])equal(planner.regroup(regroupSource,invalid),null,'Invalid inline totals or sizes cannot be applied');
 equal(JSON.stringify(regroupSource),regroupBefore,'Regrouping cannot modify the previous saved configuration');
+const resizeSource=planner.normalize({players:24,coaches:3,groupSizes:[3,7,8,6],levels:['base','challenge','standard','base']}),resizeBefore=JSON.stringify(resizeSource);
+for(const space of[{pitch:'quarter',width:35,height:25},{pitch:'half',width:50,height:35},{pitch:'full',width:70,height:50},{pitch:'full',width:105,height:68},{pitch:'half',width:35,height:90},{pitch:'full',width:120,height:25}]){
+  const config=planner.resize(resizeSource,space),training=planner.adapt(thu,config);
+  equal([config.pitch,config.width,config.height].join(','),[space.pitch,space.width,space.height].join(','),'Inline resize uses the exact selected available area');
+  equal([config.players,config.coaches].join(','),'24,3','Resize preserves attendance and coaching staff');
+  equal(JSON.stringify(config.groupSizes),JSON.stringify(resizeSource.groupSizes),'Resize preserves unequal skill-group sizes');
+  equal(JSON.stringify(config.levels),JSON.stringify(resizeSource.levels),'Resize preserves all skill profiles');
+  for(const block of training.blocks.slice(0,5))for(const area of FootballScenes.groups(block.diagram,24,training.quarterPitch)){
+    check(area.x>=2&&area.y>=2&&area.x+area.w<=space.width-2&&area.y+area.h<=space.height-2,'Resized layout stays within the new available area');
+    const scene=FootballScenes.build(block.diagram,{total:24,size:area.count,pitchIndex:area.index,area});
+    equal(scene.nodes.filter(n=>n.kind==='player').length,area.count,'Resize keeps the same real children in the animation');
+    equal([scene.pitch.length,scene.pitch.width].join(','),[area.length,area.width].join(','),'Animation and overall layout use identical resized exercise dimensions');
+    check(scene.pitch.y+scene.pitch.h+22<=310,'Resized exercise remains inside the SVG viewport');
+  }
+  equal(JSON.stringify(training.blocks.map(b=>[b.start,b.end])),JSON.stringify(thu.blocks.map(b=>[b.start,b.end])),'Resizing cannot change the session schedule');
+  equal(JSON.stringify(setup.build(training).steps.map(step=>step.total)),JSON.stringify([8,16,16,32,32]),'New area still has a complete cone preparation plan');
+}
+for(const space of[null,{pitch:'other',width:50,height:35},{pitch:'half',width:34,height:35},{pitch:'half',width:121,height:35},{pitch:'half',width:50,height:24},{pitch:'half',width:50,height:91},{pitch:'half',width:50.5,height:35},{pitch:'half',width:NaN,height:35}])equal(planner.resize(resizeSource,space),null,'Invalid inline area changes cannot be applied');
+equal(JSON.stringify(resizeSource),resizeBefore,'Resize cannot mutate the previously saved conditions');
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

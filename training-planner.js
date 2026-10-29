@@ -11,6 +11,10 @@ const TrainingPlanner = {
     return{players,coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90),groupSizes:sizes.length===4&&sizes.every(n=>Number.isInteger(n)&&n>=3&&n<=8)&&sizes.reduce((a,b)=>a+b,0)===players?sizes:this.groups(players),levels:Array.from({length:4},(_,i)=>Object.hasOwn(this.levels,levels[i])?levels[i]:'standard')};
   },
   groups(total){return Array.from({length:4},(_,index)=>Math.floor(total/4)+(index<total%4?1:0));},
+  resize(input,space){
+    if(!space||!Object.hasOwn(this.pitches,space.pitch)||!Number.isInteger(space.width)||space.width<35||space.width>120||!Number.isInteger(space.height)||space.height<25||space.height>90)return null;
+    return this.normalize({...input,pitch:space.pitch,width:space.width,height:space.height});
+  },
   regroup(input,sizes){
     if(!Array.isArray(sizes)||sizes.length!==4||!sizes.every(n=>Number.isInteger(n)&&n>=3&&n<=8))return null;
     const players=sizes.reduce((sum,n)=>sum+n,0);if(players<14||players>30)return null;

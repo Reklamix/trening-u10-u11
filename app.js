@@ -286,7 +286,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onPitchChange:changePitch,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -616,6 +616,16 @@ const PersonalPlans = [
       link.addEventListener('click',event=>{if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();history.pushState(null,'',link.href);onRoute();});return link;
     }));
     if(!items.length)$('catalog-list').append(el('p','notice','Nič sa nenašlo. Skús inú tému alebo kratší názov.'));
+  }
+  function changePitch(space){
+    const source=state.trainings.find(training=>training.id===state.selected.id),current=state.selected.planConfig;
+    if(!current||!TrainingPlanner.supports(source))return false;
+    const config=TrainingPlanner.resize(current,space);if(!config)return false;
+    configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
+    render(TrainingPlanner.adapt(source,config));
+    history.replaceState(null,'',linkFor(source.id,activeBlock().id,state.view==='field'?null:state.view));
+    message(`Priestor ${config.width} × ${config.height} m. `+(configSaved?'Uložené pre tento tréning.':'Použité; prehliadač nastavenie neuložil. Zachovaj si zdieľaný odkaz.'));
+    return true;
   }
   function changeGroupCounts(sizes){
     const source=state.trainings.find(training=>training.id===state.selected.id),current=state.selected.planConfig;
