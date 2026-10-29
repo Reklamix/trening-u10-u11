@@ -6,17 +6,18 @@ Web: https://reklamix.github.io/trening-u10-u11/
 
 ## Čitateľné cvičenie
 
-Prispôsobiteľné štvrtkové cvičenia majú **jeden kompaktný spodný panel**: Postup / Plocha / Čas / Tréner / Pomôcky a Späť / Hotovo. Počas cvičenia ho neduplikuje globálna navigácia; hore sú priame odkazy Prehľad a Moje. Ostatné stránky a staršie dni zachovávajú pôvodnú navigáciu.
+Aktuálny dizajn adaptívnych štvrtkových cvičení vychádza z používateľom vybraného **návrhu1 – Trénerova karta**. Svetlé pozadie, Inter, zelené ovládanie, hlavička s dátumom/časom/počtom a bodový výber6častí, skupina a živý nákres. Textúra trávy a transparentné lopty/kužele sú dekoratívne lokálne assety; skutoční hráči, počty, roly, dráhy a časovanie zostávajú v pôvodnom SVG/FootballScenes. Základné dvojice/trojice sú vycentrované, stále v skutočných vzdialenostiach3.5m. Zobrazené šípky sú skrátené pred hráčom, aby zostali čitateľné ich hroty; časovanie a pravidlá animácie ostávajú zachované.
 
-- **Postup:** najprv stojaci nákres, stručné označenie skupiny a jeden hlavný pokyn. Prehrať spúšťa animáciu; Kroky otvorí postup po bodoch s tlačidlami Späť/Ďalej. Nákres vráti vizuál. Viac k postupu obsahuje celé zadanie a pôvodný návod. Krokovanie animácie a reset sú v Plocha → Nastaviť skupinu → Schéma a nastavenia. SVG výrez odstraňuje prázdne okraje, nemení geometriu činnosti.
-- **Plocha:** dva krátke údaje (celý priestor/jedna plocha), vybraná skupina a Mapa rozloženia. Pripraviť ihrisko otvorí pôvodnú prípravu. Skupiny a tréneri rozbalí úplné rozdelenie a odstupy; Nastaviť skupinu zachováva úpravy skupiny, náročnosti, počtov a priestoru.
-- **Čas:** samostatné Práca / Oddych / Striedanie a pôvodný časovač. Dávky a prestávky sa nemenia.
-- **Tréner:** krátke heslo pre deti, ďalšie poznámky cez Pokyny trénera.
-- **Pomôcky:** všetky ikony a celkové počty spolu v mriežke. Ťuknutie zobrazí lokálny počet alebo rozloženie; Celý zoznam obsahuje úplný rozpis. Kužele na bránky sú už zahrnuté v celkovom počte.
+- **Prehrať** je v nákrese. Predvolene0.5× a opakovanie zapnuté, bez autoplay. Všetky pôvodné animácie, plný obeh, pauza, reset, krokovanie, posuvník, rýchlosti a zväčšenie zostávajú.
+- **Popis cvičenia** je priamo pod nákresom. Ťuknutie na celý riadok otvorí úplný popis podľa aktuálnej náročnosti a postup po bodoch. Všetky kroky a pôvodný sprievodca sú dostupné v detaile.
+- Karty **Práca/Oddych** ukazujú krátku dávku a otvoria úplný rozpis vrátane vody a zostávajúcich prestávok. Rondo zobrazuje skutočnú prácu/oddych v jednom kole, nie čas celej série. V Čas zostáva samostatné Striedanie a nezávislý tréningový časovač.
+- Riadok **Plocha/Deti/Pomôcky** číta lokálnu skupinu: fyzické rozmery, počet zo všetkých detí a presné lokálne kužele/lopty. Hodnoty sa aktualizujú po úprave podmienok.
+- Spodné tlačidlá **Plocha/Čas/Pomôcky** a plné **Hotovo** zostávajú dostupné na dosah palca. Každý detail má návrat na Nákres.
+- Menu **⋯ pri názve** obsahuje Nákres, Popis a postup, Pokyny trénera, Nastavenia tréningu, Predošlý cvik a Moje. Zmena skupiny/náročnosti/počtov/ihriska je naďalej priamo pri cvičení: skupinový odznak alebo menu → Nastavenia tréningu. Schéma a nastavenia obsahuje pôvodné pokročilé prehrávanie. Celý Prehľad s počtom trénerov je cez hornú šípku.
 
-Zobrazuje sa jedna téma. Bežný mobil používa jednu obrazovku a lokálne posúvanie dlhších podrobností; nízke okno ≤520 px umožňuje posúvať celú stránku. Spodné tlačidlá zostávajú dostupné. Téma, bod a vybraná pomôcka držia pri úprave skupiny; nový blok začína nákresom. Skrytá animácia sa pozastaví, tréningový časovač pokračuje nezávisle. Zdieľanie, uložené dni, priebeh a osobné plány zostávajú.
+Štandardný viewport390×844 zodpovedá vybranému obrázku;375×812 používa o trochu nižší nákres. Malé displeje/dlhé názvy posúvajú iba obsah, spodné ovládanie zostáva. Nízke okno≤520px umožní posúvať stránku. Zmena počtu, skupiny, náročnosti a priestoru synchronizuje nákres, animáciu, text, dávky, pomôcky, mapu aj prípravu; nenuluje nezávislý bežiaci časovač. Nový cvik má stojaci nákres a predvolené prehrávanie. Ostatné stránky, archív, PDF a šifrované plány nemenia svoj dizajn ani obsah.
 
-`exercise-brief.js` naďalej odvodzuje obsah zo skutočnej skupiny, zručností, geometrie a dávok. Mení sa prezentácia, zdrojové tréningy zostávajú bez zmien.
+`exercise-card.css` je samostatná scoped vrstva nad existujúcim rozhraním. `exercise-brief.js` dopĺňa iba krátke glance údaje; celý pôvodný rozpis zostáva dostupný. Assety/licencie: [assets/README-card.md](assets/README-card.md). Vizuálne porovnanie a kontrola funkcií: [design-qa.md](design-qa.md).
 
 **Príprava ihriska · krok po kroku** v Prehľade alebo v karte Plocha pri cvičení otvorí päť krokov pre štvrtok 29. 10.: 8 úvodných rohov + 4 balíčky po 6, rozdelenie na 12 × 9 m, rozšírenie na 14 × 9 m, koncové zóny a kužeľové bránky. Každý krok má čas, nákres, počet pridaných/presúvaných/ponechaných mét a rozdelenie práce trénerov. Oranžové kužele sú nové, modré sa presunú z označených pôvodných miest, zelené zostávajú. Celkovo sa používa tých istých 32 mét. Kroky možno prejsť Späť/Ďalší alebo vybrať priamo; príprava nemení zvolenú činnosť, dokončenie ani tréningový časovač a pri otvorení pozastaví animáciu. Geometria pochádza z existujúceho quarterPitch a schém cvičení; staršie dni tento vstup nemajú.
 
@@ -125,7 +126,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv18/footballv19/exercise-briefv2/coaching-guidev4/pitch-setupv3/training-plannerv4/CSSv23. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv19/footballv20/exercise-briefv3/coaching-guidev4/pitch-setupv3/training-plannerv4/CSSv24/exercise-cardv1. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 

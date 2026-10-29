@@ -286,7 +286,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,brief:state.selected.planConfig?index=>ExerciseBrief.build(state.selected,activeBlock(),index):null,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onSetup:()=>window.PitchSetup.open(state.selected),onGuideSection:section=>openCoachingGuide(section),onPitchChange:changePitch,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,brief:state.selected.planConfig?index=>ExerciseBrief.build(state.selected,activeBlock(),index):null,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onPrivate:()=>navigate('private'),onSetup:()=>window.PitchSetup.open(state.selected),onGuideSection:section=>openCoachingGuide(section),onPitchChange:changePitch,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -452,7 +452,15 @@ const PersonalPlans = [
     addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
     renderGroupCue();
   }
-  function renderGroupCue(){const index=window.FootballBoard?.selection()?.index||0,variant=TrainingPlanner.forGroup(state.selected,activeBlock(),index);$('active-cue').textContent='„'+variant.cues[0]+'“';}
+  function renderCardSession(){
+    if(!state.selected?.planConfig)return;
+    const date=new Intl.DateTimeFormat('sk-SK',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(state.selected.date+'T12:00:00'));
+    $('card-date').textContent=date[0].toUpperCase()+date.slice(1);
+    $('card-time').textContent=timeRange(state.selected,activeBlock().start,activeBlock().end);
+    const people=el('img','card-ui-icon');people.src='./assets/bootstrap-icons/people-fill.svg';people.alt='';$('card-total').replaceChildren(el('span','','U11'),people,el('span','',String(state.selected.planConfig.players)));
+    $('card-index').textContent=`${state.blockIndex+1}/${state.selected.blocks.length}`;
+  }
+  function renderGroupCue(){renderCardSession();const index=window.FootballBoard?.selection()?.index||0,variant=TrainingPlanner.forGroup(state.selected,activeBlock(),index);$('active-cue').textContent='„'+variant.cues[0]+'“';}
   function renderActive() {
     window.PitchSetup?.close();
     window.CoachingGuide?.close();
@@ -663,6 +671,8 @@ const PersonalPlans = [
     $('open-pitch-setup').hidden = ['private','overview','catalog'].includes(view) || !window.PitchSetup?.supports(state.selected);
     $('main').classList.toggle('private-mode', view === 'private');
     $('main').classList.toggle('exercise-focus',view==='field'&&Boolean(state.selected?.planConfig));
+    const cardToolbar=document.querySelector('.exercise-toolbar'),cardHeading=document.querySelector('.activity-heading');
+    if(view==='field'&&state.selected?.planConfig)cardToolbar.append($('share-block'));else cardHeading.append($('share-block'));
     for (const name of ['field', 'overview', 'equipment', 'coaching', 'catalog', 'private']) $(name + '-view').hidden = name !== view;
     document.querySelectorAll('[data-view]').forEach(a => {
       if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');

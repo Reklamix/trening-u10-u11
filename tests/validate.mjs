@@ -119,7 +119,7 @@ for (const row of gameRows) {
   equal(total, Number(row[0]), 'Every child assigned in final games');
 }
 
-const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'training-planner.js', 'exercise-brief.js', 'coaching-guide.js', 'pitch-setup.js', 'trainings.json', 'personal-plan.enc.json', 'personal-plan-2026-10-29.enc.json', '.nojekyll', 'README.md'];
+const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'training-planner.js', 'exercise-brief.js', 'exercise-card.css', 'coaching-guide.js', 'pitch-setup.js', 'trainings.json', 'personal-plan.enc.json', 'personal-plan-2026-10-29.enc.json', '.nojekyll', 'README.md'];
 for (const file of publicFiles) {
   const content = read(file);
   check(!/\uFFFD/.test(content), 'No replacement glyphs');
@@ -131,6 +131,9 @@ const html = read('index.html');
 check(html.includes('lang="sk"') && html.includes('width=device-width'), 'Slovak responsive HTML');
 for (const match of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)) check(read(match[1].split('?')[0]).length > 0, 'Local asset exists');
 const css = read('styles.css');
+for(const asset of new Set([...read('exercise-card.css').matchAll(/url\(['\"]?(\.\/assets\/[^)'\"]+)/g)].map(match=>match[1].slice(2))))check(readFileSync(path.join(root,asset)).length>0,'Every new card CSS asset ships locally: '+asset);
+for(const asset of ['card-grass.webp','card-cone.webp','card-ball.webp','card-player-blue.webp']){const bytes=readFileSync(path.join(root,'assets',asset));check(bytes.subarray(0,4).toString()==='RIFF'&&bytes.subarray(8,12).toString()==='WEBP','Generated delivery asset is valid WebP: '+asset);}
+
 check(css.includes('prefers-reduced-motion') && css.includes(':focus-visible'), 'Reduced motion and visible keyboard focus');
 check(!/innerHTML\s*=|insertAdjacentHTML|eval\(/.test(read('app.js')), 'Content is not interpolated into HTML');
 check(!/innerHTML\s*=|insertAdjacentHTML|eval\(/.test(read('football.js')), 'Football diagrams use safe DOM construction');
@@ -588,6 +591,9 @@ for(let players=14;players<=30;players++)for(const level of['base','standard','c
     for(const area of areas.length?areas:[{index:0}]){
       const brief=briefModel.build(training,block,area.index);
       for(const field of['description','space','grouping','work','rest','rotation','slogan'])check(typeof brief[field]==='string'&&brief[field].length>0,'Every exercise has visible instructions, organization, rest and a child-facing slogan');
+      check(brief.glance&&typeof brief.glance.work==='string'&&brief.glance.work.length>0&&typeof brief.glance.rest==='string'&&brief.glance.rest.length>0,'Glance work and rest remain meaningful for every attendance and skill variant');
+      if(block.diagram==='football-pass'&&level==='base'){const scene=FootballScenes.build(block.diagram,{total:players,size:area.count,pitchIndex:area.index,area}),children=scene.nodes.filter(node=>node.kind==='player');check(Math.abs(children.reduce((sum,node)=>sum+node.x,0)/children.length-(scene.pitch.x+scene.pitch.w/2))<1e-8,'Basic passing stations are centered while their true 3.5 m distances and full tracks remain covered by geometry checks');}
+      if(block.diagram==='football-rondo'){equal(brief.glance.work,String(brief.round.playSeconds)+' s','Rondo glance shows actual active seconds per round, not series time including rests');equal(brief.glance.rest,String(brief.round.restSeconds)+' s','Rondo glance shows actual rest seconds for this group');}
       check(brief.steps.length>=3&&brief.steps.every(step=>typeof step==='string'&&step.length>0),'Every exercise has concrete ordered actions');
       check(brief.kit.length>0&&brief.kit.every(text=>typeof text==='string'),'Every exercise has its own required equipment list');
       check(brief.visualKit.length>0&&brief.visualKit.every(item=>['ball','cone','bibs','gates','timer','signal','water'].includes(item.kind)&&item.title&&item.value&&item.detail),'Visual equipment has a recognizable kind and complete text equivalent');
