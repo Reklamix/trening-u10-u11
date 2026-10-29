@@ -541,16 +541,28 @@ const PersonalPlans = [
       if (block.variantNotes?.[String(groupSize)]) panel.append(el('p', '', block.variantNotes[String(groupSize)]));
     }
   }
+  function kitImage(name) {
+    const key=name.toLocaleLowerCase('sk');
+    const src=key.includes('lopt')?'card-ball.webp':key.includes('kuže')||key.includes('mét')?'card-cone.webp':key.includes('rozliš')?'bootstrap-icons/people-fill.svg':key.includes('brán')?'bootstrap-icons/bounding-box.svg':'bootstrap-icons/stopwatch.svg';
+    const img=el('img','shell-kit-image');img.src='./assets/'+src;img.alt='';return img;
+  }
+  function compactQuantity(item) {
+    const gates=item.quantity.match(/^(\d+) bránok zo \d+ .*kužeľov$/);
+    if(item.name.toLocaleLowerCase('sk').includes('brán')&&gates)return gates[1]+' z kužeľov';
+    const equals=item.quantity.lastIndexOf('=');
+    return equals>=0?item.quantity.slice(equals+1).trim():item.quantity;
+  }
   function renderEquipment() {
     const checked = checkedGear();
     $('equipment-progress').textContent = 'Pripravené: ' + checked.length + ' z ' + state.selected.equipment.length;
     $('equipment-list').replaceChildren(...state.selected.equipment.map(item => {
+      const card=el('div','shell-equipment-item');
       const label = el('label', 'equipment-card');
       const input = el('input');
       input.type = 'checkbox';
       input.checked = checked.includes(item.name);
       const content = el('span');
-      content.append(el('strong', '', item.name), el('small', '', item.quantity), el('p', '', item.detail));
+      content.append(el('strong', '', item.name), el('small', '', item.quantity));
       input.addEventListener('change', () => {
         const values = new Set(checkedGear());
         if (input.checked) values.add(item.name); else values.delete(item.name);
@@ -558,8 +570,9 @@ const PersonalPlans = [
         writeLocal(storageKeys.gear, state.gear);
         $('equipment-progress').textContent = 'Pripravené: ' + values.size + ' z ' + state.selected.equipment.length;
       });
-      label.append(input, content);
-      return label;
+      label.append(input, kitImage(item.name), content);
+      const details=el('details','equipment-help');details.append(el('summary','','Ako použiť a rozložiť'),el('p','',item.detail));
+      card.append(label,details);return card;
     }));
   }
   function render(training) {
@@ -601,6 +614,10 @@ const PersonalPlans = [
     const topics=[...new Set(training.blocks.flatMap(block=>TrainingLibrary.tags[block.diagram]||[]))].filter(topic=>topic!=='finish');
     $('training-topics').replaceChildren(...topics.map(topic=>el('span','topic-chip',TrainingLibrary.topics[topic])));
     $('plan-form').hidden=!config;
+    $('conditions-panel').hidden=!config;
+    $('conditions-summary').textContent=config?`${config.players} detí · ${config.coaches} ${config.coaches===1?'tréner':'tréneri'}`:'';
+    const facts=[[training.duration+' min','Trvanie','stopwatch'],[config?config.width+' × '+config.height+' m':training.category,'Priestor','bounding-box'],[config?String(config.coaches):training.coaches,'Tréneri','people-fill']];
+    $('summary-facts').replaceChildren(...facts.map(([value,label,icon])=>{const tile=el('div'),img=el('img');img.src='./assets/bootstrap-icons/'+icon+'.svg';img.alt='';const text=el('span');text.append(el('small','',label),el('strong','',value));tile.append(img,text);return tile;}));
     if(config){$('plan-pitch').value=config.pitch;$('plan-coaches').value=String(config.coaches);$('plan-width').value=config.width;$('plan-height').value=config.height;$('plan-dimensions-label').textContent=`Pracovné rozmery ${config.width} × ${config.height} m · upraviť`;}
     $('plan-groups').replaceChildren();$('plan-group-error').hidden=true;
     if(config)config.groupSizes.forEach((size,index)=>{const card=el('div','plan-group-card'),title=el('strong','',['A1','A2','B1','B2'][index]),countLabel=el('label','','Detí'),count=el('input');count.type='number';count.min='3';count.max='8';count.step='1';count.required=true;count.value=size;count.dataset.groupSize=index;count.setAttribute('aria-label','Detí v skupine '+title.textContent);countLabel.append(count);const levelLabel=el('label','','Náročnosť'),level=el('select');level.dataset.groupLevel=index;level.setAttribute('aria-label','Náročnosť '+title.textContent);Object.entries(TrainingPlanner.levels).forEach(([value,label])=>{const option=el('option','',label);option.value=value;level.append(option);});level.value=config.levels[index];levelLabel.append(level);const fields=el('div','plan-group-fields');fields.append(countLabel,levelLabel);card.append(title,fields);$('plan-groups').append(card);});
@@ -608,7 +625,7 @@ const PersonalPlans = [
     $('plan-saved').textContent=configSaved?'Podmienky sa ukladajú pre tento deň v zariadení. Zdieľaný odkaz obsahuje počet detí, plochu, trénerov aj rozdelenie a náročnosť skupín.':'Prehliadač neuložil podmienky. Zachovaj si ich cez Zdieľať; odkaz obsahuje rovnaký variant.';
     const notes=training.organizationNotes||[training.players,training.coaches];
     const list=el('ul');notes.forEach(note=>list.append(el('li','',note)));$('plan-recommendation').replaceChildren(list);
-    $('summary-equipment').replaceChildren(...training.equipment.map(item=>el('li','',item.name+': '+item.quantity)));
+    $('summary-equipment').replaceChildren(...training.equipment.map(item=>{const button=el('button','summary-gear');button.type='button';const text=el('span');text.append(el('strong','',item.name),el('small','',compactQuantity(item)));button.append(kitImage(item.name),text);button.addEventListener('click',()=>{navigate('equipment');const target=[...$('equipment-list').querySelectorAll('.equipment-card')].find(card=>card.textContent.includes(item.name));target?.scrollIntoView({block:'center'});target?.querySelector('input')?.focus({preventScroll:true});});return button;}));
     $('summary-setup').hidden=!window.PitchSetup?.supports(training);
   }
   function renderCatalog(){

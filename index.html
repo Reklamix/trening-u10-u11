@@ -9,17 +9,18 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123d35'/%3E%3Crect x='15' y='10' width='34' height='44' rx='2' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M15 32h34' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./styles.css?v=24">
   <link rel="stylesheet" href="./exercise-card.css?v=1">
+  <link rel="stylesheet" href="./app-shell.css?v=1">
   <script src="./football.js?v=20" defer></script>
   <script src="./training-planner.js?v=4" defer></script>
   <script src="./exercise-brief.js?v=3" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
   <script src="./pitch-setup.js?v=3" defer></script>
-  <script src="./app.js?v=19" defer></script>
+  <script src="./app.js?v=20" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
   <header class="site-header"><div class="header-inner">
-    <a class="brand" href="./" aria-label="Tréningy U10 a U11, úvod"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="10" y="5" width="20" height="30" rx="1"/><path d="M10 20h20"/><circle cx="20" cy="20" r="5"/></svg><span>TRÉNINGY <b>U10 / U11</b></span></a>
+    <a class="brand" href="./" aria-label="Tréningy U10 a U11, úvod"><img src="./assets/bootstrap-icons/bounding-box.svg" alt=""><span>TRÉNINGY <b>U10 / U11</b></span></a>
     <div class="header-actions"><button id="open-archive" class="header-button" type="button" disabled>Archív</button><button id="share" class="header-button" type="button" disabled>Zdieľať</button></div>
   </div></header>
   <main id="main" class="container" tabindex="-1">
@@ -53,26 +54,30 @@
         <div id="finished" class="finished" hidden><h2>Tréning je dokončený</h2><p>Časti máš označené. Doprajte si vodu a pokojný záver.</p><button id="review-training" class="secondary-button" type="button">Pozrieť prehľad</button></div>
       </section>
       <section id="overview-view" class="view" hidden aria-labelledby="training-title">
-        <p class="eyebrow">1 · Zhrnutie tréningu</p><h1 id="training-title"></h1><p id="training-focus" class="muted"></p><div id="training-topics" class="topic-chips"></div><p id="training-cue" class="active-cue"></p>
+        <p class="eyebrow">Trénerova karta · Prehľad</p><h1 id="training-title"></h1>
+        <div id="summary-facts" class="summary-facts" aria-label="Dnešné podmienky"></div>
+        <section class="summary-kit"><div class="section-heading"><h2>Nachystať na tréning</h2><button id="show-equipment" type="button" class="text-button">Checklist →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
+        <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">1 · Pripraviť ihrisko →</button><button id="summary-start" class="button" type="button">2 · Začať cvičenia →</button></div>
+        <details id="conditions-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/gear.svg" alt="">Nastaviť podmienky<span id="conditions-summary"></span></summary>
         <form id="plan-form" class="plan-card" hidden>
           <h2>Podmienky tréningu</h2><p class="small-note">Počet detí vyber hore. Nižšie nastav priestor a trénerov.</p>
           <div class="plan-form-grid">
             <label>Časť ihriska<select id="plan-pitch"><option value="quarter">1/4 ihriska</option><option value="half">1/2 ihriska</option><option value="full">Celé ihrisko</option></select></label>
             <label>Trénerov<select id="plan-coaches"><option value="1">1 tréner</option><option value="2">2 tréneri</option><option value="3">3 tréneri</option><option value="4">4 tréneri</option></select></label>
           </div>
-          <details class="plan-levels" open><summary>Skupiny a náročnosť · upraviť</summary><p class="small-note">Základy = učíme sa prijať a prihrať. Upevnenie = prihrávka a nový uhol. Výzva = riešenie pod tlakom. Deti priraď podľa aktuálnej úlohy, bez verejného poradia. V každej skupine 3–8 detí; spolu musí sedieť počet hore.</p><button id="plan-half-basics" class="secondary-button" type="button">Polovica na základy</button><p class="small-note">Rozdelí A1/A2 na Základy a B1/B2 na Upevnenie. Potom potvrď Použiť a uložiť.</p><p id="plan-group-error" class="notice" role="alert" tabindex="-1" hidden></p><div id="plan-groups" class="plan-groups"></div><p class="small-note">Pri zmene celkového počtu sa veľkosti rozdelia rovnomerne; náročnosti ostanú. Rozdelenie potom môžeš upraviť ručne.</p></details>
+          <details class="plan-levels"><summary>Skupiny a náročnosť · upraviť</summary><p class="small-note">Základy = učíme sa prijať a prihrať. Upevnenie = prihrávka a nový uhol. Výzva = riešenie pod tlakom. Deti priraď podľa aktuálnej úlohy, bez verejného poradia. V každej skupine 3–8 detí; spolu musí sedieť počet hore.</p><button id="plan-half-basics" class="secondary-button" type="button">Polovica na základy</button><p class="small-note">Rozdelí A1/A2 na Základy a B1/B2 na Upevnenie. Potom potvrď Použiť a uložiť.</p><p id="plan-group-error" class="notice" role="alert" tabindex="-1" hidden></p><div id="plan-groups" class="plan-groups"></div><p class="small-note">Pri zmene celkového počtu sa veľkosti rozdelia rovnomerne; náročnosti ostanú. Rozdelenie potom môžeš upraviť ručne.</p></details>
           <details class="plan-dimensions"><summary id="plan-dimensions-label">Pracovné rozmery · upraviť</summary><div class="plan-form-grid">
             <label>Dĺžka plochy (m)<input id="plan-width" type="number" min="35" max="120" step="1" required></label>
             <label>Šírka plochy (m)<input id="plan-height" type="number" min="25" max="90" step="1" required></label>
           </div>
           <p class="small-note">35 × 25 m je pôvodne potvrdená štvrtina. Predvoľby polovice a celého ihriska sú orientačné; rozmery uprav podľa skutočnosti.</p></details>
           <button class="button" type="submit">Použiť a uložiť</button><p id="plan-saved" class="small-note"></p>
-        </form>
-        <div class="summary-panels"><section class="plan-card"><h2>Organizácia a zameranie</h2><div id="plan-recommendation"></div><button id="show-coaching" type="button" class="text-button">Spoločné pokyny trénerov →</button></section><section class="plan-card"><h2>Čo budeš potrebovať</h2><ul id="summary-equipment"></ul><button id="show-equipment" type="button" class="text-button">Otvoriť checklist pomôcok →</button></section></div>
-        <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">2 · Pripraviť ihrisko krok po kroku →</button><button id="summary-start" class="button" type="button">3 · Prejsť na cvičenia →</button></div>
-        <h2 id="summary-timeline-title">Časový plán</h2>
+        </form></details>
+        <details class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/people-fill.svg" alt="">Zameranie a organizácia</summary><div class="disclosure-body"><p id="training-focus" class="muted"></p><div id="training-topics" class="topic-chips"></div><p id="training-cue" class="active-cue"></p><div id="plan-recommendation"></div><button id="show-coaching" type="button" class="text-button">Spoločné pokyny trénerov →</button></div></details>
+        <details class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/stopwatch.svg" alt=""><span id="summary-timeline-title">Časový plán</span></summary><div class="disclosure-body">
         <div id="grouping" class="grouping"></div><p id="completion-count" class="small-note"></p><div id="overview-blocks" class="overview-blocks"></div>
         <button id="reset-progress" class="text-button" type="button">Zrušiť označenie dokončených častí</button>
+        </div></details>
       </section>
       <section id="catalog-view" class="view" hidden aria-labelledby="catalog-title">
         <p class="eyebrow">Uložené podľa tém a dátumov</p><h1 id="catalog-title">Knižnica tréningov</h1><p class="muted">Vráť sa k celému tréningu alebo nájdi konkrétne cvičenie.</p>
@@ -115,11 +120,11 @@
     <noscript><p class="notice">Na zobrazenie tréningu zapni JavaScript.</p></noscript>
   </main>
   <nav id="bottom-nav" class="bottom-nav" aria-label="Hlavná navigácia" hidden>
-    <a href="#overview" data-view="overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h13M8 12h13M8 19h13M3 5h1M3 12h1M3 19h1"/></svg><span>Prehľad</span></a>
-    <a href="#plan" data-view="field"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="1"/><path d="M5 12h14"/><circle cx="12" cy="12" r="3"/></svg><span>Cvičenia</span></a>
-    <a href="#catalog" data-view="catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h7l2 2h9v15H3V4Zm0 5h18M7 13h10M7 17h7"/></svg><span>Knižnica</span></a>
-    <a href="#equipment" data-view="equipment"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16l1 14H3L4 7Zm4 0V5a4 4 0 0 1 8 0v2"/></svg><span>Pomôcky</span></a>
-    <a href="#private" data-view="private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="12" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg><span>Moje</span></a>
+    <a href="#overview" data-view="overview"><img src="./assets/bootstrap-icons/grid-1x2.svg" alt=""><span>Prehľad</span></a>
+    <a href="#plan" data-view="field"><img src="./assets/bootstrap-icons/bounding-box.svg" alt=""><span>Cvičenia</span></a>
+    <a href="#catalog" data-view="catalog"><img src="./assets/bootstrap-icons/collection.svg" alt=""><span>Knižnica</span></a>
+    <a href="#equipment" data-view="equipment"><img src="./assets/bootstrap-icons/bag-check.svg" alt=""><span>Pomôcky</span></a>
+    <a href="#private" data-view="private"><img src="./assets/bootstrap-icons/lock.svg" alt=""><span>Moje</span></a>
   </nav>
   <p id="status" class="toast" role="status" aria-live="polite" aria-atomic="true"></p>
   <dialog id="archive-dialog" aria-labelledby="archive-title"><h2 id="archive-title">Archív tréningov</h2><p class="muted">Vyber deň a otvor uložený tréning.</p><label for="archive-date">Dátum tréningu</label><input id="archive-date" type="date"><button id="archive-all" class="text-button" type="button">Zobraziť všetky dni</button><p id="archive-count" class="small-note" role="status"></p><div id="archive-list" class="archive-list"></div><form method="dialog"><button class="secondary-button" type="submit">Zavrieť archív</button></form></dialog>

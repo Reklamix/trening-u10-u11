@@ -48,3 +48,32 @@ final result: passed
 - Real assets placed, licenses retained, interactions tested.
 - Initial P2 findings fixed and re-captured; final full and focused comparisons inspected.
 - No actionable P0/P1/P2 issue remains; ready for authorized GitHub Pages publication.
+
+## Whole-application unification — 29 October 2026
+
+final result: passed
+
+Scope: the user explicitly expanded selected option 1 to the entire existing application, including the initial equipment overview. Existing URL, routes, training content, animation engine, settings, vault bundles and encryption are retained. This is an extension of the approved design language to existing screens; there is no separate new source mock for those screens.
+
+Evidence: selected source `../output/design/option-1-reference.png` (853×1844 pixels normalized to390×844 CSS); current exercise and overview captures at390×844, desktop1440×900. Combined comparison `shell-design-comparison.jpg` in the existing visualization evidence folder alongside `shell-overview-local.png`, `shell-exercise-local.png`, `shell-equipment-local.png`, `shell-library-local.png`, `shell-private-local.png`, and `shell-desktop-local.png`. Existing exercise-reference comparisons above still apply. Overview images were re-captured after all five asset images reported complete/naturalWidth>0.
+
+Findings fixed before passing:
+- P2: long cone-goal quantity made the first equipment row excessively tall. Show the real goal count with 'z kužeľov'; retain the full16-cone breakdown and non-additive equipment instructions in the checklist.
+- P2: bounded desktop bottom navigation was left aligned. Center the1040px navigation with50%/translateX, verified left200 at1440px viewport.
+
+Required surfaces:
+- Typography: shared locally hosted Inter, heavy26px page titles, consistent14–16px forms/body, smaller labels reserved for secondary metadata. Original exercise typography retained. No new font downloads or fallback-only capture.
+- Layout: compact overview with visible equipment, two large preparation/start actions, separate closed condition/focus/timeline disclosures; readable checklist cards and consistent rounded dialogs.320×568,375×812,390×844,1440×900 and844×390 landscape have no horizontal overflow across Overview/Library/Equipment/Private. Native vertical scrolling remains intentional for detailed lists and small screens.
+- Colors: selected ivory/sage/evergreen tokens now apply to header, navigation, inputs, cards, guide dialogs and private plan. Light-only color-scheme retained; no unsupported dark-theme claim.
+- Imagery: existing real ball/cone WebP assets reused; official Bootstrap v1.13.2 icons with included MIT license across navigation. No generated replacement assets or hand-drawn UI illustrations. Football geometry and animation remain the existing operational SVG engine.
+- Content: true quantities adapt to attendance; exact quantities/details retained in checklist. Existing coaching, rotation, water and training content are unchanged. Actual stored dates/configuration remain authoritative.
+
+Functional evidence:
+-51904 existing checks pass; app.js syntax and git diff whitespace clean.
+- Attendance14→30 updates gear and groups; quarter→half50×35→full70×50 and coaches2→3 apply and persist through navigation. All original controls remain accessible in disclosures.
+- Checklist checkbox persisted through reload, progress1/5, full usage details expand; overview gear links focus the matching checklist item.
+- Preparation opens all5steps; step2 playback starts normally at0.5/repeatON. Warmup30 produced32/32 moving player/ball actors.
+- Timeline exposes6blocks and opens block2. Existing exercise full description still opens. Library search works, archiving lists3dates, Tuesday overview hides inapplicable adaptive controls, Moje remains locked.
+- Browser console errors/warnings:0. All browser automation used hidden DOM-only IAB; no system mouse/keyboard/focus takeover.
+
+Limitations: native OS share sheet, physical-device keyboard/system text enlargement, and decrypting the private plan were not exercised. Share logic, vault data/crypto, and reduced-motion behavior are unchanged. No P0/P1/P2 remains; publication is authorized to the existing GitHub Pages address.

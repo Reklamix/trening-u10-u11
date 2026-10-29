@@ -4,6 +4,12 @@ Mobilný tréningový plánovač: najprv zhrnutie zamerania, podmienok a pomôco
 
 Web: https://reklamix.github.io/trening-u10-u11/
 
+## Jednotná Trénerova karta
+
+Vybraný návrh 1 používa celá aplikácia: úvod, pomôcky, knižnica, organizácia, osobný plán, archív aj sprievodcovia prípravou. Spoločná vrstva `app-shell.css?v=1` nadväzuje na schválenú kartu cvičenia; zachováva svetlé pozadie, Inter, zelené tlačidlá a Bootstrap Icons. `app.js?v=20` nemení adresu webu, parametre odkazov, uložené tréningy ani šifrované osobné plány.
+
+Na úvode sú rovno podmienky a vizuálne pomôcky s počtami. Dve veľké tlačidlá otvoria prípravu ihriska alebo prvé cvičenie. Nastavenia, zameranie s organizáciou a časový plán sa rozbaľujú samostatne. Kliknutie na pomôcku otvorí jej miesto v checkliste; zaškrtnutie sa naďalej ukladá pre daný deň v prehliadači. Presné rozpisy počtov a pokyny k rozloženiu zostávajú v checkliste. Bránky z kužeľov sa nepripočítavajú k métam druhýkrát.
+
 ## Čitateľné cvičenie
 
 Aktuálny dizajn adaptívnych štvrtkových cvičení vychádza z používateľom vybraného **návrhu1 – Trénerova karta**. Svetlé pozadie, Inter, zelené ovládanie, hlavička s dátumom/časom/počtom a bodový výber6častí, skupina a živý nákres. Textúra trávy a transparentné lopty/kužele sú dekoratívne lokálne assety; skutoční hráči, počty, roly, dráhy a časovanie zostávajú v pôvodnom SVG/FootballScenes. Základné dvojice/trojice sú vycentrované, stále v skutočných vzdialenostiach3.5m. Zobrazené šípky sú skrátené pred hráčom, aby zostali čitateľné ich hroty; časovanie a pravidlá animácie ostávajú zachované.
