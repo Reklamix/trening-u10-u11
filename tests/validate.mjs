@@ -119,7 +119,7 @@ for (const row of gameRows) {
   equal(total, Number(row[0]), 'Every child assigned in final games');
 }
 
-const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'training-planner.js', 'coaching-guide.js', 'pitch-setup.js', 'trainings.json', 'personal-plan.enc.json', 'personal-plan-2026-10-29.enc.json', '.nojekyll', 'README.md'];
+const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'training-planner.js', 'exercise-brief.js', 'coaching-guide.js', 'pitch-setup.js', 'trainings.json', 'personal-plan.enc.json', 'personal-plan-2026-10-29.enc.json', '.nojekyll', 'README.md'];
 for (const file of publicFiles) {
   const content = read(file);
   check(!/\uFFFD/.test(content), 'No replacement glyphs');
@@ -580,5 +580,24 @@ for(const space of[{pitch:'quarter',width:35,height:25},{pitch:'half',width:50,h
 }
 for(const space of[null,{pitch:'other',width:50,height:35},{pitch:'half',width:34,height:35},{pitch:'half',width:121,height:35},{pitch:'half',width:50,height:24},{pitch:'half',width:50,height:91},{pitch:'half',width:50.5,height:35},{pitch:'half',width:NaN,height:35}])equal(planner.resize(resizeSource,space),null,'Invalid inline area changes cannot be applied');
 equal(JSON.stringify(resizeSource),resizeBefore,'Resize cannot mutate the previously saved conditions');
+const briefModel=runInNewContext(footballPure+'\n'+plannerPure+'\n'+read('exercise-brief.js')+'\nExerciseBrief');
+for(let players=14;players<=30;players++)for(const level of['base','standard','challenge']){
+  const training=planner.adapt(thu,{players,levels:[level,level,level,level]}),before=JSON.stringify(training);
+  for(const block of training.blocks){
+    const areas=FootballScenes.groups(block.diagram,players,training.quarterPitch);
+    for(const area of areas.length?areas:[{index:0}]){
+      const brief=briefModel.build(training,block,area.index);
+      for(const field of['description','space','grouping','work','rest','rotation','slogan'])check(typeof brief[field]==='string'&&brief[field].length>0,'Every exercise has visible instructions, organization, rest and a child-facing slogan');
+      check(brief.steps.length>=3&&brief.steps.every(step=>typeof step==='string'&&step.length>0),'Every exercise has concrete ordered actions');
+      check(brief.kit.length>0&&brief.kit.every(text=>typeof text==='string'),'Every exercise has its own required equipment list');
+      if(areas.length){const scene=FootballScenes.build(block.diagram,{total:players,size:area.count,pitchIndex:area.index,area});equal(brief.ballsLocal,scene.nodes.filter(n=>n.kind==='ball').length,'Equipment matches every ball actually shown, including concurrent basic pairs');equal(brief.conesLocal,scene.cones.length,'Equipment cone count matches the visual');equal(brief.conesTotal,scene.cones.length*areas.length,'Total cones cover all simultaneous areas');check(brief.space.includes(`${area.length} × ${area.width}`),'Space instructions use current diagram dimensions');}
+      if(block.diagram==='football-rondo'){equal(brief.round.size,area.count,'Rest and rotation resolve the selected group size');check(brief.round.bufferSeconds?brief.rest.includes(String(brief.round.bufferSeconds)+' s'):!brief.rest.includes('ešte 0 s'),'Rondo rest includes a real remaining series buffer only');}
+      if(block.diagram==='football-finish'){equal(brief.ballsTotal,0,'Quiet finish does not request training balls');equal(brief.conesTotal,0,'Quiet finish requires no cone setup');}
+    }
+  }
+  equal(JSON.stringify(training),before,'Brief rendering cannot mutate the actual session or skill variants');
+}
+equal(new Set(Object.values(briefModel.slogans)).size,6,'Each exercise has its own distinct short slogan');
+equal(briefModel.build(mon,mon.blocks[0]),null,'Earlier approved archives keep their original presentation');
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

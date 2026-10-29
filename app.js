@@ -286,7 +286,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onPitchChange:changePitch,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,brief:state.selected.planConfig?index=>ExerciseBrief.build(state.selected,activeBlock(),index):null,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onSetup:()=>window.PitchSetup.open(state.selected),onGuideSection:section=>openCoachingGuide(section),onPitchChange:changePitch,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -457,7 +457,7 @@ const PersonalPlans = [
     window.PitchSetup?.close();
     window.CoachingGuide?.close();
     const block = activeBlock();
-    $('block-meta').textContent = 'Časť ' + (state.blockIndex + 1) + ' zo ' + state.selected.blocks.length + ' · ' + timeRange(state.selected,block.start,block.end);
+    $('block-meta').textContent = state.selected.planConfig?`${state.selected.date.split('-').reverse().join('.')} · ${state.blockIndex+1}/${state.selected.blocks.length} · ${timeRange(state.selected,block.start,block.end)}`:'Časť ' + (state.blockIndex + 1) + ' zo ' + state.selected.blocks.length + ' · ' + timeRange(state.selected,block.start,block.end);
     $('activity-title').textContent = block.title;
     $('active-dose').textContent = block.dose;
     $('active-cue').textContent = '„' + block.cues[0] + '“';
@@ -662,6 +662,7 @@ const PersonalPlans = [
     state.view = view;
     $('open-pitch-setup').hidden = ['private','overview','catalog'].includes(view) || !window.PitchSetup?.supports(state.selected);
     $('main').classList.toggle('private-mode', view === 'private');
+    $('main').classList.toggle('exercise-focus',view==='field'&&Boolean(state.selected?.planConfig));
     for (const name of ['field', 'overview', 'equipment', 'coaching', 'catalog', 'private']) $(name + '-view').hidden = name !== view;
     document.querySelectorAll('[data-view]').forEach(a => {
       if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
