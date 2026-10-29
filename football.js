@@ -98,6 +98,11 @@ const FootballScenes = {
       positions.slice(0,size).forEach(([u,v],i)=>add('p'+i,String(i+1),u,v)); add('ball','',.185,.62,'A','ball');
       cycle(positions.slice(0,size),Array.from({length:size},(_,i)=>String(i+1)),'Lopta sa vrátila k hráčovi 1. Celý obeh je dokončený.');
       scene.localCount=size;scene.caption=`Počet v skupine: ${size}. Celý obeh 1 → 2 → … → ${size} → 1; po každej prihrávke nový uhol.`;
+    } else if(key==='football-rondo'&&size===2) {
+      const positions=[[.25,.5],[.75,.5]];
+      positions.forEach(([u,v],i)=>add('p'+i,String(i+1),u,v));add('ball','',.28,.52,'A','ball');
+      cycle(positions,['1','2'],'Dvojica pokračuje bez obrancu. Oddych na signál podľa dávky.');
+      scene.localCount=2;scene.caption='Dvojica bez obrancu: prihrávka po zemi, prvý dotyk a nový uhol. Žiadny hráč navyše.';
     } else if(key==='football-rondo') {
       const defenders=size>=7?2:1,pos=[];
       for(let i=0;i<size-defenders;i++){const a=Math.PI+i*2*Math.PI/(size-defenders);pos.push([.5+.39*Math.cos(a),.5+.39*Math.sin(a)]);add('p'+i,String(i+defenders+1),...pos[i]);}
@@ -105,6 +110,13 @@ const FootballScenes = {
       cycle(pos,Array.from({length:size-defenders},(_,i)=>String(i+defenders+1)),'Celý obeh je dokončený. Obrancovia sa menia až na signál podľa rotácie.',true);
       if(defenders===2){const cx=scene.pitch.x+scene.pitch.w/2,cy=scene.pitch.y+scene.pitch.h/2;scene.tracks.def2=scene.tracks.def.map(([t,x,y])=>[t,2*cx-x+.06*scene.pitch.w,2*cy-y]);scene.tracks.def=scene.tracks.def.map(([t,x,y])=>[t,x-.06*scene.pitch.w,y]);}
       scene.localCount=size;scene.caption=`${size-defenders} na ${defenders}: ${size} hráčov spolu. Ukážka celého obehu lopty; obrancovia sa menia na signál.`;
+    } else if(['football-zones','football-mini-games'].includes(key)&&size===2) {
+      const zones=key==='football-zones';scene.pitch=pitch(40,46,280,20,14,zones?{zones:true}:{goals:true,goalGates:true});scene.localCount=2;scene.duration=8;
+      add('a0','A1',.2,.5);add('b0','B1',.55,.45,'B');add('ball','',.23,.52,'A','ball');
+      const route=[[0,.2,.5],[2,.38,.72],[4,.63,.72],[6,.82,.5],[8,zones?.94:1.015,.5]];
+      track('a0',route.map(([t,x,y])=>[t,Math.min(x,.94),y]));track('ball',route.map(([t,x,y])=>[t,x+.02,y+.02]));track('b0',[[0,.55,.45],[2,.42,.52],[4,.57,.55],[6,.65,.5],[8,.7,.5]]);
+      line('dribble',1,route.map(frame=>frame.slice(1)));step(0,'1 na 1: vedenie lopty a zmena smeru.');step(2,'Vyber voľnú cestu popri obrancovi.');step(6,'Zrýchli do voľna.');step(8,zones?'Bod za kontrolované vedenie do koncovej zóny.':'Bod za kontrolované prevedenie cez kužeľovú bránku.');
+      scene.caption='Presne dvaja hráči: 1 na 1, bez neutrálneho. Po zisku sa mení smer útoku; oddychujú obaja podľa dávky.';
     } else if((key==='football-zones'&&size===3)||(key==='football-mini-games'&&(area?.count??Math.floor(total/4)+(pitchIndex<total%4?1:0))===3)) {
       const zones=key==='football-zones',attacker=zones?'a1':'a0';
       scene.pitch=pitch(40,46,280,zones?20:14,zones?14:9,zones?{zones:true}:{goals:true,goalGates:true});scene.localCount=3;scene.duration=zones?6:8;
@@ -346,10 +358,10 @@ const FootballScenes = {
       const signature=JSON.stringify(config.groupSizes);if(signature===countSignature)return;countSignature=signature;countTools.replaceChildren();
       countTools.append(html('summary','',`Počty skupín · spolu ${config.players}`));
       const form=html('form'),grid=html('div','football-count-grid'),fields=[];
-      config.groupSizes.forEach((size,index)=>{const group=['A1','A2','B1','B2'][index],label=html('label','football-select-label','Detí '+group),input=html('input');input.type='number';input.min='3';input.max='8';input.step='1';input.required=true;input.value=size;input.setAttribute('aria-label','Detí '+group);label.append(input);fields.push(input);grid.append(label);});
+      config.groupSizes.forEach((size,index)=>{const group=['A1','A2','B1','B2'][index],label=html('label','football-select-label','Detí '+group),input=html('input');input.type='number';input.min='2';input.max='8';input.step='1';input.required=true;input.value=size;input.setAttribute('aria-label','Detí '+group);label.append(input);fields.push(input);grid.append(label);});
       const preview=html('p','small-note');preview.setAttribute('role','status');
       const apply=html('button','button','Použiť rozdelenie');apply.type='submit';
-      const update=()=>{const sizes=fields.map(input=>Number(input.value)),sum=sizes.reduce((a,b)=>a+b,0),valid=Boolean(TrainingPlanner.regroup(config,sizes));apply.disabled=!valid;preview.textContent=valid?(sum===config.players?`Spolu ${sum} detí; celkový počet ostane.`:`Spolu ${config.players} → ${sum} detí. Zmení sa aj počet detí spolu.`):'Každá skupina musí mať 3–8 detí, spolu 14–30.';apply.textContent=sum===config.players?'Použiť rozdelenie':`Použiť: ${Number.isFinite(sum)?sum:'—'} detí spolu`;};
+      const update=()=>{const sizes=fields.map(input=>Number(input.value)),sum=sizes.reduce((a,b)=>a+b,0),valid=Boolean(TrainingPlanner.regroup(config,sizes));apply.disabled=!valid;preview.textContent=valid?(sum===config.players?`Spolu ${sum} detí; celkový počet ostane.`:`Spolu ${config.players} → ${sum} detí. Zmení sa aj počet detí spolu.`):'Každá skupina musí mať 2–8 detí, spolu 10–30.';apply.textContent=sum===config.players?'Použiť rozdelenie':`Použiť: ${Number.isFinite(sum)?sum:'—'} detí spolu`;};
       fields.forEach(input=>input.addEventListener('input',update));
       form.addEventListener('submit',event=>{event.preventDefault();const sizes=fields.map(input=>Number(input.value));if(TrainingPlanner.regroup(config,sizes)&&options.onCountChange(sizes)){refreshPlan();build();options.onGroupChange(options.size,pitchIndex);focusControl(countTools.querySelector('button'));}});
       form.append(html('p','small-note','Pri presune uprav aj druhú skupinu. Ak niekto príde alebo odíde, upraví sa aj počet detí spolu.'),grid,preview,apply);countTools.append(form);update();

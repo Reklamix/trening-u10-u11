@@ -7,8 +7,8 @@ const TrainingPlanner = {
   normalize(input={}){
     const pitch=Object.hasOwn(this.pitches,input.pitch)?input.pitch:'quarter',preset=this.pitches[pitch];
     const integer=(value,fallback,min,max)=>Number.isFinite(Number(value))&&value!==''?Math.max(min,Math.min(max,Math.round(Number(value)))):fallback;
-    const players=integer(input.players,20,14,30),sizes=Array.isArray(input.groupSizes)?input.groupSizes.map(Number):[],levels=Array.isArray(input.levels)?input.levels:[];
-    return{players,coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90),groupSizes:sizes.length===4&&sizes.every(n=>Number.isInteger(n)&&n>=3&&n<=8)&&sizes.reduce((a,b)=>a+b,0)===players?sizes:this.groups(players),levels:Array.from({length:4},(_,i)=>Object.hasOwn(this.levels,levels[i])?levels[i]:'standard')};
+    const players=integer(input.players,20,10,30),sizes=Array.isArray(input.groupSizes)?input.groupSizes.map(Number):[],levels=Array.isArray(input.levels)?input.levels:[];
+    return{players,coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90),groupSizes:sizes.length===4&&sizes.every(n=>Number.isInteger(n)&&n>=2&&n<=8)&&sizes.reduce((a,b)=>a+b,0)===players?sizes:this.groups(players),levels:Array.from({length:4},(_,i)=>Object.hasOwn(this.levels,levels[i])?levels[i]:'standard')};
   },
   groups(total){return Array.from({length:4},(_,index)=>Math.floor(total/4)+(index<total%4?1:0));},
   resize(input,space){
@@ -16,12 +16,12 @@ const TrainingPlanner = {
     return this.normalize({...input,pitch:space.pitch,width:space.width,height:space.height});
   },
   regroup(input,sizes){
-    if(!Array.isArray(sizes)||sizes.length!==4||!sizes.every(n=>Number.isInteger(n)&&n>=3&&n<=8))return null;
-    const players=sizes.reduce((sum,n)=>sum+n,0);if(players<14||players>30)return null;
+    if(!Array.isArray(sizes)||sizes.length!==4||!sizes.every(n=>Number.isInteger(n)&&n>=2&&n<=8))return null;
+    const players=sizes.reduce((sum,n)=>sum+n,0);if(players<10||players>30)return null;
     return this.normalize({...input,players,groupSizes:sizes});
   },
   halfBasics(total){const a=Math.ceil(total/2),b=Math.floor(total/2);return{groupSizes:[Math.ceil(a/2),Math.floor(a/2),Math.ceil(b/2),Math.floor(b/2)],levels:['base','base','standard','standard']};},
-  form(size){const team=size===3?1:size>=7?3:2;return{team,neutral:size-2*team,label:`${team} na ${team}${size-2*team?' + '+(size-2*team)+' N':''}`};},
+  form(size){const team=size<=3?1:size>=7?3:2;return{team,neutral:size-2*team,label:`${team} na ${team}${size-2*team?' + '+(size-2*team)+' N':''}`};},
   organization(config,groups){
     const labels=['A1','A2','B1','B2'];
     const assignments=config.coaches===1?['Tréner 1: všetky štyri skupiny, vždy rovnaká činnosť a spoločný signál. Ukážku urob celému mužstvu.']:config.coaches===2?['Tréner 1: A1 a A2.','Tréner 2: B1 a B2.']:config.coaches===3?['Tréner 1: A1.','Tréner 2: A2.','Tréner 3: B1 a B2.']:labels.map((label,index)=>`Tréner ${index+1}: ${label}.`);
@@ -66,7 +66,7 @@ const TrainingPlanner = {
       b.steps[1]='Prijmi vnútornou stranou, priprav loptu pred seba a pošli ju po zemi spoluhráčovi. Dotyky neobmedzuj.';
       b.steps[2]='Hráči zostávajú vo svojich dvojiciach/trojici. V trojici ide lopta 1 → 2 → 3 → 1; pravidelne otoč smer. Nový uhol pridaj až po zvládnutí prihrávky.';
       const size=config.groupSizes[index],pairs=(size-3)/2;
-      b.tables=[{groupSize:size,caption:'Dvojice a prípadná trojica; každý aktívny, každá podskupina s loptou',headers:['Počet v skupine','Rozdelenie'],rows:[[String(size),size===3?'1 trojica':size%2?`${pairs} ${pairs===1?'dvojica':'dvojice'} + 1 trojica`:`${size/2} dvojice`]]}];
+      b.tables=[{groupSize:size,caption:'Dvojice a prípadná trojica; každý aktívny, každá podskupina s loptou',headers:['Počet v skupine','Rozdelenie'],rows:[[String(size),size===2?'1 dvojica':size===3?'1 trojica':size%2?`${pairs} ${pairs===1?'dvojica':'dvojice'} + 1 trojica`:`${size/2} dvojice`]]}];
     }
     if(key==='football-rondo')b.steps[3]=b.skillTask+' Bod za 3 prihrávky; roly a časy zostávajú podľa tabuľky.';
     if(key==='football-zones')b.steps[1]=b.skillTask+' Neutrálny sám neboduje; v zóne sa nečaká natrvalo.';
@@ -74,13 +74,28 @@ const TrainingPlanner = {
     b.adjustments.unshift(b.skillTask,'Ak je úloha príliš ťažká, uber najprv tlak alebo počet pravidiel. Ak je ľahká, pridaj iba jednu výzvu. Presun medzi skupinami rieš individuálne počas vody, bez verejného porovnávania detí.');
     if(level==='base')b.cues=['Priprav si loptu pred seba.','Pozri na spoluhráča a prihraj po zemi.'];
     else if(level==='challenge')b.cues=['Pozri sa pred prijatím.','Prihraj a hneď vytvor nový uhol.'];
+    if(config.groupSizes[index]===2&&key==='football-rondo'){
+      b.skillTask='Dvojica bez obrancu: prihrávaj po zemi, priprav prvý dotyk a znovu sa ukáž v inom uhle. Pri dvoch deťoch rondo s obrancom nevytvárame.';
+      b.summary=b.skillTask;b.stepTitles=['Ukážka a série','Dvojica bez obrancu','Obnovenie','Prihrávka a ponuka','Voda'];
+      b.steps=[block.steps[0],'Obaja sú spoluhráči, bez obrancu. Začni na 3–4 m, každý potrebuje veľa kontaktov.','Po lopte mimo ju priveď späť a pokračuj v rovnakej dvojici.','2 kolá po 60 s práce a 60 s oddychu; potom 30 s oddych. Obe série rovnako.','Medzi sériami 1 min voda, na konci 2 min voda a príprava zón.'];
+      b.adjustments=[b.skillTask,'Ak prihrávky nevychádzajú, skráť vzdialenosť a povoľ zastavenie lopty.'];b.cues=['Priprav si loptu a ukáž sa znova.'];
+    }
+    if(config.groupSizes[index]===2&&['football-zones','football-mini-games'].includes(key)){
+      b.stepTitles=key==='football-zones'?['Časovanie kôl','Ako získať bod','Hra 1 na 1','Obnovenie hry','Dávka hry']:['Organizácia a časovanie','Priprav bránky','Pravidlá 1 na 1','Práca a oddych','Skórovanie','Obnovenie a prestávka'];
+      b.skillTask=key==='football-zones'?'1 na 1 bez neutrálneho. Bod za kontrolované vedenie do súperovej koncovej zóny.':'1 na 1 bez neutrálneho. Bod za kontrolované prevedenie lopty cez súperovu kužeľovú bránku.';
+      b.summary=b.skillTask;b.steps[1]=key==='football-zones'?b.skillTask:b.steps[1];b.steps[2]=b.skillTask;
+      b.steps[3]=key==='football-zones'?'Bez neutrálneho. Po zisku sa otočí smer útoku; po lopte mimo začni vedením, súper 2 m od lopty.':'V každom úseku 2 min hry a 2 min oddychu pre oboch; bez neutrálneho a bez rotácie čakajúcich.';
+      if(key==='football-zones')b.steps[4]='6 kôl: 60 s hra a 60 s oddych pre oboch. Medzi kolami navyše 30 s na vodu a pokyny.';
+      else b.steps[4]='Gól za 1, bez povinnej prihrávky alebo kombinácie. Po zisku zaútoč na opačnú bránku.';
+      b.adjustments=[b.skillTask,'Pri príliš veľkom rozdiele zručností zníž tlak obrancu alebo vymeň dvojicu počas vody.'];b.cues=['Pozri na voľnú cestu a zrýchli.'];
+    }
     return b;
   },
   adapt(source,input){
     if(!this.supports(source))return source;
     const config=this.normalize(input),t=JSON.parse(JSON.stringify(source)),groups=config.groupSizes,labels=['A1','A2','B1','B2'];
     t.planConfig=config;t.organizationNotes=this.organization(config,groups);t.coaches=config.coaches+' '+(config.coaches===1?'tréner':'tréneri');t.players=config.players+' detí · bez brankárov';
-    t.attendanceCases=Array.from({length:17},(_,i)=>({total:i+14,groups:i+14===config.players?groups:this.groups(i+14)}));
+    t.attendanceCases=Array.from({length:21},(_,i)=>({total:i+10,groups:i+10===config.players?groups:this.groups(i+10)}));
     t.organizationNotes.push('Deti rozdeľ podľa aktuálneho zvládnutia tejto úlohy, nie iba podľa počtu alebo fyzickej sily. Skupiny zostávajú oddelené aj v minihre; vnútri vytvor vyrovnané družstvá. Názvy Základy/Upevnenie/Výzva sú voľby trénera, nie trvalé nálepky detí.');
     t.organizationNotes.push(labels.map((label,i)=>`${label}: ${groups[i]} · ${this.levels[config.levels[i]]}`).join('; ')+'.');
     const w=config.width,h=config.height,workW=Math.min(w,47),workH=Math.min(h,39),ox=(w-workW)/2,oy=(h-workH)/2,cw=(workW-7)/2,ch=(workH-7)/2,round=value=>Math.round(value*10)/10,gameLength=Math.min(cw,20),gameWidth=round(Math.min(ch,16,gameLength*.8)),passLength=gameLength-2;
@@ -102,7 +117,7 @@ const TrainingPlanner = {
       if(['2','3'].includes(block.id))block.coneSetup.extra=`Skupiny majú ${groups.join(' + ')} hráčov. Méty označujú hranice, nie povinné miesta hráčov. Priechody zostávajú voľné; rozdelenie trénerov nájdeš v Prehľade.`;
     }
     const pass=t.blocks[1],rondo=t.blocks[2],zones=t.blocks[3],games=t.blocks[4];
-    pass.tables=Array.from({length:6},(_,i)=>{const size=i+3;return{groupSize:size,caption:`Skupina ${size}: každý prihrá a vytvorí nový uhol`,headers:['Poradie','Po prihrávke'],rows:[[Array.from({length:size+1},(_,j)=>String(j%size+1)).join(' → '),'Posuň sa do voľného uhla, nestoj za príjemcom.']]};});
+    pass.tables=Array.from({length:7},(_,i)=>{const size=i+2;return{groupSize:size,caption:`Skupina ${size}: každý prihrá a vytvorí nový uhol`,headers:['Poradie','Po prihrávke'],rows:[[Array.from({length:size+1},(_,j)=>String(j%size+1)).join(' → '),'Posuň sa do voľného uhla, nestoj za príjemcom.']]};});
     rondo.steps=[
       '18:22–18:24 ukážka. Série 18:24–18:28:30 a 18:29:30–18:34; medzi nimi 1 min voda.',
       'V skupine 3–6 bráni jeden, v skupine 7–8 dvaja. Poradie a dávku otvor v Striedaní pre svoju skupinu; obranca sa mení až na signál.',
@@ -112,36 +127,36 @@ const TrainingPlanner = {
     ];
     rondo.tables=[];rondo.rotation=[];
     rondo.adjustments[0]='V skupine 3–6 bráni každý 35 s v každej sérii. V skupine 7–8 má každý dve obranné roly po 20 s v sérii. Výmena podľa čísel na signál, nie po chybe.';
-    for(let size=3;size<=8;size++){
-      const defenders=size>=7?2:1,play=defenders===2?20:35,rest=size===3?35:size===4?25:size===5?15:10,buffer=270-size*(play+rest);
-      const rows=Array.from({length:size},(_,i)=>{const ds=[i+1,...(defenders===2?[(i+1)%size+1]:[])];return[String(i+1),ds.join(', '),Array.from({length:size},(_,j)=>j+1).filter(p=>!ds.includes(p)).join(', '),`${play} s / ${rest} s`];});
-      rondo.tables.push({groupSize:size,caption:`${size-defenders} na ${defenders} · séria 4:30, po poradí ešte ${buffer} s oddych. Obe série rovnako.`,headers:['Kolo',defenders===1?'Obranca':'Obrancovia','Prihrávajú','Práca / oddych'],rows});
+    for(let size=2;size<=8;size++){
+      const defenders=size===2?0:size>=7?2:1,play=size===2?60:defenders===2?20:35,rest=size===2?60:size<=3?35:size===4?25:size===5?15:10,buffer=270-size*(play+rest);
+      const rows=Array.from({length:size},(_,i)=>{const ds=defenders?[i+1,...(defenders===2?[(i+1)%size+1]:[])]:[];return[String(i+1),ds.length?ds.join(', '):'Bez obrancu',Array.from({length:size},(_,j)=>j+1).filter(p=>!ds.includes(p)).join(', '),`${play} s / ${rest} s`];});
+      rondo.tables.push({groupSize:size,caption:`${size===2?'Dvojica bez obrancu':(size-defenders)+' na '+defenders} · séria 4:30, po poradí ešte ${buffer} s oddych. Obe série rovnako.`,headers:['Kolo',defenders===1?'Obranca':'Obrancovia','Prihrávajú','Práca / oddych'],rows});
       rondo.rotation.push({size,rounds:size,playSeconds:play,restSeconds:rest,bufferSeconds:buffer,defenders});
     }
-    zones.dose='90 s ukážka + 6 dvojminútových kôl + 5 × 30 s medzi kolami = 16 min. Skupina 3: 60 s hra / 60 s oddych; 4: 80 / 40 s; 5–8: 90 / 30 s.';
+    zones.dose='90 s ukážka + 6 dvojminútových kôl + 5 × 30 s medzi kolami = 16 min. Skupina 2–3: 60 s hra / 60 s oddych; 4: 80 / 40 s; 5–8: 90 / 30 s.';
     zones.steps=[
       '18:36–18:37:30 ukážka. Kolá: 18:37:30–18:39:30; 18:40–18:42; 18:42:30–18:44:30; 18:45–18:47; 18:47:30–18:49:30; 18:50–18:52. Medzi kolami 30 s prestávka.',
       'Bod za kontrolované vedenie do súperovej zóny alebo prihrávku spoluhráčovi do nábehu. V zóne sa nečaká natrvalo.',
-      'Neutrálny pomáha tímu s loptou a sám neboduje. Skupina 3 hrá 1 na 1 + N; 4–6 hrá 2 na 2 s prípadnými N; 7–8 hrá 3 na 3 + 1 alebo 2 N.',
+      'Neutrálny pomáha tímu s loptou a sám neboduje. Skupina 2 hrá 1 na 1; skupina 3 hrá 1 na 1 + N; 4–6 hrá 2 na 2 s prípadnými N; 7–8 hrá 3 na 3 + 1 alebo 2 N.',
       'Neutrálne roly meň podľa tabuľky. Pri 7 hráčoch sa N mení aj po 45 s hry, aby sa vystriedali všetci. Ostatní vytvoria dve rovnako veľké družstvá.',
       'V skupine 3 je 60 s hra + 60 s oddych, v skupine 4 je 80 + 40 s, v skupinách 5–8 je 90 + 30 s. Neutrálny počas hry pracuje; jeho rola nie je oddych.'
     ];
     zones.tables=[];zones.variantNotes={};games.variantNotes={};
-    for(let size=3;size<=8;size++){
+    for(let size=2;size<=8;size++){
       const form=this.form(size),neutralAt=round=>Array.from({length:form.neutral},(_,j)=>(round*form.neutral+j)%size+1);
-      zones.tables.push({groupSize:size,caption:`Skupina ${size}: ${form.label}`,headers:['Kolo','Neutrálni','Ostatní'],rows:Array.from({length:6},(_,i)=>[String(i+1),size===7?`0–45 s: ${neutralAt(2*i).join(', ')}; 45–90 s: ${neutralAt(2*i+1).join(', ')}`:form.neutral?neutralAt(i).join(', '):'Bez N',`Dve družstvá po ${form.team}; ${size===3?'60 / 60':size===4?'80 / 40':'90 / 30'} s hra / oddych.`])});
-      zones.variantNotes[size]=`Skupina ${size}: ${form.label}. Každý absolvuje ${size===3?6:size===4?8:9} min hry. Pri N rozdávaj neutrálne roly podľa poradia, aby sa vystriedali všetci.`;
-      games.variantNotes[size]=size===3?'1 na 1 + N. V každom 4-minútovom úseku 2 min hry a 2 min oddychu; N meň po 1 min hry. Spolu každý 8 min hry.':`${form.label}. Štyri úseky po 4 min hry; spolu 16 min. ${form.neutral?'N meň po 2 min hry, postupne po '+form.neutral+'.':'Bez neutrálnych.'}`;
+      zones.tables.push({groupSize:size,caption:`Skupina ${size}: ${form.label}`,headers:['Kolo','Neutrálni','Ostatní'],rows:Array.from({length:6},(_,i)=>[String(i+1),size===7?`0–45 s: ${neutralAt(2*i).join(', ')}; 45–90 s: ${neutralAt(2*i+1).join(', ')}`:form.neutral?neutralAt(i).join(', '):'Bez N',`Dve družstvá po ${form.team}; ${size<=3?'60 / 60':size===4?'80 / 40':'90 / 30'} s hra / oddych.`])});
+      zones.variantNotes[size]=`Skupina ${size}: ${form.label}. Každý absolvuje ${size<=3?6:size===4?8:9} min hry. Pri N rozdávaj neutrálne roly podľa poradia, aby sa vystriedali všetci.`;
+      games.variantNotes[size]=size===2?'1 na 1 bez N. V každom úseku 2 min hry a 2 min oddychu, spolu 8 min hry. Bod za prevedenie lopty cez súperovu bránku.':size===3?'1 na 1 + N. V každom 4-minútovom úseku 2 min hry a 2 min oddychu; N meň po 1 min hry. Spolu každý 8 min hry.':`${form.label}. Štyri úseky po 4 min hry; spolu 16 min. ${form.neutral?'N meň po 2 min hry, postupne po '+form.neutral+'.':'Bez neutrálnych.'}`;
     }
     games.steps=[
       `18:52–18:53 organizácia. Úseky 18:53–18:57, 18:58–19:02, 19:03–19:07 a 19:08–19:12; medzi nimi 1 min voda. Skupiny zostávajú na plochách ${gameLength} × ${gameWidth} m.`,
       'Ponechaj 4 rohové méty na každej ploche. Štyri zónové méty presuň na dve 2 m široké kužeľové bránky v strede koncových čiar.',
-      'Hernú formu vyberá veľkosť skupiny: 3 = 1 na 1 + N; 4–6 = 2 na 2 s prípadnými N; 7–8 = 3 na 3 + 1 alebo 2 N. Gól po presnej prízemnej prihrávke cez súperovu bránku, N sám neboduje.',
+      'Hernú formu vyberá veľkosť skupiny: 2 = 1 na 1; 3 = 1 na 1 + N; 4–6 = 2 na 2 s prípadnými N; 7–8 = 3 na 3 + 1 alebo 2 N. Gól po presnej prízemnej prihrávke cez súperovu bránku, N sám neboduje.',
       'Skupina 3: v každom úseku 2 min hry a 2 min oddychu, N meň každú minútu hry. Ostatné skupiny: 4 min hry, N meň každé 2 min hry podľa poradia. Pri dvoch N sa mení dvojica.',
       'Prvé dva úseky môže byť gól po prihrávke a opätovnej ponuke za 2 body. Posledné dva úseky bežné skórovanie, minimum pokynov.',
       'Po lopte mimo začni prihrávkou alebo vedením, súper približne 2 m od lopty. Cudziu loptu v priechode zastaví tréner. V prestávke voda a jeden krátky podnet.'
     ];
-    games.dose='1 min organizácia + 4 úseky po 4 min + 3 × 1 min voda = 20 min. Skupina 3: v úseku 2 min hra / 2 min oddych; ostatní 4 min hra.';
+    games.dose='1 min organizácia + 4 úseky po 4 min + 3 × 1 min voda = 20 min. Skupina 2–3: v úseku 2 min hra / 2 min oddych; ostatní 4 min hra.';
     games.summary='Herná forma podľa skupiny: 1 na 1, 2 na 2 alebo 3 na 3 s neutrálnou podporou podľa počtu. Prihrávka, nový uhol a presné zakončenie po zemi.';
     games.adjustments[0]=`Všetky štyri plochy majú ${gameLength} × ${gameWidth} m. Skupiny zostávajú na svojich plochách; používaj formu podľa ich skutočného počtu.`;
     games.adjustments[1]='Neutrálni zostávajú aktívni a nebodujú. Pri 3 hráčoch sa N mení po 1 min hry a v úseku sú 2 min hry/2 min oddychu; pri väčších skupinách výmena N po 2 min hry.';
@@ -151,7 +166,7 @@ const TrainingPlanner = {
     t.equipment[1].quantity='32 pracovných + 8 rezervných = 40 mét';
     t.equipment[3].quantity=`${teamTotal} svetlých + ${teamTotal} tmavých${neutralTotal?' + '+neutralTotal+' odlišných pre N':''}`;
     t.equipment[3].detail='Družstvá a neutrálni majú odlišné farby; pri zmene roly si hráči odovzdajú rozlišovačku.';
-    t.notes[0].text=`Vybraných ${config.players} detí bez brankárov. Štyri skupiny ${groups.join(' + ')}; jednotlivé formy, dávky a rotácie sa prispôsobujú veľkosti skupiny. Počet možno meniť od 14 do 30.`;
+    t.notes[0].text=`Vybraných ${config.players} detí bez brankárov. Štyri skupiny ${groups.join(' + ')}; jednotlivé formy, dávky a rotácie sa prispôsobujú veľkosti skupiny. Počet možno meniť od 10 do 30.`;
     t.notes[1].text=layout.assumption+' '+layout.stages['football-pass'].instructions+' '+layout.stages['football-zones'].instructions;
     t.notes[3].text='Ukážka je jedna možnosť riešenia. Vyber konkrétnu skupinu A1/A2/B1/B2; nákres, počet aj návod sa zosúladia. Animácia nemení tréningový časovač.';
     t.notes.unshift({title:'Organizácia podľa aktuálnych podmienok',text:t.organizationNotes.join(' ')});

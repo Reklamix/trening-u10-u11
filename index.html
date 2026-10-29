@@ -10,12 +10,12 @@
   <link rel="stylesheet" href="./styles.css?v=24">
   <link rel="stylesheet" href="./exercise-card.css?v=1">
   <link rel="stylesheet" href="./app-shell.css?v=1">
-  <script src="./football.js?v=20" defer></script>
-  <script src="./training-planner.js?v=4" defer></script>
-  <script src="./exercise-brief.js?v=3" defer></script>
+  <script src="./football.js?v=21" defer></script>
+  <script src="./training-planner.js?v=5" defer></script>
+  <script src="./exercise-brief.js?v=4" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
   <script src="./pitch-setup.js?v=3" defer></script>
-  <script src="./app.js?v=20" defer></script>
+  <script src="./app.js?v=21" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -65,7 +65,7 @@
             <label>Časť ihriska<select id="plan-pitch"><option value="quarter">1/4 ihriska</option><option value="half">1/2 ihriska</option><option value="full">Celé ihrisko</option></select></label>
             <label>Trénerov<select id="plan-coaches"><option value="1">1 tréner</option><option value="2">2 tréneri</option><option value="3">3 tréneri</option><option value="4">4 tréneri</option></select></label>
           </div>
-          <details class="plan-levels"><summary>Skupiny a náročnosť · upraviť</summary><p class="small-note">Základy = učíme sa prijať a prihrať. Upevnenie = prihrávka a nový uhol. Výzva = riešenie pod tlakom. Deti priraď podľa aktuálnej úlohy, bez verejného poradia. V každej skupine 3–8 detí; spolu musí sedieť počet hore.</p><button id="plan-half-basics" class="secondary-button" type="button">Polovica na základy</button><p class="small-note">Rozdelí A1/A2 na Základy a B1/B2 na Upevnenie. Potom potvrď Použiť a uložiť.</p><p id="plan-group-error" class="notice" role="alert" tabindex="-1" hidden></p><div id="plan-groups" class="plan-groups"></div><p class="small-note">Pri zmene celkového počtu sa veľkosti rozdelia rovnomerne; náročnosti ostanú. Rozdelenie potom môžeš upraviť ručne.</p></details>
+          <details class="plan-levels"><summary>Skupiny a náročnosť · upraviť</summary><p class="small-note">Základy = učíme sa prijať a prihrať. Upevnenie = prihrávka a nový uhol. Výzva = riešenie pod tlakom. Deti priraď podľa aktuálnej úlohy, bez verejného poradia. V každej skupine 2–8 detí; spolu musí sedieť počet hore.</p><button id="plan-half-basics" class="secondary-button" type="button">Polovica na základy</button><p class="small-note">Rozdelí A1/A2 na Základy a B1/B2 na Upevnenie. Potom potvrď Použiť a uložiť.</p><p id="plan-group-error" class="notice" role="alert" tabindex="-1" hidden></p><div id="plan-groups" class="plan-groups"></div><p class="small-note">Pri zmene celkového počtu sa veľkosti rozdelia rovnomerne; náročnosti ostanú. Rozdelenie potom môžeš upraviť ručne.</p></details>
           <details class="plan-dimensions"><summary id="plan-dimensions-label">Pracovné rozmery · upraviť</summary><div class="plan-form-grid">
             <label>Dĺžka plochy (m)<input id="plan-width" type="number" min="35" max="120" step="1" required></label>
             <label>Šírka plochy (m)<input id="plan-height" type="number" min="25" max="90" step="1" required></label>

@@ -445,10 +445,13 @@ for(const step of setupPlan.steps){
 const plannerPure=read('training-planner.js');
 const {planner,library}=runInNewContext(footballPure+'\n'+plannerPure+'\n({planner:TrainingPlanner,library:TrainingLibrary})');
 const plannerSource=JSON.stringify(thu);
-for(let players=14;players<=30;players++)for(const pitch of ['quarter','half','full']){
+equal(planner.normalize({players:9}).players,10,'Attendance lower bound is ten');
+equal(planner.normalize({players:31}).players,30,'Attendance upper bound remains thirty');
+equal(JSON.stringify(planner.groups(10)),JSON.stringify([3,3,2,2]),'Ten attendees are assigned exactly once without inventing players');
+for(let players=10;players<=30;players++)for(const pitch of ['quarter','half','full']){
   const training=planner.adapt(thu,{players,pitch,coaches:2}),groups=planner.groups(players),config=training.planConfig;
   equal(groups.reduce((sum,n)=>sum+n,0),players,'Adaptive plan assigns every attendee once');
-  check(groups.every(n=>n>=3&&n<=8),'Every supported group has an implemented drill form');
+  check(groups.every(n=>n>=2&&n<=8),'Every supported group has an implemented drill form');
   equal(training.duration,75,'Adaptive training retains the full 75 minutes');
   equal(JSON.stringify(training.blocks.map(b=>[b.start,b.end])),JSON.stringify(thu.blocks.map(b=>[b.start,b.end])),'Adaptive variants preserve the training timeline');
   for(const block of training.blocks.filter(b=>b.diagram!=='football-finish')){
@@ -459,7 +462,7 @@ for(let players=14;players<=30;players++)for(const pitch of ['quarter','half','f
       const scene=FootballScenes.build(block.diagram,{total:players,size:area.count,pitchIndex:area.index,area});
       equal(scene.nodes.filter(n=>n.kind==='player').length,area.count,'Animation shows exactly the configured local group, including 3/7/8');
       check(scene.pitch.y+scene.pitch.h+22<=310,'Adaptive football diagrams fit their SVG viewport');
-      if(block.diagram==='football-rondo')equal(scene.nodes.filter(n=>n.team==='B').length,area.count>=7?2:1,'Larger rondos have two actual defenders');
+      if(block.diagram==='football-rondo')equal(scene.nodes.filter(n=>n.team==='B').length,area.count===2?0:area.count>=7?2:1,'Larger rondos have two actual defenders');
       if(['football-zones','football-mini-games'].includes(block.diagram)){
         const form=planner.form(area.count);
         equal(scene.nodes.filter(n=>n.kind==='player'&&n.team==='A').length,form.team,'Adaptive attacking team matches the drill instructions');
@@ -505,12 +508,12 @@ equal(library.filter(data.trainings,{topic:'duels',mode:'drills'}).length,1,'Lib
 check(library.filter(data.trainings,{query:'klucka',mode:'drills'}).length>0,'Library search works without Slovak diacritics');
 check(library.filter(data.trainings,{query:'29.10.2026',mode:'drills'}).every(item=>item.training.date==='2026-10-29'),'Library date search opens the expected training day');
 equal(library.filter(data.trainings,{query:'29.10.2026',mode:'drills'}).length,6,'Date search includes all six activities of the saved day');
-for(const size of[3,7,8])for(const key of['football-pass','football-rondo']){
+for(const size of[2,3,7,8])for(const key of['football-pass','football-rondo']){
   const scene=FootballScenes.build(key,{size});
   for(const transfer of scene.transfers){const ball=FootballScenes.sample(scene.tracks.ball,transfer.settled),receiver=FootballScenes.sample(scene.tracks[transfer.to],transfer.settled);check(Math.hypot(ball.x-receiver.x,ball.y-receiver.y)<12,'New group sizes complete each pass at the actual receiving player');}
 }
 equal(Object.keys(planner.normalize({players:20,privateNotes:'not-used'})).sort().join(','),'coaches,groupSizes,height,levels,pitch,players,width','Public configuration retains only its seven public planning fields, no personal notes');
-for(const sizes of[[3,3,4,4],[3,3,8,8],[5,7,4,6],[8,8,7,7]]){
+for(const sizes of[[3,3,2,2],[3,3,4,4],[3,3,8,8],[5,7,4,6],[8,8,7,7]]){
   const players=sizes.reduce((a,b)=>a+b,0),training=planner.adapt(thu,{players,groupSizes:sizes,levels:['base','challenge','standard','base']});
   equal(JSON.stringify(training.attendanceCases.find(c=>c.total===players).groups),JSON.stringify(sizes),'Manual skill-group counts are used by the actual attendance plan');
   for(const block of training.blocks){
@@ -524,7 +527,7 @@ for(const sizes of[[3,3,4,4],[3,3,8,8],[5,7,4,6],[8,8,7,7]]){
     }
   }
 }
-for(let size=3;size<=8;size++){
+for(let size=2;size<=8;size++){
   const area={length:12,width:9,count:size,skill:'base'},scene=FootballScenes.build('football-pass',{size,area});
   equal(scene.nodes.filter(n=>n.kind==='player').length,size,'Basic pairs and trio include every player');
   equal(scene.nodes.filter(n=>n.kind==='ball').length,Math.floor(size/2),'Each basic pair or trio has its own ball');
@@ -532,9 +535,9 @@ for(let size=3;size<=8;size++){
   for(const track of Object.values(scene.tracks)){check(track.every((frame,i)=>!i||frame[0]>track[i-1][0]),'Concurrent basic balls advance strictly in time');equal(JSON.stringify(track[0].slice(1)),JSON.stringify(track.at(-1).slice(1)),'Basic passing loops back to its starting receiver');}
 }
 const skillTraining=planner.adapt(thu,{players:30,levels:['base','challenge','standard','base']});
-for(let players=14;players<=30;players++){
+for(let players=10;players<=30;players++){
   const preset=planner.halfBasics(players),a=preset.groupSizes[0]+preset.groupSizes[1],b=preset.groupSizes[2]+preset.groupSizes[3];
-  equal(a+b,players,'Half-basic shortcut includes every selected child');check(Math.abs(a-b)<=1,'Half-basic shortcut splits skill streams as evenly as attendance permits');check(preset.groupSizes.every(n=>n>=3&&n<=8),'Half-basic shortcut stays in supported group sizes up to thirty');
+  equal(a+b,players,'Half-basic shortcut includes every selected child');check(Math.abs(a-b)<=1,'Half-basic shortcut splits skill streams as evenly as attendance permits');check(preset.groupSizes.every(n=>n>=2&&n<=8),'Half-basic shortcut stays in supported group sizes up to thirty');
 }
 equal(JSON.stringify(planner.halfBasics(30).groupSizes),JSON.stringify([8,7,8,7]),'Thirty children split into fifteen basic and fifteen consolidating');
 for(const [index,level]of skillTraining.planConfig.levels.entries())for(const source of skillTraining.blocks.slice(1,5)){
@@ -547,7 +550,7 @@ for(const [index,level]of skillTraining.planConfig.levels.entries())for(const so
 equal(JSON.stringify(planner.normalize({players:30,groupSizes:[3,3,3,3],levels:['unknown']})),JSON.stringify(planner.normalize({players:30})),'Invalid shared group settings fall back to a complete valid plan');
 equal(JSON.stringify(thu),plannerSource,'All skill adaptations leave the canonical source untouched');
 const regroupSource=planner.normalize({players:24,coaches:3,pitch:'half',width:52,height:36,levels:['base','challenge','base','standard']}),regroupBefore=JSON.stringify(regroupSource);
-for(const sizes of[[5,7,6,6],[7,6,6,6],[5,6,6,6],[3,3,4,4],[8,8,7,7],[3,8,3,8]]){
+for(const sizes of[[3,3,2,2],[3,3,3,2],[3,3,3,3],[2,7,7,8],[5,7,6,6],[7,6,6,6],[5,6,6,6],[3,3,4,4],[8,8,7,7],[3,8,3,8]]){
   const before=JSON.stringify(sizes),config=planner.regroup(regroupSource,sizes),total=sizes.reduce((sum,n)=>sum+n,0),training=planner.adapt(thu,config);
   equal(config.players,total,'Inline group edit updates attendance to the exact sum');
   equal(JSON.stringify(config.groupSizes),before,'Inline group edit never silently balances other groups');
@@ -562,7 +565,7 @@ for(const sizes of[[5,7,6,6],[7,6,6,6],[5,6,6,6],[3,3,4,4],[8,8,7,7],[3,8,3,8]])
   const rondo=training.blocks[2];for(const size of new Set(sizes)){const rotation=rondo.rotation.find(r=>r.size===size),table=rondo.tables.find(t=>t.groupSize===size);equal(rotation.rounds,table.rows.length,'New group size resolves the complete matching rotation');equal(rotation.rounds*(rotation.playSeconds+rotation.restSeconds)+rotation.bufferSeconds,270,'Changed rondo rotation still fits its full series');}
   equal(JSON.stringify(sizes),before,'Regrouping does not modify the supplied draft counts');
 }
-for(const invalid of[[3,3,3,3],[8,8,8,7],[2,7,7,8],[9,5,5,5],[5.5,6.5,6,6],[6,6,6],null])equal(planner.regroup(regroupSource,invalid),null,'Invalid inline totals or sizes cannot be applied');
+for(const invalid of[[2,2,2,2],[8,8,8,7],[1,7,7,8],[9,5,5,5],[5.5,6.5,6,6],[6,6,6],null])equal(planner.regroup(regroupSource,invalid),null,'Invalid inline totals or sizes cannot be applied');
 equal(JSON.stringify(regroupSource),regroupBefore,'Regrouping cannot modify the previous saved configuration');
 const resizeSource=planner.normalize({players:24,coaches:3,groupSizes:[3,7,8,6],levels:['base','challenge','standard','base']}),resizeBefore=JSON.stringify(resizeSource);
 for(const space of[{pitch:'quarter',width:35,height:25},{pitch:'half',width:50,height:35},{pitch:'full',width:70,height:50},{pitch:'full',width:105,height:68},{pitch:'half',width:35,height:90},{pitch:'full',width:120,height:25}]){
@@ -584,7 +587,7 @@ for(const space of[{pitch:'quarter',width:35,height:25},{pitch:'half',width:50,h
 for(const space of[null,{pitch:'other',width:50,height:35},{pitch:'half',width:34,height:35},{pitch:'half',width:121,height:35},{pitch:'half',width:50,height:24},{pitch:'half',width:50,height:91},{pitch:'half',width:50.5,height:35},{pitch:'half',width:NaN,height:35}])equal(planner.resize(resizeSource,space),null,'Invalid inline area changes cannot be applied');
 equal(JSON.stringify(resizeSource),resizeBefore,'Resize cannot mutate the previously saved conditions');
 const briefModel=runInNewContext(footballPure+'\n'+plannerPure+'\n'+read('exercise-brief.js')+'\nExerciseBrief');
-for(let players=14;players<=30;players++)for(const level of['base','standard','challenge']){
+for(let players=10;players<=30;players++)for(const level of['base','standard','challenge']){
   const training=planner.adapt(thu,{players,levels:[level,level,level,level]}),before=JSON.stringify(training);
   for(const block of training.blocks){
     const areas=FootballScenes.groups(block.diagram,players,training.quarterPitch);
@@ -609,6 +612,20 @@ for(let players=14;players<=30;players++)for(const level of['base','standard','c
     }
   }
   equal(JSON.stringify(training),before,'Brief rendering cannot mutate the actual session or skill variants');
+}
+const tenPlayerPlan=planner.adapt(thu,{players:10});
+for(const block of tenPlayerPlan.blocks.slice(1,5)){
+  const variant=planner.forGroup(tenPlayerPlan,block,2),brief=briefModel.build(tenPlayerPlan,block,2);
+  check(guide.supports(variant),'Two-player replacement retains every coaching-guide step');
+  if(block.diagram==='football-rondo'){
+    equal(brief.round.defenders,0,'Two-player passing does not invent a defender');
+    equal(brief.round.playSeconds,60,'Two-player passing uses sixty seconds work');
+    equal(brief.round.restSeconds,60,'Two-player passing uses sixty seconds rest');
+    equal(brief.round.bufferSeconds,30,'Two-player passing retains the complete 4:30 series');
+    check(brief.description.includes('bez obrancu'),'Two-player rondo replacement is clearly explained');
+  }
+  if(block.diagram==='football-zones')equal(brief.glance.work,'6 × 60 s','1v1 zones preserve short rounds and equal recovery');
+  if(block.diagram==='football-mini-games'){equal(brief.glance.work,'4 × 2 min','1v1 games use two active minutes per block');check(brief.description.includes('prevedenie'),'Solo attacker can score by dribbling without a missing teammate');}
 }
 equal(new Set(Object.values(briefModel.slogans)).size,6,'Each exercise has its own distinct short slogan');
 equal(briefModel.build(mon,mon.blocks[0]),null,'Earlier approved archives keep their original presentation');
