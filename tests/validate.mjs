@@ -390,7 +390,7 @@ for (const block of guideTraining.blocks) {
 check(!guide.supports({diagram:'duel-no-keeper',steps:[]}), 'Archived activities retain their existing instruction controls');
 
 const setupPure = read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0];
-const setup = runInNewContext(footballPure + '\n' + setupPure + '\nPitchSetupPlan');
+const {setup,setupMotion} = runInNewContext(footballPure + '\n' + setupPure + '\n({setup:PitchSetupPlan,setupMotion:PitchSetupMotion})');
 const originalTraining = JSON.stringify(thu);
 const setupPlan = setup.build(thu);
 equal(JSON.stringify(thu), originalTraining, 'Setup plan never mutates saved training or activity geometry');
@@ -415,5 +415,28 @@ for (const [index,step] of setupPlan.steps.entries()) {
 equal(setupPlan.steps.at(-1).kept.length,16,'Converting zones to goals retains all sixteen corner cones');
 equal(setupPlan.steps.at(-1).added.length,0,'Eight final goals reuse existing cones');
 check(data.trainings.filter(training=>training.id!=='2026-10-29').every(training=>!setup.supports(training)),'Existing archive does not show an unrelated setup plan');
+
+for(const step of setupPlan.steps){
+  const unchanged=JSON.stringify(step),motion=setupMotion.create(step);
+  equal(motion.moves.length,step.moves.length,'Every moved cone has exactly one animated path');
+  equal(motion.added.length,step.added.length,'Every newly added cone has exactly one placement reveal');
+  equal(motion.groups.length,new Set([...step.moves.map(move=>move.to.area),...step.added.map(point=>point.area)]).size,'Animation visits each affected area once');
+  const start=setupMotion.sample(motion,0),end=setupMotion.sample(motion,motion.duration);
+  check(start.added.every(opacity=>opacity===0),'New cones are absent before their placement');
+  check(end.added.every(opacity=>opacity===1),'All added cones are visible at the completed layout');
+  check(end.complete&&!start.complete,'Playback has a definite completion point');
+  motion.moves.forEach((move,i)=>{
+    check(Math.hypot(start.moves[i].x-move.from.x,start.moves[i].y-move.from.y)<1e-9,'Animated cone starts exactly at its actual previous position');
+    check(Math.hypot(end.moves[i].x-move.to.x,end.moves[i].y-move.to.y)<1e-9,'Animated cone finishes exactly at its assigned new position');
+    const halfway=setupMotion.sample(motion,(move.start+move.end)/2).moves[i];
+    check(Math.hypot(halfway.x-(move.from.x+move.to.x)/2,halfway.y-(move.from.y+move.to.y)/2)<1e-9,'Midpoint follows the actual straight move without overshoot');
+  });
+  for(const time of[0,motion.duration/4,motion.duration/2,motion.duration,motion.duration+1]){
+    const frame=setupMotion.sample(motion,time);
+    check(frame.moves.every(point=>Number.isFinite(point.x)&&Number.isFinite(point.y)),'Animated coordinates are always finite');
+    check(frame.added.every(opacity=>opacity>=0&&opacity<=1),'Placement reveals stay within visible opacity bounds');
+  }
+  equal(JSON.stringify(step),unchanged,'Animation leaves cone geometry and preparation instructions untouched');
+}
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

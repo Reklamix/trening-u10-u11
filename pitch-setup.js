@@ -78,6 +78,27 @@ const PitchSetupPlan = {
   }
 };
 
+const PitchSetupMotion = {
+  create(step) {
+    const groups=step.map.areas.map(area=>area.label).filter(area=>step.moves.some(move=>move.to.area===area)||step.added.some(point=>point.area===area));
+    return {
+      groups,duration:groups.length*4+2,
+      moves:step.moves.map(move=>({...move,start:groups.indexOf(move.to.area)*4+.4,end:groups.indexOf(move.to.area)*4+2.6})),
+      added:step.added.map(point=>{const start=groups.indexOf(point.area)*4+(step.moves.some(move=>move.to.area===point.area)?2.8:.5);return{point,start,end:start+.7};})
+    };
+  },
+  sample(plan,time) {
+    const t=Math.max(0,Math.min(plan.duration,time)),unit=(start,end)=>Math.max(0,Math.min(1,(t-start)/(end-start)));
+    const area=plan.groups[Math.min(plan.groups.length-1,Math.floor(t/4))];
+    return {
+      area,complete:t>=plan.duration,
+      phase:plan.moves.some(move=>move.to.area===area&&t<move.end)?'presun':plan.added.some(item=>item.point.area===area&&t<item.end)?'pridanie':'kontrola',
+      moves:plan.moves.map(move=>{const u=unit(move.start,move.end);return{x:move.from.x+(move.to.x-move.from.x)*u,y:move.from.y+(move.to.y-move.from.y)*u};}),
+      added:plan.added.map(item=>unit(item.start,item.end))
+    };
+  }
+};
+
 // PITCH_SETUP_BROWSER
 (() => {
   const NS='http://www.w3.org/2000/svg';
@@ -96,13 +117,19 @@ const PitchSetupPlan = {
     steps.forEach((step,index)=>{const option=el('option','',`${index+1}. ${step.title}`);option.value=index;select.append(option);});
     label.append(select);nav.append(label);
     const body=el('div','setup-body'),footer=el('footer','setup-footer');
-    let index=0;
+    let index=0,rate=.5,repeat=true,clock=null,animationFrame=null,updateMotion=null;
+    function pauseMotion(){
+      if(animationFrame!==null)cancelAnimationFrame(animationFrame);animationFrame=null;
+      if(clock)clock.pause();updateMotion?.();
+    }
+    function disposeMotion(){pauseMotion();updateMotion=null;clock=null;}
     function render(){
+      disposeMotion();
       const step=steps[index];select.value=String(index);body.replaceChildren();footer.replaceChildren();body.scrollTop=0;
       const progress=el('p','setup-progress',`Krok ${index+1} z ${steps.length} · ${step.when}`);progress.setAttribute('role','status');
       body.append(progress,el('h3','setup-step-title',step.title));
       const facts=el('div','setup-facts');
-      for(const[name,value]of[['Rozložené',step.total],['Pridaj',step.added.length],['Presuň',step.moves.length],['Bokom',step.stored]]){
+      for(const[name,value]of[['Po kroku',step.total],['Pridaj',step.added.length],['Presuň',step.moves.length],['Bokom',step.stored]]){
         const item=el('div');item.append(el('span','',name),el('strong','',String(value)));facts.append(item);
       }
       body.append(facts);
@@ -111,17 +138,53 @@ const PitchSetupPlan = {
       const text=(x,y,value,size=1.4)=>svg('text',{x,y,'text-anchor':'middle','font-size':size,fill:'#173b31','font-weight':650,'paint-order':'stroke',stroke:'white','stroke-width':.35},value);
       map.append(text(layout.width/2,-1.7,`${layout.width} m`),text(-1.4,layout.height/2,`${layout.height} m`,1.2),text(layout.corridor.x+layout.corridor.width/2,layout.height/2,'3 m',1.2));
       for(const area of step.map.areas){
-        map.append(svg('rect',{x:area.x,y:area.y,width:area.w,height:area.h,fill:'#f6f8f1',stroke:'#638268','stroke-width':.22}));
+        map.append(svg('rect',{'data-setup-area':area.label,x:area.x,y:area.y,width:area.w,height:area.h,fill:'#f6f8f1',stroke:'#638268','stroke-width':.22}));
         if(step.map.key==='football-zones'&&!step.map.cornersOnly)for(const x of[area.x,area.x+area.w-2])map.append(svg('rect',{x,y:area.y,width:2,height:area.h,fill:'#d8eea4'}));
         map.append(text(area.x+area.w/2,area.y+area.h/2-.4,area.label,1.8),text(area.x+area.w/2,area.y+area.h/2+1.5,`${area.length} × ${area.width} m`,1.3));
       }
       for(const move of step.moves){
         const {from,to}=move,angle=Math.atan2(to.y-from.y,to.x-from.x);
-        map.append(svg('circle',{cx:from.x,cy:from.y,r:.38,fill:'white',stroke:'#6d7880','stroke-width':.16,'data-setup-old':''}),svg('path',{d:`M${from.x} ${from.y}L${to.x} ${to.y}`,fill:'none',stroke:'#16729c','stroke-width':.18,'stroke-dasharray':'.35 .2'}),svg('path',{d:`M${to.x} ${to.y}l${-.7*Math.cos(angle-.45)} ${-.7*Math.sin(angle-.45)}M${to.x} ${to.y}l${-.7*Math.cos(angle+.45)} ${-.7*Math.sin(angle+.45)}`,stroke:'#16729c','stroke-width':.18,fill:'none'}));
+        const route=svg('g',{'data-setup-route':to.area});
+        route.append(svg('circle',{cx:from.x,cy:from.y,r:.38,fill:'white',stroke:'#6d7880','stroke-width':.16,'data-setup-old':''}),svg('path',{d:`M${from.x} ${from.y}L${to.x} ${to.y}`,fill:'none',stroke:'#16729c','stroke-width':.18,'stroke-dasharray':'.35 .2'}),svg('path',{d:`M${to.x} ${to.y}l${-.7*Math.cos(angle-.45)} ${-.7*Math.sin(angle-.45)}M${to.x} ${to.y}l${-.7*Math.cos(angle+.45)} ${-.7*Math.sin(angle+.45)}`,stroke:'#16729c','stroke-width':.18,fill:'none'}));map.append(route);
       }
-      const cone=(p,kind,color)=>{const g=svg('g',{'data-setup-cone':kind});g.append(svg('path',{d:`M${p.x} ${p.y-.65}l-.55 1h1.1Z`,fill:color,stroke:'#173b31','stroke-width':.11}),svg('path',{d:`M${p.x-.22} ${p.y-.12}h.44`,stroke:'white','stroke-width':.12}));map.append(g);};
-      step.kept.forEach(p=>cone(p,'kept','#216a4b'));step.added.forEach(p=>cone(p,'added','#f47700'));step.moves.forEach(({to})=>cone(to,'moved','#16729c'));
+      const cone=(p,kind,color)=>{const g=svg('g',{'data-setup-cone':kind});g.append(svg('path',{d:`M${p.x} ${p.y-.65}l-.55 1h1.1Z`,fill:color,stroke:'#173b31','stroke-width':.11}),svg('path',{d:`M${p.x-.22} ${p.y-.12}h.44`,stroke:'white','stroke-width':.12}));map.append(g);return g;};
+      step.kept.forEach(p=>cone(p,'kept','#216a4b'));
+      const added=step.added.map(p=>cone(p,'added','#f47700')),moved=step.moves.map(({to})=>cone(to,'moved','#16729c'));
       body.append(map);
+      const motion=PitchSetupMotion.create(step);clock=new FootballTimeline(motion.duration);clock.setRate(rate);clock.setLoop(repeat);
+      let animated=false;
+      const controls=el('div','setup-motion-controls'),play=el('button','button'),restart=el('button','secondary-button','Od začiatku'),drawing=el('button','secondary-button','Nákres');
+      for(const button of[play,restart,drawing])button.type='button';controls.append(play,restart,drawing);
+      const settings=el('div','setup-motion-settings'),speedLabel=el('label','','Rýchlosť ukážky'),speed=el('select');speed.setAttribute('aria-label','Rýchlosť presunu kužeľov');
+      for(const[value,label]of[[.25,'0,25× · veľmi pomaly'],[.5,'0,5× · pomaly'],[1,'1× · normálne']]){const option=el('option','',label);option.value=value;speed.append(option);}speed.value=String(rate);speedLabel.append(speed);
+      const repeatLabel=el('label','setup-motion-repeat'),loop=el('input');loop.type='checkbox';loop.checked=repeat;repeatLabel.append(loop,document.createTextNode('Opakovať dokola'));settings.append(speedLabel,repeatLabel);
+      const status=el('p','setup-motion-status');status.setAttribute('role','status');
+      const timeline=el('details','setup-motion-timeline');timeline.append(el('summary','','Prejsť na čas ukážky'));
+      const output=el('output','setup-motion-time');output.setAttribute('aria-live','off');
+      const seek=el('input');seek.type='range';seek.min='0';seek.max=motion.duration;seek.step='.01';seek.setAttribute('aria-label','Priebeh presunu kužeľov');timeline.append(output,seek);
+      updateMotion=()=>{
+        const time=animated?clock.time():motion.duration,frame=PitchSetupMotion.sample(motion,time);
+        if(animated&&frame.complete&&clock.origin!==null&&!clock.loop)clock.pause();
+        moved.forEach((element,i)=>{const point=frame.moves[i],to=step.moves[i].to;element.setAttribute('transform',`translate(${point.x-to.x} ${point.y-to.y})`);});
+        added.forEach((element,i)=>element.setAttribute('opacity',String(frame.added[i])));
+        map.querySelectorAll('[data-setup-route]').forEach(route=>route.setAttribute('opacity',!animated||frame.complete||route.getAttribute('data-setup-route')===frame.area?'1':'.2'));
+        map.querySelectorAll('[data-setup-area]').forEach(area=>area.setAttribute('fill',animated&&!frame.complete&&area.getAttribute('data-setup-area')===frame.area?'#e8edb5':'#f6f8f1'));
+        const playing=clock.origin!==null;
+        play.textContent=playing?'Pauza':animated?(frame.complete?'Prehrať znova':'Pokračovať'):(step.moves.length?'Prehrať presun':'Ukázať pridanie');
+        drawing.setAttribute('aria-pressed',String(!animated));
+        const message=!animated?'Najprv nákres. Ukážku spustíš tlačidlom.':frame.complete?'Ukážka dokončená. Kužele sú na nových miestach.':`${playing?'':'Pozastavené · '}${frame.area}: ${frame.phase==='presun'?'presun z pôvodných miest':frame.phase==='pridanie'?'pridanie nových mét':'kontrola nových miest'}.`;
+        if(status.textContent!==message)status.textContent=message;
+        seek.value=String(time);output.textContent=`${time.toFixed(1)} / ${motion.duration.toFixed(1)} s`;
+      };
+      const tick=()=>{updateMotion();if(clock.origin!==null)animationFrame=requestAnimationFrame(tick);else animationFrame=null;};
+      play.addEventListener('click',()=>{if(clock.origin!==null)pauseMotion();else{animated=true;clock.play();updateMotion();animationFrame=requestAnimationFrame(tick);}});
+      restart.addEventListener('click',()=>{pauseMotion();animated=true;clock.seek(0);updateMotion();});
+      drawing.addEventListener('click',()=>{pauseMotion();animated=false;clock.seek(0);updateMotion();});
+      speed.addEventListener('change',()=>{rate=Number(speed.value);clock.setRate(rate);updateMotion();});
+      loop.addEventListener('change',()=>{repeat=loop.checked;clock.setLoop(repeat);updateMotion();});
+      seek.addEventListener('input',()=>{const value=Number(seek.value);pauseMotion();animated=true;clock.seek(value);updateMotion();});
+      body.append(controls,settings,status,timeline);updateMotion();
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)body.append(el('p','setup-motion-note','Pri obmedzenom pohybe môžeš použiť posuvník času alebo tlačidlo Nákres.'));
       const legend=el('p','setup-legend','Oranžové = pridaj · modré = presuň sem · zelené = nechaj. Prázdny krúžok a šípka ukazujú presun z pôvodného miesta.');body.append(legend);
       body.append(el('p','setup-action',step.action));
       if(step.kit)body.append(el('p','setup-kit',step.kit));
@@ -132,7 +195,8 @@ const PitchSetupPlan = {
     }
     select.addEventListener('change',()=>{index=Number(select.value);render();});
     dialog.append(header,nav,body,footer);document.body.append(dialog);active=dialog;
-    dialog.addEventListener('close',()=>{dialog.remove();if(active===dialog)active=null;if(returnFocus?.isConnected)returnFocus.focus();},{once:true});render();dialog.showModal();
+    const onVisibility=()=>{if(document.hidden)pauseMotion();};document.addEventListener('visibilitychange',onVisibility);window.addEventListener('pagehide',pauseMotion);
+    dialog.addEventListener('close',()=>{disposeMotion();document.removeEventListener('visibilitychange',onVisibility);window.removeEventListener('pagehide',pauseMotion);dialog.remove();if(active===dialog)active=null;if(returnFocus?.isConnected)returnFocus.focus();},{once:true});render();dialog.showModal();
   }
   window.PitchSetup={supports:training=>PitchSetupPlan.supports(training),open,close};
 })();
