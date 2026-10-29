@@ -171,6 +171,17 @@ const FootballScenes = {
   const colors={A:'#176ca2',B:'#c14e33',N:'#eed06b',T:'#d6dfd0'};
   const svgNode=(tag,attrs={},text)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;};
   const html=(tag,className,text)=>{const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=text;return n;};
+  function equipmentIcon(kind){
+    const icon=svgNode('svg',{viewBox:'0 0 64 64',class:'exercise-kit-icon','aria-hidden':'true',focusable:'false'}),stroke='#173b31';
+    if(kind==='ball'){icon.append(svgNode('circle',{cx:32,cy:32,r:25,fill:'white',stroke,'stroke-width':2.5}),svgNode('path',{d:'M32 21L43 29L39 42H25L21 29Z',fill:stroke}),svgNode('path',{d:'M32 7V21M43 29L56 24M39 42L47 52M25 42L17 52M21 29L8 24',fill:'none',stroke,'stroke-width':2}));}
+    else if(kind==='cone'){icon.append(svgNode('path',{d:'M32 8L13 51H51ZM8 51H56V57H8Z',fill:'#f47700',stroke,'stroke-width':2,'stroke-linejoin':'round'}),svgNode('path',{d:'M23 29H41M19 39H45',stroke:'white','stroke-width':4}));}
+    else if(kind==='bibs'){for(const[x,color]of[[4,'#176ca2'],[22,'#c14e33'],[40,'#eed06b']])icon.append(svgNode('path',{d:`M${x} 17l6-5 4 7 4-7 6 5v34H${x}Z`,fill:color,stroke:'white','stroke-width':1.5,'stroke-linejoin':'round'}));}
+    else if(kind==='gates'){for(const x of[12,52])icon.append(svgNode('path',{d:`M${x} 24l-9 26h18Z`,fill:'#f47700',stroke,'stroke-width':2}));icon.append(svgNode('path',{d:'M21 45H43',stroke,'stroke-width':2,'stroke-dasharray':'3 3'}),svgNode('text',{x:32,y:20,'text-anchor':'middle','font-size':13,'font-weight':700,fill:stroke},'2 m'));}
+    else if(kind==='timer'){icon.append(svgNode('circle',{cx:32,cy:36,r:22,fill:'white',stroke,'stroke-width':3}),svgNode('path',{d:'M25 6H39M32 6V14M47 15L53 21M32 21V36L42 41',fill:'none',stroke,'stroke-width':3,'stroke-linecap':'round'}));}
+    else if(kind==='signal'){icon.append(svgNode('path',{d:'M7 30h24l10-11h14v18H40a16 16 0 1 1-33-7Z',fill:'#d8eea4',stroke,'stroke-width':2.5}),svgNode('circle',{cx:22,cy:40,r:7,fill:'white',stroke,'stroke-width':2}),svgNode('path',{d:'M49 10V5M58 16L62 13',stroke,'stroke-width':2.5,'stroke-linecap':'round'}));}
+    else if(kind==='water'){icon.append(svgNode('path',{d:'M25 6H39V15L44 23V56H20V23L25 15Z',fill:'#d8edf6',stroke,'stroke-width':2.5,'stroke-linejoin':'round'}),svgNode('path',{d:'M25 12H39M21 34Q27 29 33 34T43 34M21 41Q27 36 33 41T43 41',fill:'none',stroke:'#16729c','stroke-width':2.5}));}
+    return icon;
+  }
   function routePath(points,wavy=false) {
     const result=[];
     for(let j=1;j<points.length;j++){
@@ -261,9 +272,9 @@ const FootballScenes = {
       const how=card('Ako to robiť');how.append(html('p','',data.description),list('ol',data.steps));if(guide)how.append(guide);briefRoot.append(how);
       const space=card('Plocha a rozdelenie detí');space.append(html('p','exercise-fact',data.space),html('p','',data.grouping));if(data.groups.length)space.append(list('ul',data.groups));if(data.coaches.length)space.append(list('ul',data.coaches));if(data.spacing)space.append(html('p','small-note',data.spacing));
       if(areas.length){const mapButton=html('button','secondary-button','Ukázať rozmiestnenie');mapButton.type='button';mapButton.dataset.exerciseMap='true';mapButton.setAttribute('aria-haspopup','dialog');mapButton.addEventListener('click',openLayout);space.append(mapButton);const prepare=html('button','text-button','Príprava ihriska krok po kroku →');prepare.type='button';prepare.addEventListener('click',options.onSetup);space.append(prepare);}briefRoot.append(space,tweaks);
-      const load=card('Práca, oddych a striedanie');for(const[label,text]of[['Práca',data.work],['Oddych',data.rest],['Striedanie',data.rotation]]){const p=html('p');p.append(html('strong','',label+': '),document.createTextNode(text));load.append(p);}if(!['football-warmup','football-finish'].includes(block.diagram)){const rotate=html('button','secondary-button','Podrobné striedanie');rotate.type='button';rotate.addEventListener('click',()=>options.onGuideSection('rotations'));load.append(rotate);}briefRoot.append(load);
-      if(data.notes.length){const notes=card('Poznámky trénera');notes.append(list('ul',data.notes));briefRoot.append(notes);}
-      const kit=card('Pomôcky na toto cvičenie');kit.append(list('ul',data.kit));if(data.conesTotal)kit.append(html('p','small-note',data.conePlacement));briefRoot.append(kit);
+      for(const[title,text,kind]of[['Práca',data.work,'work'],['Oddych',data.rest,'rest'],['Striedanie',data.rotation,'rotation']]){const section=card(title);section.classList.add('exercise-'+kind);section.append(html('p','',text));if(kind==='rotation'&&!['football-warmup','football-finish'].includes(block.diagram)){const rotate=html('button','secondary-button','Podrobné striedanie');rotate.type='button';rotate.addEventListener('click',()=>options.onGuideSection('rotations'));section.append(rotate);}briefRoot.append(section);}
+      if(data.notes.length){const notes=card('Poznámky trénera');notes.classList.add('exercise-notes');notes.append(list('ul',data.notes));briefRoot.append(notes);}
+      const kit=card('Pomôcky na toto cvičenie'),gear=html('div','exercise-kit-grid');kit.classList.add('exercise-kit');for(const item of data.visualKit){const tile=html('div','exercise-kit-tile');tile.dataset.equipment=item.kind;const text=html('div','exercise-kit-text');text.append(html('h3','',item.title),html('strong','exercise-kit-value',item.value),html('p','',item.detail));tile.append(equipmentIcon(item.kind),text);gear.append(tile);}kit.append(gear);for(const note of data.kitNotes)kit.append(html('p','small-note',note));if(data.conesTotal)kit.append(html('p','small-note',data.conePlacement));briefRoot.append(kit);
       const slogan=card('Heslo pre deti');slogan.classList.add('exercise-slogan');slogan.append(html('blockquote','',data.slogan));briefRoot.append(slogan);
     }
     function selection(){return{index:pitchIndex,count:options.size,label:areas[pitchIndex]?.label,areas};}

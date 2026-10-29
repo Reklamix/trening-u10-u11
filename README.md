@@ -6,7 +6,7 @@ Web: https://reklamix.github.io/trening-u10-u11/
 
 ## Čitateľné cvičenie
 
-Prispôsobiteľný štvrtok má poradie **vizuál + prehrávanie → Ako to robiť → Plocha a rozdelenie detí → Práca, oddych a striedanie → Poznámky trénera → Pomôcky na toto cvičenie → Heslo pre deti**. Kľúčové pokyny sú viditeľné bez otvárania dialógu. Krátke heslo je trénerský pokyn deťom. `exercise-brief.js` odvodí obsah z aktuálnej skupiny, zručností, rozmerov a rotačných dávok; uvádza aj lokálne/spoločné počty lôpt a kužeľov. Základné prihrávky preto správne počítajú vlastné lopty dvojíc/trojice. Rondo uvádza skutočný oddych a zvyšok série, hry formu aj N podľa počtu.
+Prispôsobiteľný štvrtok má poradie **vizuál + prehrávanie → Ako to robiť → Plocha a rozdelenie detí → Práca → Oddych → Striedanie → Poznámky trénera → Pomôcky na toto cvičenie → Heslo pre deti**. Kľúčové pokyny sú viditeľné bez otvárania dialógu. Krátke heslo je trénerský pokyn deťom. `exercise-brief.js` odvodí obsah z aktuálnej skupiny, zručností, rozmerov a rotačných dávok. Pomôcky zobrazuje ikonami s textom a lokálnymi/spoločnými počtami lôpt, kužeľov, rozlišovačiek a kužeľových bránok; bránkové kužele sa nezapočítavajú dvakrát. Základné prihrávky preto správne počítajú vlastné lopty dvojíc/trojice. Rondo uvádza skutočný oddych a zvyšok série, hry formu aj N podľa počtu.
 
 Výber zóny/skupiny, náročnosti, počtov a priestoru je stále priamo pri cvičení v **Upraviť skupinu a podmienky** pod organizáciou; pôvodné schémové a prehrávacie nastavenia sú tam tiež. Po zmene sa všetky karty zosúladia s animáciou. Príprava ihriska a mapa sú priamo v karte Plocha; podrobný krokový návod ostáva v Ako to robiť a rotácie v Podrobné striedanie. V cvičení sa nahradí veľký výber dňa krátkym dátumom/časom pri názve, deň ostáva v Prehľade/Archíve. Mobil aj počítač majú postup pod vizuálom. Časovač a Hotovo zostávajú; staršie tréningy, Prehľad, archív a Moje nemenia svoje rozloženie.
 
@@ -117,7 +117,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv17/footballv16/exercise-briefv1/coaching-guidev4/pitch-setupv3/training-plannerv4/CSSv20. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv17/footballv17/exercise-briefv2/coaching-guidev4/pitch-setupv3/training-plannerv4/CSSv21. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 
