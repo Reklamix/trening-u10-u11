@@ -31,6 +31,7 @@ const CoachingGuideModel = {
   function close() { if (active?.open) active.close(); }
   function open({ block, training, attendance, size, section = 'prepare', layoutMap, selection, onAreaChange }) {
     close();
+    const sourceBlock=block;
     const returnFocus = document.activeElement;
     const groups = training.attendanceCases.find(item => item.total === attendance)?.groups || [];
     let areaIndex = selection?.index || 0;
@@ -62,11 +63,13 @@ const CoachingGuideModel = {
       disclosure.append(node('summary', '', label), node('p', '', text)); return disclosure;
     }
     function render() {
+      block=TrainingPlanner.forGroup(training,sourceBlock,areaIndex);
       nav.querySelectorAll('button').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.guideSection === section)));
       body.replaceChildren(); footer.replaceChildren(); body.scrollTop = 0;
       if (areas.length) body.append(node('p', 'guide-selected', 'Schéma a návod: ' + areas[areaIndex].label + ' · ' + size + ' ' + (size<5?'hráči':'hráčov')));
+      if(block.skillTask)body.append(card(block.skillLabel,block.skillTask));
       if (section === 'prepare') {
-        body.append(node('p', 'guide-intro', block.summary));
+        if(block.summary!==block.skillTask)body.append(node('p', 'guide-intro', block.summary));
         const facts = node('div', 'guide-facts'), stage = training.quarterPitch?.stages?.[block.diagram];
         facts.append(card('Detí spolu', String(attendance)));
         if (block.diagram === 'football-warmup') facts.append(card('Zóny A + B', areas.length ? areas.map(area=>area.count).join(' + ') : Math.floor(attendance / 2) + ' + ' + Math.ceil(attendance / 2)));
@@ -88,7 +91,7 @@ const CoachingGuideModel = {
         const progress = node('p', 'guide-progress', `Krok ${step + 1} z ${block.steps.length}`); progress.setAttribute('role', 'status');
         const dots = node('div', 'guide-step-track'); dots.setAttribute('aria-hidden', 'true');
         block.steps.forEach((_, index) => dots.append(node('span', index <= step ? 'is-done' : '')));
-        body.append(progress, dots, card(CoachingGuideModel.titles[block.diagram][step], block.steps[step], 'guide-current-step'));
+        body.append(progress, dots, card(block.stepTitles?.[step]||CoachingGuideModel.titles[block.diagram][step], block.steps[step], 'guide-current-step'));
       } else if (section === 'rotations') {
         if ((block.tables || []).some(table => table.groupSize)) {
           const label = node('label', 'guide-group', 'Skupina, ktorú práve vedieš');

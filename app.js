@@ -101,6 +101,7 @@ const PersonalPlans = [
   function route() {
     const params = new URLSearchParams(location.hash.slice(1));
     const config={};for(const[key,param]of Object.entries({players:'pocet',pitch:'plocha',coaches:'treneri',width:'dlzka',height:'sirka'}))if(params.has(param))config[key]=params.get(param);
+    for(const[key,param]of Object.entries({levels:'urovne',groupSizes:'skupiny'}))if(params.has(param))config[key]=params.get(param).split(',');
     return { id: params.get('trening'), block: params.get('blok'), section: params.get('sekcia'), attendance: Number(params.get('pocet')),config };
   }
 
@@ -110,6 +111,7 @@ const PersonalPlans = [
     const params = new URLSearchParams({ trening: id });
     if (state.selected?.id === id && state.selected.attendanceCases) params.set('pocet', String(state.attendance));
     if(state.selected?.id===id&&state.selected.planConfig){const config=state.selected.planConfig;for(const[key,param]of Object.entries({pitch:'plocha',coaches:'treneri',width:'dlzka',height:'sirka'}))params.set(param,String(config[key]));}
+    if(state.selected?.id===id&&state.selected.planConfig){params.set('urovne',state.selected.planConfig.levels.join(','));params.set('skupiny',state.selected.planConfig.groupSizes.join(','));}
     if (block) params.set('blok', block);
     if (section) params.set('sekcia', section);
     url.hash = params.toString();
@@ -284,7 +286,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -448,7 +450,9 @@ const PersonalPlans = [
     $('active-diagram').replaceChildren();
     const block=activeBlock();
     addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
+    renderGroupCue();
   }
+  function renderGroupCue(){const index=window.FootballBoard?.selection()?.index||0,variant=TrainingPlanner.forGroup(state.selected,activeBlock(),index);$('active-cue').textContent='„'+variant.cues[0]+'“';}
   function renderActive() {
     window.PitchSetup?.close();
     window.CoachingGuide?.close();
@@ -590,8 +594,10 @@ const PersonalPlans = [
     $('training-topics').replaceChildren(...topics.map(topic=>el('span','topic-chip',TrainingLibrary.topics[topic])));
     $('plan-form').hidden=!config;
     if(config){$('plan-pitch').value=config.pitch;$('plan-coaches').value=String(config.coaches);$('plan-width').value=config.width;$('plan-height').value=config.height;$('plan-dimensions-label').textContent=`Pracovné rozmery ${config.width} × ${config.height} m · upraviť`;}
+    $('plan-groups').replaceChildren();$('plan-group-error').hidden=true;
+    if(config)config.groupSizes.forEach((size,index)=>{const card=el('div','plan-group-card'),title=el('strong','',['A1','A2','B1','B2'][index]),countLabel=el('label','','Detí'),count=el('input');count.type='number';count.min='3';count.max='8';count.step='1';count.required=true;count.value=size;count.dataset.groupSize=index;count.setAttribute('aria-label','Detí v skupine '+title.textContent);countLabel.append(count);const levelLabel=el('label','','Náročnosť'),level=el('select');level.dataset.groupLevel=index;level.setAttribute('aria-label','Náročnosť '+title.textContent);Object.entries(TrainingPlanner.levels).forEach(([value,label])=>{const option=el('option','',label);option.value=value;level.append(option);});level.value=config.levels[index];levelLabel.append(level);const fields=el('div','plan-group-fields');fields.append(countLabel,levelLabel);card.append(title,fields);$('plan-groups').append(card);});
     $('summary-timeline-title').textContent=`Časový plán · ${training.duration} minút`;
-    $('plan-saved').textContent=configSaved?'Podmienky sa ukladajú pre tento deň v zariadení. Zdieľaný odkaz obsahuje aj počet detí, plochu, rozmery a trénerov.':'Prehliadač neuložil podmienky. Zachovaj si ich cez Zdieľať; odkaz obsahuje rovnaký variant.';
+    $('plan-saved').textContent=configSaved?'Podmienky sa ukladajú pre tento deň v zariadení. Zdieľaný odkaz obsahuje počet detí, plochu, trénerov aj rozdelenie a náročnosť skupín.':'Prehliadač neuložil podmienky. Zachovaj si ich cez Zdieľať; odkaz obsahuje rovnaký variant.';
     const notes=training.organizationNotes||[training.players,training.coaches];
     const list=el('ul');notes.forEach(note=>list.append(el('li','',note)));$('plan-recommendation').replaceChildren(list);
     $('summary-equipment').replaceChildren(...training.equipment.map(item=>el('li','',item.name+': '+item.quantity)));
@@ -614,7 +620,7 @@ const PersonalPlans = [
   function applyPlan(changes){
     const source=state.trainings.find(training=>training.id===state.selected.id);
     if(!TrainingPlanner.supports(source))return;
-    const config=TrainingPlanner.normalize({...state.selected.planConfig,...changes});configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
+    const config=TrainingPlanner.normalize({...state.selected.planConfig,...changes,...(changes.players?{groupSizes:TrainingPlanner.groups(Number(changes.players))}:{})});configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
     const block=activeBlock().id,section=state.view==='field'?null:state.view;
     const next=TrainingPlanner.adapt(source,config);state.selected=next;state.attendance=config.players;
     history.replaceState(null,'',linkFor(source.id,block,section));render(next);renderActive();setView(state.view);
@@ -825,7 +831,8 @@ const PersonalPlans = [
     if (state.detail === 'rotations') renderDetail();
   });
   $('plan-pitch').addEventListener('change',()=>{const preset=TrainingPlanner.pitches[$('plan-pitch').value];$('plan-width').value=preset.width;$('plan-height').value=preset.height;$('plan-dimensions-label').textContent=`Pracovné rozmery ${preset.width} × ${preset.height} m · upraviť`;});
-  $('plan-form').addEventListener('submit',event=>{event.preventDefault();applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value});});
+  $('plan-half-basics').addEventListener('click',()=>{const preset=TrainingPlanner.halfBasics(state.attendance);document.querySelectorAll('[data-group-size]').forEach((input,i)=>{input.value=preset.groupSizes[i];input.removeAttribute('aria-invalid');});document.querySelectorAll('[data-group-level]').forEach((select,i)=>select.value=preset.levels[i]);$('plan-group-error').hidden=true;message('Pripravené rozdelenie približne na polovicu. Potvrď tlačidlom Použiť a uložiť.');});
+  $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav počty v skupinách, spolu musia byť ${state.attendance}. Každá skupina má 3–8 detí.`;$('plan-group-error').closest('details').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});});
   $('summary-start').addEventListener('click',()=>navigate('field',0));
   $('summary-setup').addEventListener('click',()=>window.PitchSetup.open(state.selected));
   $('show-equipment').addEventListener('click',()=>navigate('equipment'));

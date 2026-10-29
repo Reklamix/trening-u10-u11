@@ -20,7 +20,7 @@ const FootballScenes = {
   keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-mini-games','football-finish'],
   groups(key,total,layout) {
     const areas=layout?.stages?.[key]?.areas||[];
-    return areas.map((area,index)=>({...area,index,count:key==='football-warmup'?(layout.warmupCounts?.[index]??(index?Math.ceil(total/2):Math.floor(total/2))):Math.floor(total/areas.length)+(index<total%areas.length?1:0)}));
+    return areas.map((area,index)=>({...area,index,count:area.count??(key==='football-warmup'?(layout.warmupCounts?.[index]??(index?Math.ceil(total/2):Math.floor(total/2))):Math.floor(total/areas.length)+(index<total%areas.length?1:0))}));
   },
   mapPoint(area,pitch,point) {
     const u=(point.x-pitch.x)/pitch.w,v=(point.y-pitch.y)/pitch.h;
@@ -81,6 +81,18 @@ const FootballScenes = {
       }
       step(0,'Všetci súčasne vedú vlastnú loptu a sledujú voľný priestor.');step(1,'Meň smer a vyhni sa spoluhráčom.');step(2,'Krátke dotyky, lopta blízko nohy.');step(3,'Rozhliadni sa a pokračuj do voľna.');step(4,'Vedenie pokračuje; dráhy sú len ukážka.');
       scene.caption=`Zóna ${pitchIndex?'B':'A'}: ${n} detí. Obe zóny spolu ${total}. Všetci vedú loptu súčasne, každý svoju. Ukážkové dráhy nie sú povinné trasy ani stanovištia. Potom sa pracuje vo dvojiciach/trojici.`;
+    } else if(key==='football-pass'&&area?.skill==='base') {
+      const pods=Array.from({length:Math.floor(size/2)},()=>2);if(size%2)pods[pods.length-1]=3;
+      let player=0;scene.duration=8;scene.localCount=size;
+      pods.forEach((count,row)=>{
+        const y=(row+1)/(pods.length+1),span=3.5/scene.pitch.length,dy=3.5*Math.sqrt(3)/4/scene.pitch.width,positions=count===3?[[.16,y-dy],[.16+span,y-dy],[.16+span/2,y+dy]]:[[.16,y],[.16+span,y]],ids=[];
+        positions.forEach(([u,v])=>{const id='p'+player;ids.push(id);add(id,String(++player),u,v);});
+        const ballId=row?'ball'+row:'ball';add(ballId,'',positions[0][0]+.03,positions[0][1]+.02,'A','ball');
+        const route=count===2?[0,1,1,0,0]:[0,1,1,2,2,0,0],frames=route.map((target,i)=>[i*8/(route.length-1),positions[target][0]+.03,positions[target][1]+.02]);track(ballId,frames);
+        for(let i=0;i<count;i++)line('pass',i+1,[positions[i],positions[(i+1)%count]]).label=false;
+      });
+      step(0,'Dvojice/trojica súčasne: krátka prihrávka po zemi.');step(2,'Prijmi a priprav si loptu, bez tlaku.');step(4,'Prihraj späť alebo ďalšiemu v trojici.');step(8,'Pokračujte; každý má veľa kontaktov.');
+      scene.caption=`Základy: ${size} hráčov, ${pods.length} lôpt. Každá dvojica/trojica pracuje súčasne, vzdialenosť susedov 3,5 m. Bez povinného behu po prihrávke.`;
     } else if(key==='football-pass') {
       const positions=size>6?Array.from({length:size},(_,i)=>{const a=Math.PI+i*2*Math.PI/size;return[.5+.35*Math.cos(a),.5+.35*Math.sin(a)];}):[[.15,.6],[.65,.2],[.9,.65],[.45,.9],[.2,.15],[.8,.9]];
       positions.slice(0,size).forEach(([u,v],i)=>add('p'+i,String(i+1),u,v)); add('ball','',.185,.62,'A','ball');
@@ -93,7 +105,7 @@ const FootballScenes = {
       cycle(pos,Array.from({length:size-defenders},(_,i)=>String(i+defenders+1)),'Celý obeh je dokončený. Obrancovia sa menia až na signál podľa rotácie.',true);
       if(defenders===2){const cx=scene.pitch.x+scene.pitch.w/2,cy=scene.pitch.y+scene.pitch.h/2;scene.tracks.def2=scene.tracks.def.map(([t,x,y])=>[t,2*cx-x+.06*scene.pitch.w,2*cy-y]);scene.tracks.def=scene.tracks.def.map(([t,x,y])=>[t,x-.06*scene.pitch.w,y]);}
       scene.localCount=size;scene.caption=`${size-defenders} na ${defenders}: ${size} hráčov spolu. Ukážka celého obehu lopty; obrancovia sa menia na signál.`;
-    } else if((key==='football-zones'&&size===3)||(key==='football-mini-games'&&Math.floor(total/4)+(pitchIndex<total%4?1:0)===3)) {
+    } else if((key==='football-zones'&&size===3)||(key==='football-mini-games'&&(area?.count??Math.floor(total/4)+(pitchIndex<total%4?1:0))===3)) {
       const zones=key==='football-zones',attacker=zones?'a1':'a0';
       scene.pitch=pitch(40,46,280,zones?20:14,zones?14:9,zones?{zones:true}:{goals:true,goalGates:true});scene.localCount=3;scene.duration=zones?6:8;
       add(attacker,'A1',.2,.3);add('defender','B1',.6,.25,'B');add('n1','N1',.45,.55,'N');add('ball','',.23,.32,'A','ball');
@@ -115,7 +127,7 @@ const FootballScenes = {
       line('run',2,route);step(0,size>=5?'1. Prihrávka neutrálnemu hráčovi.':'1. Hráč s loptou si pripraví prihrávku.');step(2,'2. A2 nabieha okolo obrancu do voľnej zóny.');step(4,'3. Prihrávka do nábehu, príjem v koncovej zóne.');step(6,'Bod získava A2. Neutrálny sám neboduje.');
       const team=size>=7?3:2,neutral=size-team*2;scene.localCount=size;scene.caption=`${team} na ${team}${neutral?' + '+neutral+' N':''}. Zóny hlboké 2 m. Ukážka prihrávky; platí aj kontrolované vedenie do zóny.`;
     } else if(key==='football-mini-games') {
-      const n=Math.floor(total/4)+(pitchIndex<total%4?1:0);
+      const n=area?.count??Math.floor(total/4)+(pitchIndex<total%4?1:0);
       scene.pitch=pitch(40,46,280,14,9,{goals:true,goalGates:true});scene.localCount=n;scene.duration=8;
       add('a0','A1',.18,.32);add('a1','A2',.33,.7);add('b0','B1',.7,.12,'B');add('b1','B2',.65,.7,'B');
       if(n>=7){add('a2','A3',.2,.85);add('b2','B3',.8,.45,'B');}
@@ -198,7 +210,7 @@ const FootballScenes = {
       map=svgNode('svg',{viewBox:`-3 -4 ${layout.width+6} ${layout.height+7}`,role:'img','aria-label':`Rozloženie pracovnej plochy: ${block.title}`,class:'football-layout-map'});
       layoutGuide.append(map,html('p','',stage.instructions));
     }
-    const caption=html('p','football-caption');
+    const caption=html('p','football-caption'),skill=html('div','football-skill');
     const status=html('p','football-status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
     const progress=html('output','football-progress');progress.setAttribute('aria-live','off');progress.setAttribute('aria-label','Priebeh celej ukážky');
     const controls=html('div','football-controls'),play=html('button','button','Prehrať'),next=html('button','secondary-button','Ďalší krok'),reset=html('button','secondary-button','Od začiatku');
@@ -221,7 +233,7 @@ const FootballScenes = {
     legend.append(caption,list);
     if(!layout&&/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
     if(areas.length)root.append(areaTools);
-    root.append(figure,controls);
+    root.append(skill,figure,controls);
     if(options.onGuide){
       const guide=html('button','football-guide-entry');guide.type='button';guide.setAttribute('aria-haspopup','dialog');
       const guideArrow=html('span','','→');guideArrow.setAttribute('aria-hidden','true');guide.append(html('strong','','Ako viesť cvičenie'),guideArrow);
@@ -261,6 +273,7 @@ const FootballScenes = {
     }
     function build() {
       pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      const variant=options.groupBlock?.(pitchIndex);skill.hidden=!variant?.skillTask;skill.replaceChildren();if(variant?.skillTask)skill.append(html('strong','',variant.skillLabel+' · '+(areas[pitchIndex]?.label||'')),html('p','',variant.skillTask));
       svg.setAttribute('aria-label',block.title+(areas.length?' · '+areaLabel(areas[pitchIndex]):''));renderMap();
       clock.setRate(Number(speed.value));clock.setLoop(repeat.checked);
       if(block.coneSetup){

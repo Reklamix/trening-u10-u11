@@ -18,7 +18,11 @@ Nad štvrtkovým nákresom vyberáš skutočnú skupinu A1/A2/B1/B2 aj s počtom
 
 `training-planner.js` tvorí pracovný variant štvrtka z nedotknutého zdroja v trainings.json. Rondo3–6 má jedného obrancu,7–8 dvoch s rovnakou záťažou v skupine; všetky série trvajú4:30. Skupina3 má kratšiu hru a dlhší oddych. V skupine7 sa neutrálny v zónach mení po45s hry. Dávky sú v návode a tabuľkách. Ide o organizačný návrh, ktorý tréner dolaďuje podľa úrovne detí.
 
-Nastavenia sa ukladajú v tomto prehliadači pre každý dátum (`training-config-v1`). Zdieľaný URL obsahuje `pocet`, `plocha=quarter|half|full`, `treneri`, `dlzka` a `sirka`; kolega tak otvorí rovnaký variant. Tieto podmienky sú verejné. Súkromný obsah, heslo, poznámky, checklist a dokončenie sa neprenášajú. GitHub Pages nemá zápis z formulára do spoločného repozitára; obsah a kategórie sú trvalo vo verejnom zdroji, lokálne podmienky sa medzi zariadeniami prenesú odkazom.
+**Skupiny a náročnosť**: pre A1/A2/B1/B2 vyber Základy/Upevnenie/Výzva a prípadne uprav počty (3–8 v každej, súčet musí sedieť s 14–30 deťmi hore). Tréner priradí konkrétne deti podľa aktuálnej úlohy; aplikácia ich nehodnotí. Skupiny sa nemiešajú ani v minihre. Základy majú krátke prihrávky vo dvojiciach/trojici s vlastnými loptami (aj animácia), príjem bez okamžitého odoberania a jednoduchšie bodovanie. Výzva pridáva aktívnejší tlak, rozhľad a ponuku; obmedzenie dotykov až pri zvládnutí. Nákres aj návod čítajú rovnakú skupinu a zmenu náročnosti. Časy, oddych, hranice a kužele sa nemenia. Pri zmene celkového počtu sa veľkosti vrátia na rovnomerné; profily zostanú. Neplatný súčet formulár neuloží a oznámi chybu. Ide o pracovné voľby pre konkrétne cvičenie, nie trvalé poradie detí. Princíp diferenciácie: [The FA – How to challenge all the players](https://www.thefa.com/bootroom/resources/coaching/how-to-challenge-all-the-players-in-your-coaching-session); konkrétne varianty sú vlastný návrh.
+
+Používateľ odhaduje pri plných30 deťoch približne polovicu s potrebou základov. Skratka **Polovica na základy** pripraví A1/A2 Základy a B1/B2 Upevnenie, pri30 počty8+7+8+7 (15 a15). Potvrdenie cez Použiť a uložiť; Výzvu môže tréner zvoliť následne. Funguje aj pri14–29, rozdiel oboch vetiev najviac jedno dieťa. Konkrétne deti sa automaticky nepriraďujú.
+
+Nastavenia sa ukladajú v tomto prehliadači pre každý dátum (`training-config-v1`). Zdieľaný URL obsahuje `pocet`, `plocha=quarter|half|full`, `treneri`, `dlzka`, `sirka`, štyri hodnoty `skupiny` a štyri voľby `urovne` (`base|standard|challenge`); kolega tak otvorí rovnaký variant. Tieto súhrnné podmienky sú verejné, neukladajú mená ani individuálne hodnotenia. Staršie odkazy bez nových polí fungujú s pôvodným Upevnením. Súkromný obsah, heslo, poznámky, checklist a dokončenie sa neprenášajú. GitHub Pages nemá zápis z formulára do spoločného repozitára; obsah a kategórie sú trvalo vo verejnom zdroji, lokálne podmienky sa medzi zariadeniami prenesú odkazom.
 
 `TrainingLibrary.topics` a `TrainingLibrary.tags` v training-planner.js sú trvalé tematické zaradenie: prihrávky, prvý dotyk, pohyb bez lopty, vedenie/kľučky, súboje, rozhodovanie/prečíslenie, rozohrávka, koordinácia/rýchlosť, malé hry, záver. Cvičenie môže mať viac tém. Pri novom type cvičenia pridaj jeho témy; knižnica automaticky načíta nové tréningy zo zdrojových dát. Historické pondelkové a utorkové plány zostávajú pôvodné; novú rodinu prispôsobiteľných tréningov treba výslovne doplniť s vlastnými dávkami a kontrolami.
 
@@ -101,7 +105,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv12/footballv11/coaching-guidev3/pitch-setupv3/training-plannerv1/CSSv15. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv13/footballv12/coaching-guidev4/pitch-setupv3/training-plannerv2/CSSv16. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 

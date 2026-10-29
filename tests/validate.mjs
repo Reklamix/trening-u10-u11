@@ -506,6 +506,42 @@ for(const size of[3,7,8])for(const key of['football-pass','football-rondo']){
   const scene=FootballScenes.build(key,{size});
   for(const transfer of scene.transfers){const ball=FootballScenes.sample(scene.tracks.ball,transfer.settled),receiver=FootballScenes.sample(scene.tracks[transfer.to],transfer.settled);check(Math.hypot(ball.x-receiver.x,ball.y-receiver.y)<12,'New group sizes complete each pass at the actual receiving player');}
 }
-equal(Object.keys(planner.normalize({players:20,privateNotes:'not-used'})).sort().join(','),'coaches,height,pitch,players,width','Public configuration retains only its five public planning fields');
+equal(Object.keys(planner.normalize({players:20,privateNotes:'not-used'})).sort().join(','),'coaches,groupSizes,height,levels,pitch,players,width','Public configuration retains only its seven public planning fields, no personal notes');
+for(const sizes of[[3,3,4,4],[3,3,8,8],[5,7,4,6],[8,8,7,7]]){
+  const players=sizes.reduce((a,b)=>a+b,0),training=planner.adapt(thu,{players,groupSizes:sizes,levels:['base','challenge','standard','base']});
+  equal(JSON.stringify(training.attendanceCases.find(c=>c.total===players).groups),JSON.stringify(sizes),'Manual skill-group counts are used by the actual attendance plan');
+  for(const block of training.blocks){
+    const areas=FootballScenes.groups(block.diagram,players,training.quarterPitch);
+    if(areas.length)equal(areas.reduce((sum,a)=>sum+a.count,0),players,'Manual groups assign every child once on every activity map');
+    for(const area of areas){
+      const variant=planner.forGroup(training,block,area.index),scene=FootballScenes.build(block.diagram,{total:players,size:area.count,pitchIndex:area.index,area});
+      equal(scene.nodes.filter(n=>n.kind==='player').length,area.count,'Animations retain each manual group size, including final games');
+      check(guide.supports(variant),'Every skill variant keeps the complete step-by-step guide');
+      check(variant.skillTask.length>0,'Every selected group has a visible actionable skill task');
+    }
+  }
+}
+for(let size=3;size<=8;size++){
+  const area={length:12,width:9,count:size,skill:'base'},scene=FootballScenes.build('football-pass',{size,area});
+  equal(scene.nodes.filter(n=>n.kind==='player').length,size,'Basic pairs and trio include every player');
+  equal(scene.nodes.filter(n=>n.kind==='ball').length,Math.floor(size/2),'Each basic pair or trio has its own ball');
+  for(const arrow of scene.arrows){const [a,b]=arrow.points,distance=Math.hypot((a.x-b.x)/scene.pitch.w*12,(a.y-b.y)/scene.pitch.h*9);check(Math.abs(distance-3.5)<1e-8,'Basic passing is actually 3.5 metres in every pair and every side of the trio');}
+  for(const track of Object.values(scene.tracks)){check(track.every((frame,i)=>!i||frame[0]>track[i-1][0]),'Concurrent basic balls advance strictly in time');equal(JSON.stringify(track[0].slice(1)),JSON.stringify(track.at(-1).slice(1)),'Basic passing loops back to its starting receiver');}
+}
+const skillTraining=planner.adapt(thu,{players:30,levels:['base','challenge','standard','base']});
+for(let players=14;players<=30;players++){
+  const preset=planner.halfBasics(players),a=preset.groupSizes[0]+preset.groupSizes[1],b=preset.groupSizes[2]+preset.groupSizes[3];
+  equal(a+b,players,'Half-basic shortcut includes every selected child');check(Math.abs(a-b)<=1,'Half-basic shortcut splits skill streams as evenly as attendance permits');check(preset.groupSizes.every(n=>n>=3&&n<=8),'Half-basic shortcut stays in supported group sizes up to thirty');
+}
+equal(JSON.stringify(planner.halfBasics(30).groupSizes),JSON.stringify([8,7,8,7]),'Thirty children split into fifteen basic and fifteen consolidating');
+for(const [index,level]of skillTraining.planConfig.levels.entries())for(const source of skillTraining.blocks.slice(1,5)){
+  const before=JSON.stringify(source),variant=planner.forGroup(skillTraining,source,index);
+  equal(variant.skillLabel,planner.levels[level],'The guide resolves the selected group, rather than keeping the first group profile');
+  equal(JSON.stringify(source),before,'Skill instructions cannot mutate another group or the saved source');
+  equal(variant.dose,source.dose,'Skill rules preserve the existing load and rest schedule');
+  if(level==='base'&&source.diagram==='football-mini-games')check(variant.steps[4].includes('gól za 1')&&!variant.steps[4].includes('za 2'),'Basic games remove the advanced scoring requirement');
+}
+equal(JSON.stringify(planner.normalize({players:30,groupSizes:[3,3,3,3],levels:['unknown']})),JSON.stringify(planner.normalize({players:30})),'Invalid shared group settings fall back to a complete valid plan');
+equal(JSON.stringify(thu),plannerSource,'All skill adaptations leave the canonical source untouched');
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

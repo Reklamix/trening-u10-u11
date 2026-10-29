@@ -1,28 +1,79 @@
 'use strict';
 
 const TrainingPlanner = {
+  levels:{base:'Základy',standard:'Upevnenie',challenge:'Výzva'},
   pitches:{quarter:{label:'1/4 ihriska',width:35,height:25},half:{label:'1/2 ihriska',width:50,height:35},full:{label:'Celé ihrisko',width:70,height:50}},
   supports(training){return training?.id==='2026-10-29'&&Boolean(training.quarterPitch);},
   normalize(input={}){
     const pitch=Object.hasOwn(this.pitches,input.pitch)?input.pitch:'quarter',preset=this.pitches[pitch];
     const integer=(value,fallback,min,max)=>Number.isFinite(Number(value))&&value!==''?Math.max(min,Math.min(max,Math.round(Number(value)))):fallback;
-    return{players:integer(input.players,20,14,30),coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90)};
+    const players=integer(input.players,20,14,30),sizes=Array.isArray(input.groupSizes)?input.groupSizes.map(Number):[],levels=Array.isArray(input.levels)?input.levels:[];
+    return{players,coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90),groupSizes:sizes.length===4&&sizes.every(n=>Number.isInteger(n)&&n>=3&&n<=8)&&sizes.reduce((a,b)=>a+b,0)===players?sizes:this.groups(players),levels:Array.from({length:4},(_,i)=>Object.hasOwn(this.levels,levels[i])?levels[i]:'standard')};
   },
   groups(total){return Array.from({length:4},(_,index)=>Math.floor(total/4)+(index<total%4?1:0));},
+  halfBasics(total){const a=Math.ceil(total/2),b=Math.floor(total/2);return{groupSizes:[Math.ceil(a/2),Math.floor(a/2),Math.ceil(b/2),Math.floor(b/2)],levels:['base','base','standard','standard']};},
   form(size){const team=size===3?1:size>=7?3:2;return{team,neutral:size-2*team,label:`${team} na ${team}${size-2*team?' + '+(size-2*team)+' N':''}`};},
   organization(config,groups){
     const labels=['A1','A2','B1','B2'];
-    const assignments=config.coaches===1?['Tréner 1: všetky štyri skupiny, vždy rovnaká činnosť a spoločný signál. Ukážku urob celému mužstvu.']:config.coaches===2?['Tréner 1: A1 a A2.','Tréner 2: B1 a B2.']:config.coaches===3?['Tréner 1: A1.','Tréner 2: A2.','Tréner 3: B1 a B2 (dve menšie skupiny).']:labels.map((label,index)=>`Tréner ${index+1}: ${label}.`);
+    const assignments=config.coaches===1?['Tréner 1: všetky štyri skupiny, vždy rovnaká činnosť a spoločný signál. Ukážku urob celému mužstvu.']:config.coaches===2?['Tréner 1: A1 a A2.','Tréner 2: B1 a B2.']:config.coaches===3?['Tréner 1: A1.','Tréner 2: A2.','Tréner 3: B1 a B2.']:labels.map((label,index)=>`Tréner ${index+1}: ${label}.`);
     const notes=[...assignments,`Skupiny: ${labels.map((label,index)=>label+' = '+groups[index]).join(', ')}. Čísla hráčov prideľ v každej skupine samostatne.`];
     if(config.coaches===1)notes.push('Pri jednom trénerovi nerob rôzne stanovištia naraz. Počas vody priprav ďalšiu činnosť, dávaj najviac jeden krátky podnet celej skupine.');
     if(config.players>24&&config.width*config.height<=1000)notes.push('25–30 detí na tejto ploche: tesnejšie technické hry 3 na 3 s neutrálnymi. Odporúčame aspoň 2 trénerov; pre voľnejšiu hru zvoľ väčší priestor. Hrajte po zemi, bez silových striel.');
     return notes;
   },
+  forGroup(training,block,index=0){
+    if(!training?.planConfig)return block;
+    const config=training.planConfig,key=block.diagram;
+    if(key==='football-warmup'){
+      const first=index*2,labels=['A1','A2','B1','B2'];
+      return{...block,skillLabel:[first,first+1].map(i=>labels[i]+' · '+this.levels[config.levels[i]]).join(' / '),skillTask:'Vedenie začína každý s vlastnou loptou. Na prihrávky vytvor dvojice/trojicu v rámci A1/A2 alebo B1/B2 podľa zvolenej náročnosti; skupiny nemiešaj.',steps:block.steps.map((text,i)=>i===2?text+' Dvojice skladaj v rámci budúcich skupín. Základy: 3–4 m, prijmi a prihraj bez tlaku. Upevnenie: prvý dotyk do voľna. Výzva: rozhľad a prihrávka po pohybe.':text)};
+    }
+    if(key==='football-finish')return block;
+    const level=config.levels[index]||'standard',b={...block,steps:[...block.steps],cues:[...block.cues],adjustments:[...block.adjustments],skillLabel:this.levels[level]};
+    const tasks={
+      'football-pass':{
+        base:'Dvojice/trojica na 3–4 m, každá s loptou. Prijmi, upokoj loptu a prihraj vnútornou stranou po zemi. Bez obrancu a bez povinného presunu po prihrávke.',
+        standard:'Pred prijatím sa pozri. Prvým dotykom priprav ďalšiu prihrávku a po prihrávke vytvor nový uhol.',
+        challenge:'Pred prijatím sa dvakrát rozhliadni, prijmi otvoreným postavením a po prihrávke sa rýchlo ponúkni. Až pri úspešnom obehu skús 2–3 dotyky; pri stratách limit zruš.'},
+      'football-rondo':{
+        base:'Obranca najprv iba kráča a zachytáva prihrávky; loptu pri nohe neodoberá. Hráč môže loptu zastaviť a pripraviť si prihrávku. Tlak pridaj až po viacerých zvládnutých prihrávkach.',
+        standard:'Aktívny, primeraný tlak. Dotyky neobmedzuj; sleduj rozhľad a ponuku v rôznych uhloch.',
+        challenge:'Obrancovia aktívne zatvárajú prihrávkové línie. Hľadaj novú ponuku hneď po prihrávke. Limit 2–3 dotykov zaveď len pri opakovane úspešnej hre.'},
+      'football-zones':{
+        base:'Prijímajúci dostane približne 2 s na spracovanie bez odoberania lopty. Dotyky neobmedzuj; do zóny možno viesť aj prihrať. Nevynucuj počet prihrávok.',
+        standard:'Voľné dotyky a aktívna obrana. Bod za kontrolované vedenie alebo príjem prihrávky v zóne.',
+        challenge:'Aktívna obrana bez ochrany príjmu. Hľadaj prihrávku do nábehu; bod po prihrávke a opätovnej ponuke môže byť za 2. Bez povinného počtu prihrávok.'},
+      'football-mini-games':{
+        base:'Vyrovnané tímy iba v tejto skupine. Pri príjme približne 2 s bez odoberania; potom normálna hra. Gól za 1, voľné dotyky, žiadna povinná kombinácia.',
+        standard:'Vyrovnané tímy v rámci skupiny, voľná hra a pôvodné bodovanie. Sleduj ponuku po prihrávke.',
+        challenge:'Tímy zostávajú v tejto skupine, obrana naplno primerane úlohe. Prvé dva úseky odmeň gól po prihrávke a novej ponuke za 2; posledné dva voľná hra.'}
+    };
+    b.skillTask=tasks[key]?.[level]||'';
+    b.summary=b.skillTask;
+    if(level==='challenge'&&key==='football-pass')b.steps[1]+=' '+b.skillTask;
+    if(level==='base'&&key==='football-pass'){
+      b.stepTitles=['Dvojice a trojica','Prijmi a prihraj','Práca bez presunu','Série a prestávky','Voda'];
+      b.steps[0]='V rovnakej ploche vytvor dvojice; pri nepárnom počte jednu trojicu. Každá má vlastnú loptu, prihrávka na 3–4 m, žiadne rady ani presun do susednej skupiny.';
+      b.steps[1]='Prijmi vnútornou stranou, priprav loptu pred seba a pošli ju po zemi spoluhráčovi. Dotyky neobmedzuj.';
+      b.steps[2]='Hráči zostávajú vo svojich dvojiciach/trojici. V trojici ide lopta 1 → 2 → 3 → 1; pravidelne otoč smer. Nový uhol pridaj až po zvládnutí prihrávky.';
+      const size=config.groupSizes[index],pairs=(size-3)/2;
+      b.tables=[{groupSize:size,caption:'Dvojice a prípadná trojica; každý aktívny, každá podskupina s loptou',headers:['Počet v skupine','Rozdelenie'],rows:[[String(size),size===3?'1 trojica':size%2?`${pairs} ${pairs===1?'dvojica':'dvojice'} + 1 trojica`:`${size/2} dvojice`]]}];
+    }
+    if(key==='football-rondo')b.steps[3]=b.skillTask+' Bod za 3 prihrávky; roly a časy zostávajú podľa tabuľky.';
+    if(key==='football-zones')b.steps[1]=b.skillTask+' Neutrálny sám neboduje; v zóne sa nečaká natrvalo.';
+    if(key==='football-mini-games'){b.steps[2]+=' '+b.skillTask;if(level==='base')b.steps[4]='Všetky štyri úseky gól za 1. Žiadna povinná kombinácia ani počet dotykov. Podpor snahu prijať a presne prihrať.';}
+    b.adjustments.unshift(b.skillTask,'Ak je úloha príliš ťažká, uber najprv tlak alebo počet pravidiel. Ak je ľahká, pridaj iba jednu výzvu. Presun medzi skupinami rieš individuálne počas vody, bez verejného porovnávania detí.');
+    if(level==='base')b.cues=['Priprav si loptu pred seba.','Pozri na spoluhráča a prihraj po zemi.'];
+    else if(level==='challenge')b.cues=['Pozri sa pred prijatím.','Prihraj a hneď vytvor nový uhol.'];
+    return b;
+  },
   adapt(source,input){
     if(!this.supports(source))return source;
-    const config=this.normalize(input),t=JSON.parse(JSON.stringify(source)),groups=this.groups(config.players),labels=['A1','A2','B1','B2'];
+    const config=this.normalize(input),t=JSON.parse(JSON.stringify(source)),groups=config.groupSizes,labels=['A1','A2','B1','B2'];
     t.planConfig=config;t.organizationNotes=this.organization(config,groups);t.coaches=config.coaches+' '+(config.coaches===1?'tréner':'tréneri');t.players=config.players+' detí · bez brankárov';
-    t.attendanceCases=Array.from({length:17},(_,i)=>({total:i+14,groups:this.groups(i+14)}));
+    t.attendanceCases=Array.from({length:17},(_,i)=>({total:i+14,groups:i+14===config.players?groups:this.groups(i+14)}));
+    t.organizationNotes.push('Deti rozdeľ podľa aktuálneho zvládnutia tejto úlohy, nie iba podľa počtu alebo fyzickej sily. Skupiny zostávajú oddelené aj v minihre; vnútri vytvor vyrovnané družstvá. Názvy Základy/Upevnenie/Výzva sú voľby trénera, nie trvalé nálepky detí.');
+    t.organizationNotes.push(labels.map((label,i)=>`${label}: ${groups[i]} · ${this.levels[config.levels[i]]}`).join('; ')+'.');
     const w=config.width,h=config.height,workW=Math.min(w,47),workH=Math.min(h,39),ox=(w-workW)/2,oy=(h-workH)/2,cw=(workW-7)/2,ch=(workH-7)/2,round=value=>Math.round(value*10)/10,gameLength=Math.min(cw,20),gameWidth=round(Math.min(ch,16,gameLength*.8)),passLength=gameLength-2;
     const gameAreas=labels.map((label,i)=>({label,x:ox+2+Math.floor(i/2)*(cw+3)+(cw-gameLength)/2,y:oy+2+(i%2)*(ch+3)+(ch-gameWidth)/2,w:gameLength,h:gameWidth,length:gameLength,width:gameWidth}));
     const passAreas=gameAreas.map(area=>({...area,x:area.x+1,w:passLength,length:passLength}));
@@ -32,7 +83,7 @@ const TrainingPlanner = {
     t.organizationNotes.push(`Dostupných ${w} × ${h} m; pracovná zóna ${workW} × ${workH} m v strede. Plochy držíme blízko seba kvôli presunom a prehľadu trénerov.`);
     layout.assumption=`${this.pitches[config.pitch].label}: dostupná plocha ${w} × ${h} m. Cvičenia sú sústredené v zóne ${workW} × ${workH} m. Štvrť 35 × 25 m je pôvodne potvrdená; ostatné rozmery si over podľa prideleného priestoru. Priechody aspoň 3 m, obvod aspoň 2 m.`;
     for(const[key,areas]of Object.entries({'football-warmup':warmAreas,'football-pass':passAreas,'football-rondo':passAreas,'football-zones':gameAreas,'football-mini-games':gameAreas})){
-      layout.stages[key].areas=areas;
+      layout.stages[key].areas=areas.map((area,i)=>({...area,count:key==='football-warmup'?layout.warmupCounts[i]:groups[i],skill:key==='football-warmup'?null:config.levels[i]}));
       layout.stages[key].instructions=key==='football-warmup'?`Dve zóny ${warmLength} × ${warmWidth} m; A má ${layout.warmupCounts[0]} a B ${layout.warmupCounts[1]} detí. A neskôr vytvorí A1/A2, B vytvorí B1/B2. Každý vlastnú loptu. Voľný stredný priechod 3 m.`:`Štyri plochy ${areas[0].length} × ${areas[0].width} m: ${labels.map((label,i)=>label+' '+groups[i]).join(', ')} hráčov. Medzi pracovnými plochami aspoň 3 m, po obvode aspoň 2 m. ${key==='football-zones'?'Koncové zóny sú hlboké 2 m.':key==='football-mini-games'?'Dve kužeľové bránky široké 2 m na každej ploche.':''}`;
     }
     for(const block of t.blocks){
@@ -96,6 +147,7 @@ const TrainingPlanner = {
     t.notes[3].text='Ukážka je jedna možnosť riešenia. Vyber konkrétnu skupinu A1/A2/B1/B2; nákres, počet aj návod sa zosúladia. Animácia nemení tréningový časovač.';
     t.notes.unshift({title:'Organizácia podľa aktuálnych podmienok',text:t.organizationNotes.join(' ')});
     t.sources.push({label:'FIFA Training Centre: zmena počtu hráčov a priestoru',url:'https://www.fifatrainingcentre.com/en/practice/grassroots/8-to-12/different-pitches.php'});
+    t.sources.push({label:'The FA: primerané výzvy podľa aktuálnych zručností',url:'https://www.thefa.com/bootroom/resources/coaching/how-to-challenge-all-the-players-in-your-coaching-session'});
     return t;
   }
 };
