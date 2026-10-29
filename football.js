@@ -197,11 +197,11 @@ const FootballScenes = {
     if(areas.length)options.size=areas[pitchIndex].count;
     const focused=Boolean(options.brief),root=html('div',focused?'football-board exercise-flow':'football-board');
     const briefRoot=html('div','exercise-info'),tweaks=html('details','exercise-tweaks');
-    let topic='steps',instructionIndex=0,equipmentIndex=0,timePart='work',instructionMode=false;
-    const itemPager=html('div','exercise-item-pager'),modeButton=html('button','secondary-button exercise-mode-button','Ako to robiť →');modeButton.type='button';modeButton.addEventListener('click',()=>{instructionMode=!instructionMode;pause();applyTopic();});
+    let topic='steps',instructionIndex=0,equipmentIndex=-1,timePart='work',instructionMode=false;
+    const preview=html('p','exercise-preview'),itemPager=html('div','exercise-item-pager'),modeButton=html('button','secondary-button exercise-mode-button','Ako to robiť →');modeButton.type='button';modeButton.addEventListener('click',()=>{instructionMode=!instructionMode;pause();applyTopic();});
     const topicNav=html('nav','exercise-topic-nav');topicNav.setAttribute('aria-label','Podrobnosti cvičenia');
     if(focused)for(const[key,title]of[['steps','Postup'],['space','Plocha'],['time','Čas'],['coach','Tréner'],['kit','Pomôcky']]){const button=html('button','',title);button.type='button';button.dataset.topic=key;button.setAttribute('aria-controls','exercise-panel-'+key);button.addEventListener('click',()=>{topic=key;briefRoot.scrollTop=0;if(key!=='steps')pause();applyTopic();parent.closest('section')?.scrollIntoView({block:'start',behavior:'instant'});});topicNav.append(button);}
-    tweaks.append(html('summary','',areas.length?'Upraviť skupinu a podmienky':'Schéma a nastavenia'));
+    tweaks.append(html('summary','',areas.length?'Nastaviť skupinu':'Schéma a nastavenia'));
     const selectors=html('div','football-selectors');
     const choose=(label,values,selected,callback)=>{const wrap=html('label','football-select-label',label),select=html('select');select.setAttribute('aria-label',label);values.forEach(([value,text])=>{const option=html('option','',text);option.value=value;select.append(option);});select.value=selected;select.addEventListener('change',()=>callback(Number(select.value)));wrap.append(select);selectors.append(wrap);};
     const areaTools=html('div','football-area-tools');
@@ -234,7 +234,8 @@ const FootballScenes = {
     const status=html('p','football-status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
     const progress=html('output','football-progress');progress.setAttribute('aria-live','off');progress.setAttribute('aria-label','Priebeh celej ukážky');
     const controls=html('div','football-controls'),play=html('button','button','Prehrať'),next=html('button','secondary-button','Ďalší krok'),reset=html('button','secondary-button','Od začiatku');
-    for(const b of[play,next,reset])b.type='button';controls.append(play,next,reset);
+    for(const b of[play,next,reset])b.type='button';if(focused)controls.append(play,modeButton);else controls.append(play,next,reset);
+    const fineControls=html('div','football-controls exercise-animation-tools');if(focused)fineControls.append(next,reset);
     const settings=html('div','football-playback-settings'),speedLabel=html('label','football-select-label','Rýchlosť animácie'),speed=html('select');speed.setAttribute('aria-label','Rýchlosť animácie');
     for(const[value,label]of[[.25,'0,25×'],[.5,'0,5×'],[1,'1×'],[1.5,'1,5×']]){const option=html('option','',label);option.value=value;speed.append(option);}speed.value='0.5';speedLabel.append(speed);
     const repeatLabel=html('label','football-repeat'),repeat=html('input');repeat.type='checkbox';repeat.checked=true;repeatLabel.append(repeat,document.createTextNode('Opakovať dokola'));settings.append(speedLabel,repeatLabel);
@@ -257,20 +258,20 @@ const FootballScenes = {
     if(options.levelConfig?.()&&areas.length)toolsParent.append(levelTools);
     if(options.onCountChange&&options.levelConfig?.()&&areas.length)toolsParent.append(countTools);
     if(options.onPitchChange&&options.levelConfig?.()&&areas.length)toolsParent.append(pitchTools);
-    if(focused)root.append(figure,controls,briefRoot,itemPager,modeButton,topicNav);else root.append(skill,figure,controls);
+    if(focused)root.append(figure,controls,preview,briefRoot,itemPager,topicNav);else root.append(skill,figure,controls);
     let guide;
     if(options.onGuide){
       guide=html('button','football-guide-entry');guide.type='button';guide.setAttribute('aria-haspopup','dialog');
       const guideArrow=html('span','','→');guideArrow.setAttribute('aria-hidden','true');guide.append(html('strong','','Ako viesť cvičenie'),guideArrow);
       guide.addEventListener('click',options.onGuide);if(!focused)root.append(guide);
-      const more=html('details','football-options');more.append(html('summary','','Schéma a nastavenia'),coneGuide,layoutGuide,selectors,settings,status,progress,scrub,note,legend);toolsParent.append(more);
-    }else root.append(coneGuide,layoutGuide,selectors,settings,status,progress,scrub,note,legend);
+      const more=html('details','football-options');more.append(html('summary','','Schéma a nastavenia'),coneGuide,layoutGuide,selectors,settings,...(focused?[fineControls]:[]),status,progress,scrub,note,legend);toolsParent.append(more);
+    }else root.append(coneGuide,layoutGuide,selectors,settings,...(focused?[fineControls]:[]),status,progress,scrub,note,legend);
     parent.append(root);
     let actors=new Map(),arrowLayers=[];
-    function focusControl(element){element.focus({preventScroll:true});if(focused){const box=element.getBoundingClientRect();if(box.top<12||box.bottom>innerHeight-228)element.scrollIntoView({block:'nearest',behavior:'instant'});}}
+    function focusControl(element){element.focus({preventScroll:true});if(focused){const box=element.getBoundingClientRect();if(box.top<12||box.bottom>innerHeight-150)element.scrollIntoView({block:'nearest',behavior:'instant'});}}
     function applyTopic(){
       root.dataset.topic=topic;root.dataset.instructions=String(instructionMode);
-      modeButton.hidden=topic!=='steps';modeButton.textContent=instructionMode?'← Nákres a animácia':'Ako to robiť →';modeButton.setAttribute('aria-expanded',String(instructionMode));modeButton.setAttribute('aria-controls','exercise-panel-steps');
+      modeButton.hidden=topic!=='steps';modeButton.textContent=instructionMode?'← Nákres':'Kroky →';preview.hidden=topic!=='steps'||instructionMode;modeButton.setAttribute('aria-expanded',String(instructionMode));modeButton.setAttribute('aria-controls','exercise-panel-steps');
       const oldPager=itemPager.firstElementChild;if(oldPager)briefRoot.querySelector('[data-panel="'+oldPager.dataset.panel+'"]')?.append(oldPager);itemPager.replaceChildren();const activePager=briefRoot.querySelector('[data-panel="'+topic+'"] .exercise-pager');if(activePager)itemPager.append(activePager);itemPager.hidden=topic==='steps'&&!instructionMode||!activePager;
       briefRoot.hidden=topic==='steps'&&!instructionMode;
       for(const panel of briefRoot.children)panel.hidden=panel.dataset.panel!==topic;
@@ -278,21 +279,26 @@ const FootballScenes = {
     }
     function renderBrief(){
       if(!focused)return;
-      const data=options.brief(pitchIndex);if(!data)return;itemPager.replaceChildren();briefRoot.replaceChildren();visualLabel.textContent=data.selection;
+      const data=options.brief(pitchIndex);if(!data)return;itemPager.replaceChildren();briefRoot.replaceChildren();visualLabel.textContent=data.selection.replace(/^Ukážka /,'').replace(/ z \d+ detí/,' detí');preview.textContent=data.steps[instructionIndex]||data.steps[0];
       const panels={};for(const key of['steps','space','time','coach','kit']){const panel=html('div','exercise-topic-panel');panel.id='exercise-panel-'+key;panel.dataset.panel=key;panel.setAttribute('role','region');panel.setAttribute('aria-label',{steps:'Postup cvičenia',space:'Plocha a skupiny',time:'Práca, oddych a striedanie',coach:'Pokyny trénera',kit:'Pomôcky cvičenia'}[key]);panels[key]=panel;briefRoot.append(panel);}
       const card=(title)=>{const section=html('section','exercise-card');section.append(html('h2','',title));return section;};
       const list=(tag,items)=>{const node=html(tag);items.forEach(text=>node.append(html('li','',text)));return node;};
       const pager=(kind,index,count,change)=>{const bar=html('div','exercise-pager exercise-'+kind+'-pager'),back=html('button','secondary-button','← Späť'),forward=html('button','button','Ďalej →'),counter=html('output','',`${index+1} / ${count}`);counter.setAttribute('aria-live','polite');for(const button of[back,forward])button.type='button';back.setAttribute('aria-label',kind==='step'?'Predošlý bod postupu':'Predošlá pomôcka');forward.setAttribute('aria-label',kind==='step'?'Ďalší bod postupu':'Ďalšia pomôcka');back.disabled=index===0;forward.disabled=index===count-1;for(const[button,direction]of[[back,-1],[forward,1]])button.addEventListener('click',()=>{change(index+direction);renderBrief();focusControl(root.querySelector('.exercise-'+kind+'-pager button'+(direction>0?':last-child':':first-child')+':not(:disabled)')||root.querySelector('.exercise-'+kind+'-pager button:not(:disabled)'));});bar.dataset.panel=kind==='step'?'steps':'kit';bar.append(back,counter,forward);return bar;};
       instructionIndex=Math.min(instructionIndex,data.steps.length-1);
-      const how=card('Ako to robiť');how.append(html('p','exercise-current-step',data.steps[instructionIndex]),pager('step',instructionIndex,data.steps.length,index=>instructionIndex=index));const full=html('details','exercise-more');full.append(html('summary','','Zadanie a celý postup'),html('p','',data.description),list('ol',data.steps));if(guide)full.append(guide);how.append(full);panels.steps.append(how);
-      const space=card('Plocha a rozdelenie detí');space.append(html('p','exercise-fact',data.space),html('p','',data.grouping));if(data.groups.length)space.append(list('ul',data.groups));if(data.coaches.length)space.append(list('ul',data.coaches));if(data.spacing)space.append(html('p','small-note',data.spacing));
-      if(areas.length){const mapButton=html('button','secondary-button','Ukázať rozmiestnenie');mapButton.type='button';mapButton.dataset.exerciseMap='true';mapButton.setAttribute('aria-haspopup','dialog');mapButton.addEventListener('click',openLayout);space.append(mapButton);const prepare=html('button','text-button','Príprava ihriska krok po kroku →');prepare.type='button';prepare.addEventListener('click',options.onSetup);space.append(prepare);}panels.space.append(space,tweaks);
+      const how=card('Postup');how.append(html('p','exercise-current-step',data.steps[instructionIndex]),pager('step',instructionIndex,data.steps.length,index=>instructionIndex=index));const full=html('details','exercise-more');full.append(html('summary','','Viac k postupu'),html('p','',data.description),list('ol',data.steps));if(guide)full.append(guide);how.append(full);panels.steps.append(how);
+      const space=card('Rozloženie'),facts=html('div','exercise-facts'),area=areas[pitchIndex];
+      if(area){for(const[value,label]of[[`${layout.width} × ${layout.height} m`,'Celý priestor'],[`${area.length} × ${area.width} m`,'Jedna plocha']]){const fact=html('div');fact.append(html('strong','',value),html('span','',label));facts.append(fact);}space.append(facts,html('p','exercise-group-chip',visualLabel.textContent));}else space.append(html('p','',data.grouping));
+      if(areas.length){const mapButton=html('button','secondary-button','Mapa rozloženia');mapButton.type='button';mapButton.dataset.exerciseMap='true';mapButton.setAttribute('aria-haspopup','dialog');mapButton.addEventListener('click',openLayout);space.append(mapButton);const prepare=html('button','text-button','Pripraviť ihrisko →');prepare.type='button';prepare.addEventListener('click',options.onSetup);space.append(prepare);}
+      const organization=html('details','exercise-more');organization.append(html('summary','','Skupiny a tréneri'),html('p','',data.space),html('p','',data.grouping));if(data.groups.length)organization.append(list('ul',data.groups));if(data.coaches.length)organization.append(list('ul',data.coaches));if(data.spacing)organization.append(html('p','small-note',data.spacing));space.append(organization);panels.space.append(space,tweaks);
       const timeNav=html('div','exercise-time-nav');timeNav.setAttribute('role','group');timeNav.setAttribute('aria-label','Dávka cvičenia');
       for(const[title,text,kind]of[['Práca',data.work,'work'],['Oddych',data.rest,'rest'],['Striedanie',data.rotation,'rotation']]){const button=html('button','secondary-button',title);button.type='button';button.setAttribute('aria-pressed',String(timePart===kind));button.setAttribute('aria-controls','exercise-time-'+kind);button.addEventListener('click',()=>{timePart=kind;for(const item of timeNav.children)item.setAttribute('aria-pressed',String(item===button));for(const section of panels.time.querySelectorAll('[data-time-part]'))section.hidden=section.dataset.timePart!==kind;});timeNav.append(button);const section=card(title);section.id='exercise-time-'+kind;section.dataset.timePart=kind;section.hidden=timePart!==kind;section.classList.add('exercise-'+kind);section.append(html('p','',text));if(kind==='rotation'&&!['football-warmup','football-finish'].includes(block.diagram)){const rotate=html('button','secondary-button','Podrobné striedanie');rotate.type='button';rotate.addEventListener('click',()=>options.onGuideSection('rotations'));section.append(rotate);}panels.time.append(section);}panels.time.prepend(timeNav);
-      if(data.notes.length){const notes=card('Poznámky trénera');notes.classList.add('exercise-notes');notes.append(list('ul',data.notes));panels.coach.append(notes);}
-      const slogan=card('Heslo pre deti');slogan.classList.add('exercise-slogan');slogan.append(html('blockquote','',data.slogan));panels.coach.prepend(slogan);
+      if(data.notes.length){const notes=html('details','exercise-more exercise-coach-notes');notes.append(html('summary','','Pokyny trénera'),list('ul',data.notes));panels.coach.append(notes);}
+      const slogan=card('Povedz deťom');slogan.classList.add('exercise-slogan');slogan.append(html('blockquote','',data.slogan));panels.coach.prepend(slogan);
       equipmentIndex=Math.min(equipmentIndex,data.visualKit.length-1);
-      const kit=card('Pomôcky na toto cvičenie'),gear=html('div','exercise-kit-grid'),item=data.visualKit[equipmentIndex];kit.classList.add('exercise-kit');const tile=html('div','exercise-kit-tile');tile.dataset.equipment=item.kind;const text=html('div','exercise-kit-text');text.append(html('h3','',item.title),html('strong','exercise-kit-value',item.value),html('p','',item.detail));tile.append(equipmentIcon(item.kind),text);gear.append(tile);kit.append(gear);if(data.visualKit.length>1)kit.append(pager('equipment',equipmentIndex,data.visualKit.length,index=>equipmentIndex=index));const all=html('details','exercise-more');all.append(html('summary','','Všetky pomôcky a rozloženie'),list('ul',data.kit));if(data.conesTotal)all.append(html('p','small-note',data.conePlacement));kit.append(all);for(const note of data.kitNotes)kit.append(html('p','small-note',note));panels.kit.append(kit);
+      const kit=card('Pomôcky'),gear=html('div','exercise-kit-overview'),detail=html('div','exercise-kit-detail');detail.id='exercise-kit-detail';kit.classList.add('exercise-kit');
+      const titles={ball:'Lopty',cone:'Kužele',bibs:'Rozlišovačky',gates:'Bránky',timer:'Stopky',signal:'Píšťalka',water:'Voda'};
+      const showEquipment=index=>{equipmentIndex=index;detail.replaceChildren();detail.hidden=index<0;for(const[order,button]of [...gear.children].entries())button.setAttribute('aria-expanded',String(order===index));if(index<0)return;const item=data.visualKit[index];detail.append(html('h3','',item.title),html('p','',item.detail));if(item.kind==='cone'&&data.conesTotal)detail.append(html('p','small-note',data.conePlacement));};
+      for(const[index,item]of data.visualKit.entries()){const tile=html('button','exercise-kit-choice');tile.type='button';tile.dataset.equipment=item.kind;tile.setAttribute('aria-controls',detail.id);tile.setAttribute('aria-label',`${item.title}: ${item.value}. Podrobnosti`);tile.append(equipmentIcon(item.kind),html('span','exercise-kit-name',titles[item.kind]),html('strong','exercise-kit-count',item.value));tile.addEventListener('click',()=>{showEquipment(equipmentIndex===index?-1:index);if(!detail.hidden)detail.scrollIntoView({block:'nearest',behavior:'instant'});});gear.append(tile);}kit.append(gear,detail);showEquipment(equipmentIndex);const all=html('details','exercise-more');all.append(html('summary','','Celý zoznam'),list('ul',data.kit));if(data.conesTotal)all.append(html('p','small-note',data.conePlacement));kit.append(all);panels.kit.append(kit);
       applyTopic();
     }
     function selection(){return{index:pitchIndex,count:options.size,label:areas[pitchIndex]?.label,areas};}
@@ -382,6 +388,7 @@ const FootballScenes = {
         if(setup.extra)coneGuide.append(html('p','small-note',setup.extra));
       }
       const p=scene.pitch;
+      if(focused)svg.setAttribute('viewBox',p?`${p.x-20} ${p.y-20} ${p.w+40} ${p.h+56}`:'0 0 360 270');
       if(p){
         svg.append(svgNode('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:'#e5eddd',stroke:'#638268','stroke-width':1.2}));
         if(p.zones){const depth=p.w*2/p.length;for(const x of[p.x,p.x+p.w-depth])svg.append(svgNode('rect',{x,y:p.y,width:depth,height:p.h,fill:'#cfdcbd',stroke:'#638268'}));}
@@ -413,7 +420,7 @@ const FootballScenes = {
         else g.append(svgNode('text',{x:0,y:.5,'text-anchor':'middle','dominant-baseline':'middle',fill:['N','T'].includes(node.team)?'#173b31':'white','font-size':r===7?7:9,'font-weight':650},node.label));
         svg.append(g);actors.set(node.id,g);
       }
-      caption.textContent=scene.caption;scrub.max=String(scene.duration);controls.hidden=scene.duration===0;settings.hidden=scene.duration===0;scrub.hidden=scene.duration===0;note.hidden=scene.duration===0;progress.hidden=scene.duration===0;
+      caption.textContent=scene.caption;scrub.max=String(scene.duration);controls.hidden=scene.duration===0&&!focused;play.hidden=scene.duration===0;fineControls.hidden=scene.duration===0;settings.hidden=scene.duration===0;scrub.hidden=scene.duration===0;note.hidden=scene.duration===0;progress.hidden=scene.duration===0;
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)note.textContent='Prehrávanie spustíš iba tlačidlom. Pri obmedzenom pohybe môžeš použiť Ďalší krok alebo posuvník.';
       renderBrief();
       render();

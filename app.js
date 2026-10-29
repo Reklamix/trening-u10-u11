@@ -466,7 +466,7 @@ const PersonalPlans = [
     const last = state.blockIndex === state.selected.blocks.length - 1;
     const allDone = completed().length === state.selected.blocks.length;
     const lastDone = last && completed().includes(block.id);
-    $('complete-block').textContent = last ? lastDone ? 'Posledná časť hotová ✓' : 'Dokončiť tréning ✓' : 'Hotovo → ďalej';
+    $('complete-block').textContent = last ? lastDone ? 'Posledná časť hotová ✓' : 'Dokončiť tréning ✓' : state.selected.planConfig ? 'Hotovo →' : 'Hotovo → ďalej';
     $('complete-block').disabled = lastDone;
     const next = state.selected.blocks[state.blockIndex + 1];
     $('next-preview').textContent = next ? 'Nasleduje: ' + next.title + ' · ' + (next.end - next.start) + ' min' : 'Posledná časť tréningu.';
