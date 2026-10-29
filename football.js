@@ -188,6 +188,7 @@ const FootballScenes = {
     const selectors=html('div','football-selectors');
     const choose=(label,values,selected,callback)=>{const wrap=html('label','football-select-label',label),select=html('select');select.setAttribute('aria-label',label);values.forEach(([value,text])=>{const option=html('option','',text);option.value=value;select.append(option);});select.value=selected;select.addEventListener('change',()=>callback(Number(select.value)));wrap.append(select);selectors.append(wrap);};
     const areaTools=html('div','football-area-tools');
+    const levelTools=html('div','football-level-tools');
     let areaSelect;
     const areaLabel=area=>`${area.label} · ${area.count} ${area.count<5?'hráči':'hráčov'}`;
     if(areas.length){
@@ -233,6 +234,7 @@ const FootballScenes = {
     legend.append(caption,list);
     if(!layout&&/^\.\/assets\/[a-z0-9._-]+\.png$/i.test(options.sheet||'')){const a=html('a','guide-link','Otvoriť všetkých šesť schém ↗');a.href=options.sheet;a.target='_blank';a.rel='noopener noreferrer';legend.append(a);}
     if(areas.length)root.append(areaTools);
+    if(options.levelConfig?.()&&areas.length)root.append(levelTools);
     root.append(skill,figure,controls);
     if(options.onGuide){
       const guide=html('button','football-guide-entry');guide.type='button';guide.setAttribute('aria-haspopup','dialog');
@@ -243,6 +245,17 @@ const FootballScenes = {
     parent.append(root);
     let actors=new Map(),arrowLayers=[];
     function selection(){return{index:pitchIndex,count:options.size,label:areas[pitchIndex]?.label,areas};}
+    function renderLevelTools(){
+      const config=options.levelConfig?.();levelTools.replaceChildren();if(!config||!areas.length)return;
+      const indices=block.diagram==='football-warmup'?[pitchIndex*2,pitchIndex*2+1]:[pitchIndex];
+      for(const index of indices){
+        const group=['A1','A2','B1','B2'][index],label=html('label','football-select-label','Náročnosť '+group),select=html('select');select.setAttribute('aria-label','Náročnosť '+group);select.dataset.levelGroup=index;
+        for(const[value,title]of Object.entries(TrainingPlanner.levels)){const option=html('option','',title);option.value=value;select.append(option);}select.value=config.levels[index];
+        select.addEventListener('change',()=>{if(options.onLevelChange?.(index,select.value)){const updated=options.levelConfig();if(block.diagram!=='football-warmup')areas.forEach(area=>area.skill=updated.levels[area.index]);build();options.onGroupChange(options.size,pitchIndex);levelTools.querySelector(`[data-level-group="${index}"]`).focus({preventScroll:true});}else select.value=options.levelConfig().levels[index];});
+        label.append(select);levelTools.append(label);
+      }
+      const note=html('p','small-note','Ukladá sa pre skupinu v tomto tréningu.');note.style.gridColumn='1 / -1';levelTools.append(note);
+    }
     function selectArea(index){
       if(!Number.isInteger(index)||!areas[index])return;
       pitchIndex=index;options.size=areas[index].count;areaSelect.value=String(index);build();options.onGroupChange(options.size,index);
@@ -273,6 +286,7 @@ const FootballScenes = {
     }
     function build() {
       pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      renderLevelTools();
       const variant=options.groupBlock?.(pitchIndex);skill.hidden=!variant?.skillTask;skill.replaceChildren();if(variant?.skillTask)skill.append(html('strong','',variant.skillLabel+' · '+(areas[pitchIndex]?.label||'')),html('p','',variant.skillTask));
       svg.setAttribute('aria-label',block.title+(areas.length?' · '+areaLabel(areas[pitchIndex]):''));renderMap();
       clock.setRate(Number(speed.value));clock.setLoop(repeat.checked);

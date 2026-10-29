@@ -22,6 +22,8 @@ Nad štvrtkovým nákresom vyberáš skutočnú skupinu A1/A2/B1/B2 aj s počtom
 
 Používateľ odhaduje pri plných30 deťoch približne polovicu s potrebou základov. Skratka **Polovica na základy** pripraví A1/A2 Základy a B1/B2 Upevnenie, pri30 počty8+7+8+7 (15 a15). Potvrdenie cez Použiť a uložiť; Výzvu môže tréner zvoliť následne. Funguje aj pri14–29, rozdiel oboch vetiev najviac jedno dieťa. Konkrétne deti sa automaticky nepriraďujú.
 
+Náročnosť možno meniť aj **priamo v cvičení pod výberom skupiny**. Pri rozohriatí má zóna A samostatné voľby A1/A2 a B má B1/B2; pri ďalších činnostiach meníš práve zvolenú skupinu. Zmena sa hneď použije a uloží pre danú skupinu v celom tomto tréningu, vrátane Prehľadu a zdieľaného odkazu. Návod, pokyn a nákres sa zosúladia; ukážka sa vráti na stojaci začiatok, rýchlosť a opakovanie ostanú. Blok, skupina, tréningový časovač aj dokončenie sa nemenia. Staršie plány a pokojný záver nové voľby nemajú.
+
 Nastavenia sa ukladajú v tomto prehliadači pre každý dátum (`training-config-v1`). Zdieľaný URL obsahuje `pocet`, `plocha=quarter|half|full`, `treneri`, `dlzka`, `sirka`, štyri hodnoty `skupiny` a štyri voľby `urovne` (`base|standard|challenge`); kolega tak otvorí rovnaký variant. Tieto súhrnné podmienky sú verejné, neukladajú mená ani individuálne hodnotenia. Staršie odkazy bez nových polí fungujú s pôvodným Upevnením. Súkromný obsah, heslo, poznámky, checklist a dokončenie sa neprenášajú. GitHub Pages nemá zápis z formulára do spoločného repozitára; obsah a kategórie sú trvalo vo verejnom zdroji, lokálne podmienky sa medzi zariadeniami prenesú odkazom.
 
 `TrainingLibrary.topics` a `TrainingLibrary.tags` v training-planner.js sú trvalé tematické zaradenie: prihrávky, prvý dotyk, pohyb bez lopty, vedenie/kľučky, súboje, rozhodovanie/prečíslenie, rozohrávka, koordinácia/rýchlosť, malé hry, záver. Cvičenie môže mať viac tém. Pri novom type cvičenia pridaj jeho témy; knižnica automaticky načíta nové tréningy zo zdrojových dát. Historické pondelkové a utorkové plány zostávajú pôvodné; novú rodinu prispôsobiteľných tréningov treba výslovne doplniť s vlastnými dávkami a kontrolami.
@@ -105,7 +107,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv13/footballv12/coaching-guidev4/pitch-setupv3/training-plannerv2/CSSv16. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv14/footballv13/coaching-guidev4/pitch-setupv3/training-plannerv2/CSSv17. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 

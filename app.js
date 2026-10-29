@@ -286,7 +286,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -616,6 +616,16 @@ const PersonalPlans = [
       link.addEventListener('click',event=>{if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();history.pushState(null,'',link.href);onRoute();});return link;
     }));
     if(!items.length)$('catalog-list').append(el('p','notice','Nič sa nenašlo. Skús inú tému alebo kratší názov.'));
+  }
+  function changeGroupLevel(index,level){
+    const source=state.trainings.find(training=>training.id===state.selected.id),current=state.selected.planConfig;
+    if(!current||!TrainingPlanner.supports(source)||!Number.isInteger(index)||index<0||index>3||!Object.hasOwn(TrainingPlanner.levels,level))return false;
+    const config=TrainingPlanner.normalize({...current,levels:current.levels.map((value,i)=>i===index?level:value)});
+    configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
+    render(TrainingPlanner.adapt(source,config));
+    history.replaceState(null,'',linkFor(source.id,activeBlock().id,state.view==='field'?null:state.view));
+    message(`${['A1','A2','B1','B2'][index]} · ${TrainingPlanner.levels[level]}. `+(configSaved?'Uložené pre túto skupinu v tomto tréningu.':'Použité; prehliadač nastavenie neuložil. Zachovaj si zdieľaný odkaz.'));
+    return true;
   }
   function applyPlan(changes){
     const source=state.trainings.find(training=>training.id===state.selected.id);
