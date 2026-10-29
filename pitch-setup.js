@@ -55,6 +55,20 @@ const PitchSetupPlan = {
         map:snapshot('football-mini-games')
       }
     ];
+    if(layout.dynamic){
+      const warm=layout.stages['football-warmup'].areas[0],pass=layout.stages['football-pass'].areas[0],game=layout.stages['football-zones'].areas[0];
+      instructions[0].action=`Vyznač dve zóny ${warm.length} × ${warm.width} m podľa nákresu. Do každého rohu polož jednu métu. Priechody nechaj aspoň 3 m a obvod aspoň 2 m voľný.`;
+      instructions[1].action=`Pôvodných 8 rohov presuň podľa šípok do rohov nových plôch a pridaj ďalších 8 rohových mét. Vzniknú štyri plochy ${pass.length} × ${pass.width} m.`;
+      instructions[2].title=`Rozšír plochy na ${game.length} × ${game.width} m`;
+      instructions[2].action=`Na každej ploche presuň ľavé rohy o 1 m doľava a pravé o 1 m doprava. Nový rozmer je ${game.length} × ${game.width} m, spolu presuň 16 mét.`;
+      instructions[2].extra=`Šírka ${game.width} m zostáva. Zachovaj voľné priechody aspoň 3 m a obvod aspoň 2 m.`;
+      instructions[3].extra=`Každá plocha má 4 rohové + 4 zónové méty. Zóny sú hlboké 2 m; stredná časť má ${game.length-4} × ${game.width} m.`;
+      instructions[4].coach=`Skupiny zostávajú na plochách ${game.length} × ${game.width} m; 16 zónových mét sa použije na bránky.`;
+    }
+    if(training.planConfig&&training.planConfig.coaches!==2){
+      for(const step of instructions)step.coach=training.organizationNotes.join(' ')+' Presuny robte počas uvedených prestávok na vodu.';
+      instructions[0].coach=training.planConfig.coaches===1?'Jeden tréner vedie obe zóny rovnakou úlohou a spoločným signálom. Balíčky priprav vopred; A sa neskôr rozdelí na A1/A2 a B na B1/B2.':training.planConfig.coaches===3?'Tréner 1 vedie zónu A, tréner 2 zónu B, tréner 3 pripraví pomôcky a pomáha s organizáciou. Po rozdelení plôch platí rozdelenie z Prehľadu.':'Tréneri 1 a 2 vedú A, tréneri 3 a 4 vedú B. Neskôr má každý svoju skupinu A1/A2/B1/B2.';
+    }
     let previous = [];
     for (const step of instructions) {
       const remaining = new Set(step.map.cones);
@@ -133,14 +147,14 @@ const PitchSetupMotion = {
         const item=el('div');item.append(el('span','',name),el('strong','',String(value)));facts.append(item);
       }
       body.append(facts);
-      const map=svg('svg',{viewBox:`-3 -4 ${layout.width+6} ${layout.height+7}`,role:'img','aria-label':`Príprava krok ${index+1}: ${step.title}`,class:'setup-map'});
+      const scale=Math.max(1,layout.width/35),map=svg('svg',{viewBox:`${-3*scale} ${-4*scale} ${layout.width+6*scale} ${layout.height+7*scale}`,role:'img','aria-label':`Príprava krok ${index+1}: ${step.title}`,class:'setup-map'});
       map.append(svg('rect',{x:0,y:0,width:layout.width,height:layout.height,fill:'#e5eddd',stroke:'#173b31','stroke-width':.25}),svg('rect',{x:layout.corridor.x,y:0,width:layout.corridor.width,height:layout.height,fill:'#e7d5b7'}));
-      const text=(x,y,value,size=1.4)=>svg('text',{x,y,'text-anchor':'middle','font-size':size,fill:'#173b31','font-weight':650,'paint-order':'stroke',stroke:'white','stroke-width':.35},value);
-      map.append(text(layout.width/2,-1.7,`${layout.width} m`),text(-1.4,layout.height/2,`${layout.height} m`,1.2),text(layout.corridor.x+layout.corridor.width/2,layout.height/2,'3 m',1.2));
+      const text=(x,y,value,size=1.4)=>svg('text',{x,y,'text-anchor':'middle','font-size':size*scale,fill:'#173b31','font-weight':650,'paint-order':'stroke',stroke:'white','stroke-width':.35},value);
+      map.append(text(layout.width/2,-1.7*scale,`${layout.width} m`),text(-1.4*scale,layout.height/2,`${layout.height} m`,1.2),text(layout.corridor.x+layout.corridor.width/2,layout.height/2,'3 m',1.2/scale));
       for(const area of step.map.areas){
         map.append(svg('rect',{'data-setup-area':area.label,x:area.x,y:area.y,width:area.w,height:area.h,fill:'#f6f8f1',stroke:'#638268','stroke-width':.22}));
         if(step.map.key==='football-zones'&&!step.map.cornersOnly)for(const x of[area.x,area.x+area.w-2])map.append(svg('rect',{x,y:area.y,width:2,height:area.h,fill:'#d8eea4'}));
-        map.append(text(area.x+area.w/2,area.y+area.h/2-.4,area.label,1.8),text(area.x+area.w/2,area.y+area.h/2+1.5,`${area.length} × ${area.width} m`,1.3));
+        map.append(text(area.x+area.w/2,area.y+area.h/2-.4*scale,area.label,1.8),text(area.x+area.w/2,area.y+area.h/2+1.5*scale,`${area.length} × ${area.width} m`,1.3));
       }
       for(const move of step.moves){
         const {from,to}=move,angle=Math.atan2(to.y-from.y,to.x-from.x);

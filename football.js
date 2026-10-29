@@ -20,7 +20,7 @@ const FootballScenes = {
   keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-mini-games','football-finish'],
   groups(key,total,layout) {
     const areas=layout?.stages?.[key]?.areas||[];
-    return areas.map((area,index)=>({...area,index,count:key==='football-warmup'?(index?Math.ceil(total/2):Math.floor(total/2)):Math.floor(total/areas.length)+(index<total%areas.length?1:0)}));
+    return areas.map((area,index)=>({...area,index,count:key==='football-warmup'?(layout.warmupCounts?.[index]??(index?Math.ceil(total/2):Math.floor(total/2))):Math.floor(total/areas.length)+(index<total%areas.length?1:0)}));
   },
   mapPoint(area,pitch,point) {
     const u=(point.x-pitch.x)/pitch.w,v=(point.y-pitch.y)/pitch.h;
@@ -70,10 +70,10 @@ const FootballScenes = {
     };
     if(key==='football-warmup') {
       scene.pitch=pitch(45,40,270,25,20);
-      const n=pitchIndex?Math.ceil(total/2):Math.floor(total/2); scene.localCount=n;scene.duration=4;
+      const n=area?.count??(pitchIndex?Math.ceil(total/2):Math.floor(total/2)); scene.localCount=n;scene.duration=4;
       const directions=[[.11,.04],[-.1,.06],[-.08,-.05],[.09,-.06],[.06,.07],[-.07,-.07]];
       for(let i=0;i<n;i++){
-        const u=.16+(i%3)*.34,v=.14+Math.floor(i/3)*.24,[dx,dy]=directions[i%directions.length],ballId=i===0?'ball':'b'+i;
+        const u=n>12?.13+(i%4)*.22:.16+(i%3)*.34,v=n>12?.13+Math.floor(i/4)*.22:.14+Math.floor(i/3)*.24,[dx,dy]=directions[i%directions.length],ballId=i===0?'ball':'b'+i;
         const route=[[0,u,v],[1,u+dx*.7,v+dy*.2],[2,u+dx,v+dy],[3,u+dx*.15,v+dy*.9],[4,u,v]];
         add('p'+i,String(i+1),u,v);add(ballId,'',u+.035,v+.025,'A','ball');
         track('p'+i,route);track(ballId,route.map(([t,x,y])=>[t,x+.035,y+.025]));
@@ -82,36 +82,49 @@ const FootballScenes = {
       step(0,'Všetci súčasne vedú vlastnú loptu a sledujú voľný priestor.');step(1,'Meň smer a vyhni sa spoluhráčom.');step(2,'Krátke dotyky, lopta blízko nohy.');step(3,'Rozhliadni sa a pokračuj do voľna.');step(4,'Vedenie pokračuje; dráhy sú len ukážka.');
       scene.caption=`Zóna ${pitchIndex?'B':'A'}: ${n} detí. Obe zóny spolu ${total}. Všetci vedú loptu súčasne, každý svoju. Ukážkové dráhy nie sú povinné trasy ani stanovištia. Potom sa pracuje vo dvojiciach/trojici.`;
     } else if(key==='football-pass') {
-      const positions=[[.15,.6],[.65,.2],[.9,.65],[.45,.9],[.2,.15],[.8,.9]];
+      const positions=size>6?Array.from({length:size},(_,i)=>{const a=Math.PI+i*2*Math.PI/size;return[.5+.35*Math.cos(a),.5+.35*Math.sin(a)];}):[[.15,.6],[.65,.2],[.9,.65],[.45,.9],[.2,.15],[.8,.9]];
       positions.slice(0,size).forEach(([u,v],i)=>add('p'+i,String(i+1),u,v)); add('ball','',.185,.62,'A','ball');
       cycle(positions.slice(0,size),Array.from({length:size},(_,i)=>String(i+1)),'Lopta sa vrátila k hráčovi 1. Celý obeh je dokončený.');
       scene.localCount=size;scene.caption=`Počet v skupine: ${size}. Celý obeh 1 → 2 → … → ${size} → 1; po každej prihrávke nový uhol.`;
     } else if(key==='football-rondo') {
-      const pos=[];
-      for(let i=0;i<size-1;i++){const a=Math.PI+i*2*Math.PI/(size-1);pos.push([.5+.39*Math.cos(a),.5+.39*Math.sin(a)]);add('p'+i,String(i+2),...pos[i]);}
-      add('def','D1',.5,.5,'B');add('ball','',pos[0][0]+.03,pos[0][1]+.02,'A','ball');
-      cycle(pos,Array.from({length:size-1},(_,i)=>String(i+2)),'Lopta je znovu pri hráčovi 2. Obranca sa mení až na signál podľa rotácie.',true);
-      scene.localCount=size;scene.caption=`${size-1} na 1: obranca D1 a hráči 2–${size}. Ukážka celého obehu lopty; v hre hráči vyberajú voľnú možnosť.`;
+      const defenders=size>=7?2:1,pos=[];
+      for(let i=0;i<size-defenders;i++){const a=Math.PI+i*2*Math.PI/(size-defenders);pos.push([.5+.39*Math.cos(a),.5+.39*Math.sin(a)]);add('p'+i,String(i+defenders+1),...pos[i]);}
+      add('def','D1',defenders===2?.44:.5,.5,'B');if(defenders===2)add('def2','D2',.56,.5,'B');add('ball','',pos[0][0]+.03,pos[0][1]+.02,'A','ball');
+      cycle(pos,Array.from({length:size-defenders},(_,i)=>String(i+defenders+1)),'Celý obeh je dokončený. Obrancovia sa menia až na signál podľa rotácie.',true);
+      if(defenders===2){const cx=scene.pitch.x+scene.pitch.w/2,cy=scene.pitch.y+scene.pitch.h/2;scene.tracks.def2=scene.tracks.def.map(([t,x,y])=>[t,2*cx-x+.06*scene.pitch.w,2*cy-y]);scene.tracks.def=scene.tracks.def.map(([t,x,y])=>[t,x-.06*scene.pitch.w,y]);}
+      scene.localCount=size;scene.caption=`${size-defenders} na ${defenders}: ${size} hráčov spolu. Ukážka celého obehu lopty; obrancovia sa menia na signál.`;
+    } else if((key==='football-zones'&&size===3)||(key==='football-mini-games'&&Math.floor(total/4)+(pitchIndex<total%4?1:0)===3)) {
+      const zones=key==='football-zones',attacker=zones?'a1':'a0';
+      scene.pitch=pitch(40,46,280,zones?20:14,zones?14:9,zones?{zones:true}:{goals:true,goalGates:true});scene.localCount=3;scene.duration=zones?6:8;
+      add(attacker,'A1',.2,.3);add('defender','B1',.6,.25,'B');add('n1','N1',.45,.55,'N');add('ball','',.23,.32,'A','ball');
+      track(attacker,[[0,.2,.3],[2,.2,.3],[3,.5,.8],[4,zones?.94:.72,zones?.5:.52],[6,zones?.94:.82,.5],...(zones?[]:[[8,.82,.5]])]);
+      track('ball',[[0,.23,.32],[2,.48,.57],[4,zones?.94:.75,zones?.52:.54],[6,zones?.96:.85,.52],...(zones?[]:[[8,1.015,.5]])]);
+      line('pass',1,[[.2,.3],[.45,.55]]);line('run',2,[[.2,.3],[.5,.8],[zones?.94:.72,zones?.5:.52]]);line('pass',3,[[.45,.55],[zones?.94:.72,zones?.5:.52]]);
+      if(!zones){line('dribble',4,[[.72,.52],[.82,.5]]);line('pass',5,[[.82,.5],[1.015,.5]]);}
+      step(0,'1 na 1 + N: prihrávka neutrálnemu.');step(2,'Znovu sa ponúkni, N vráti loptu do nábehu.');step(4,zones?'Príjem v koncovej zóne.':'Príjem a príprava zakončenia.');step(scene.duration,zones?'Bod v koncovej zóne; N sám neboduje.':'Presná prihrávka cez kužeľovú bránku; N sám neboduje.');
+      scene.caption='Skupina 3: 1 na 1 + N. Neutrálny pomáha útočiacemu hráčovi. Dávku hry a oddychu nájdeš v návode.';
     } else if(key==='football-zones') {
       scene.pitch=pitch(40,46,280,20,14,{zones:true});
       add('a1','A1',.2,.28);add('a2','A2',.22,.72);add('b1','B1',.6,.25,'B');add('b2','B2',.62,.65,'B');
-      if(size>=5)add('n1','N1',.45,.5,'N');if(size===6)add('n2','N2',.4,.89,'N');add('ball','',.23,.3,'A','ball');
+      if(size>=7){add('a3','A3',.15,.5);add('b3','B3',.75,.45,'B');}
+      if(size>=5)add('n1','N1',.45,.5,'N');if(size===6||size===8)add('n2','N2',.4,.89,'N');add('ball','',.23,.3,'A','ball');
       const route=[[.22,.72],[.48,.92],[.76,.92],[.94,.72]];
       track('a2',[[0,...route[0]],[2,...route[0]],[2.65,...route[1]],[3.35,...route[2]],[4,...route[3]],[6,...route[3]]]);
       if(size>=5){track('ball',[[0,.23,.3],[2,.48,.52],[4,.48,.52],[6,.96,.74]]);line('pass',1,[[.2,.28],[.45,.5]]);line('pass',3,[[.45,.5],[.94,.72]]);}
       else {track('ball',[[0,.23,.3],[4,.23,.3],[6,.96,.74]]);line('pass',3,[[.2,.28],[.94,.72]]);}
       line('run',2,route);step(0,size>=5?'1. Prihrávka neutrálnemu hráčovi.':'1. Hráč s loptou si pripraví prihrávku.');step(2,'2. A2 nabieha okolo obrancu do voľnej zóny.');step(4,'3. Prihrávka do nábehu, príjem v koncovej zóne.');step(6,'Bod získava A2. Neutrálny sám neboduje.');
-      scene.localCount=size;scene.caption=`2 na 2${size>4?' + '+(size-4)+' N':''}. Zóny hlboké 2 m. Ukážka prihrávky; platí aj kontrolované vedenie do zóny.`;
+      const team=size>=7?3:2,neutral=size-team*2;scene.localCount=size;scene.caption=`${team} na ${team}${neutral?' + '+neutral+' N':''}. Zóny hlboké 2 m. Ukážka prihrávky; platí aj kontrolované vedenie do zóny.`;
     } else if(key==='football-mini-games') {
       const n=Math.floor(total/4)+(pitchIndex<total%4?1:0);
       scene.pitch=pitch(40,46,280,14,9,{goals:true,goalGates:true});scene.localCount=n;scene.duration=8;
       add('a0','A1',.18,.32);add('a1','A2',.33,.7);add('b0','B1',.7,.12,'B');add('b1','B2',.65,.7,'B');
-      if(n>=5)add('n1','N1',.36,.38,'N');if(n===6)add('n2','N2',.45,.86,'N');add('ball','',.21,.34,'A','ball');
+      if(n>=7){add('a2','A3',.2,.85);add('b2','B3',.8,.45,'B');}
+      if(n>=5)add('n1','N1',.36,.38,'N');if(n===6||n===8)add('n2','N2',.45,.86,'N');add('ball','',.21,.34,'A','ball');
       track('a0',[[0,.18,.32],[2,.18,.32],[3,.28,.1],[4,.53,.12],[6,.53,.12],[7,.81,.48],[8,.81,.48]]);
       track('ball',[[0,.21,.34],[2,.36,.72],[4,.36,.72],[6,.56,.14],[7,.84,.5],[8,1.015,.5]]);
       line('pass',1,[[.18,.32],[.33,.7]]);line('run',2,[[.18,.32],[.28,.1],[.53,.12]]);line('pass',3,[[.33,.7],[.53,.12]]);line('dribble',4,[[.53,.12],[.81,.48]]);line('pass',5,[[.81,.48],[1.015,.5]]);
       step(0,n>4?'1. Prihraj spoluhráčovi; neutrálny pomáha tímu s loptou.':'1. Prihraj spoluhráčovi.');step(2,'2. Znovu sa ponúkni do voľného priestoru.');step(4,'3. Spoluhráč vráti loptu do nábehu.');step(6,'4. Priprav si presné zakončenie.');step(7,'5. Pošli loptu po zemi cez kužeľovú bránku.');step(8,n>4?'Príklad jednej akcie. Neutrálny sám neboduje; v hre hráči rozhodujú sami.':'Príklad jednej akcie; v hre hráči rozhodujú sami.');
-      scene.caption=`Ihrisko ${['A1','A2','B1','B2'][pitchIndex]}: 2 na 2${n>4?' + '+(n-4)+' N':''} = ${n} detí. Všetky štyri ihriská spolu ${total}. Dve kužeľové bránky široké 2 m; zakončenie po zemi.`;
+      const team=n>=7?3:2,neutral=n-2*team;scene.caption=`Ihrisko ${['A1','A2','B1','B2'][pitchIndex]}: ${team} na ${team}${neutral?' + '+neutral+' N':''} = ${n} detí. Všetky štyri ihriská spolu ${total}. Dve kužeľové bránky široké 2 m; zakončenie po zemi.`;
     } else if(key==='football-matches') {
       const n=pitchIndex?Math.floor(total/2):Math.ceil(total/2),side=Math.floor(n/2),large=total>=23;
       scene.pitch=pitch(40,40,280,large?36:32,large?26:24,{goals:true});
@@ -181,8 +194,8 @@ const FootballScenes = {
     const layoutGuide=html('details','football-cone-guide');layoutGuide.hidden=!stage;
     let map;
     if(stage){
-      layoutGuide.append(html('summary','',`Celá 1/4: ${layout.assumed?'pracovný rozmer':'približne'} ${layout.width} × ${layout.height} m`),html('p','',layout.assumption));
-      map=svgNode('svg',{viewBox:`-3 -4 ${layout.width+6} ${layout.height+7}`,role:'img','aria-label':`Rozloženie celej štvrtiny: ${block.title}`,class:'football-layout-map'});
+      layoutGuide.append(html('summary','',`${layout.label||'Celá 1/4'}: ${layout.assumed?'pracovný rozmer':'približne'} ${layout.width} × ${layout.height} m`),html('p','',layout.assumption));
+      map=svgNode('svg',{viewBox:`-3 -4 ${layout.width+6} ${layout.height+7}`,role:'img','aria-label':`Rozloženie pracovnej plochy: ${block.title}`,class:'football-layout-map'});
       layoutGuide.append(map,html('p','',stage.instructions));
     }
     const caption=html('p','football-caption');
@@ -230,7 +243,8 @@ const FootballScenes = {
         const local=FootballScenes.build(block.diagram,{total:options.total,size:area.count,pitchIndex:area.index,area});
         for(const player of local.nodes.filter(n=>n.kind==='player')){const p=FootballScenes.mapPoint(area,local.pitch,player);map.append(svgNode('circle',{'data-map-player':area.label,cx:p.x,cy:p.y,r:.42,fill:colors[player.team],stroke:'white','stroke-width':.12}));}
         for(const cone of local.cones){const p=FootballScenes.mapPoint(area,local.pitch,cone);map.append(svgNode('path',{'data-map-cone':area.label,d:`M${p.x} ${p.y-.65}l-.55 1h1.1Z`,fill:'#f47700',stroke:'#713708','stroke-width':.12}));}
-        for(const[text,dy,font]of[[areaLabel(area),-.5,1.65],[`${area.length} × ${area.width} m`,1.5,1.35]])map.append(svgNode('text',{x:area.x+area.w/2,y:area.y+area.h/2+dy,'text-anchor':'middle','font-size':font,'font-weight':650,fill:'#173b31','paint-order':'stroke',stroke:'white','stroke-width':.55},text));
+        const scale=Math.max(1,layout.width/35),labelSize=1.65*scale,dimensionSize=1.35*scale;
+        for(const[text,dy,font]of[[scale>1.2?`${area.label} · ${area.count}`:areaLabel(area),-.3*labelSize,labelSize],[`${area.length} × ${area.width} m`,1.1*dimensionSize,dimensionSize]])map.append(svgNode('text',{x:area.x+area.w/2,y:area.y+area.h/2+dy,'text-anchor':'middle','font-size':font,'font-weight':650,fill:'#173b31','paint-order':'stroke',stroke:'white','stroke-width':.35*scale},text));
       }
     }
     function openLayout(){

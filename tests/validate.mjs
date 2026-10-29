@@ -119,7 +119,7 @@ for (const row of gameRows) {
   equal(total, Number(row[0]), 'Every child assigned in final games');
 }
 
-const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'trainings.json', 'personal-plan.enc.json', 'personal-plan-2026-10-29.enc.json', '.nojekyll', 'README.md'];
+const publicFiles = ['index.html', 'styles.css', 'app.js', 'football.js', 'training-planner.js', 'coaching-guide.js', 'pitch-setup.js', 'trainings.json', 'personal-plan.enc.json', 'personal-plan-2026-10-29.enc.json', '.nojekyll', 'README.md'];
 for (const file of publicFiles) {
   const content = read(file);
   check(!/\uFFFD/.test(content), 'No replacement glyphs');
@@ -438,5 +438,74 @@ for(const step of setupPlan.steps){
   }
   equal(JSON.stringify(step),unchanged,'Animation leaves cone geometry and preparation instructions untouched');
 }
+
+const plannerPure=read('training-planner.js');
+const {planner,library}=runInNewContext(footballPure+'\n'+plannerPure+'\n({planner:TrainingPlanner,library:TrainingLibrary})');
+const plannerSource=JSON.stringify(thu);
+for(let players=14;players<=30;players++)for(const pitch of ['quarter','half','full']){
+  const training=planner.adapt(thu,{players,pitch,coaches:2}),groups=planner.groups(players),config=training.planConfig;
+  equal(groups.reduce((sum,n)=>sum+n,0),players,'Adaptive plan assigns every attendee once');
+  check(groups.every(n=>n>=3&&n<=8),'Every supported group has an implemented drill form');
+  equal(training.duration,75,'Adaptive training retains the full 75 minutes');
+  equal(JSON.stringify(training.blocks.map(b=>[b.start,b.end])),JSON.stringify(thu.blocks.map(b=>[b.start,b.end])),'Adaptive variants preserve the training timeline');
+  for(const block of training.blocks.filter(b=>b.diagram!=='football-finish')){
+    const areas=FootballScenes.groups(block.diagram,players,training.quarterPitch);
+    equal(areas.reduce((sum,area)=>sum+area.count,0),players,'Every activity map shows the entire selected attendance');
+    for(const area of areas){
+      check(area.x>=2&&area.y>=2&&area.x+area.w<=config.width-2&&area.y+area.h<=config.height-2,'Configured activities stay inside actual available dimensions');
+      const scene=FootballScenes.build(block.diagram,{total:players,size:area.count,pitchIndex:area.index,area});
+      equal(scene.nodes.filter(n=>n.kind==='player').length,area.count,'Animation shows exactly the configured local group, including 3/7/8');
+      check(scene.pitch.y+scene.pitch.h+22<=310,'Adaptive football diagrams fit their SVG viewport');
+      if(block.diagram==='football-rondo')equal(scene.nodes.filter(n=>n.team==='B').length,area.count>=7?2:1,'Larger rondos have two actual defenders');
+      if(['football-zones','football-mini-games'].includes(block.diagram)){
+        const form=planner.form(area.count);
+        equal(scene.nodes.filter(n=>n.kind==='player'&&n.team==='A').length,form.team,'Adaptive attacking team matches the drill instructions');
+        equal(scene.nodes.filter(n=>n.kind==='player'&&n.team==='B').length,form.team,'Adaptive defending team matches the drill instructions');
+        equal(scene.nodes.filter(n=>n.kind==='player'&&n.team==='N').length,form.neutral,'Neutral count agrees with the selected game form');
+      }
+      for(const node of scene.nodes.filter(n=>n.kind==='player'))for(const time of[0,scene.duration/2,scene.duration]){
+        const position=scene.tracks[node.id]?FootballScenes.sample(scene.tracks[node.id],time):node;
+        check(Number.isFinite(position.x)&&Number.isFinite(position.y)&&position.x>=scene.pitch.x&&position.x<=scene.pitch.x+scene.pitch.w&&position.y>=scene.pitch.y&&position.y<=scene.pitch.y+scene.pitch.h,'Every animated child remains on the configured activity pitch');
+      }
+    }
+    for(let i=0;i<areas.length;i++)for(const other of areas.slice(i+1)){
+      const area=areas[i],gapX=Math.max(area.x-other.x-other.w,other.x-area.x-area.w),gapY=Math.max(area.y-other.y-other.h,other.y-area.y-area.h);
+      check(gapX>=3-1e-8||gapY>=3-1e-8,'Adaptive areas retain a clear separation of at least three metres');
+    }
+  }
+  const prepared=setup.build(training);
+  equal(JSON.stringify(prepared.steps.map(step=>step.total)),JSON.stringify([8,16,16,32,32]),'Every configured footprint has a complete 32-cone setup sequence');
+  for(const rotation of training.blocks[2].rotation){
+    equal(rotation.rounds*(rotation.playSeconds+rotation.restSeconds)+rotation.bufferSeconds,270,'All rondo variants fit their 4:30 series');
+    const table=training.blocks[2].tables.find(item=>item.groupSize===rotation.size);
+    const turns=Array.from({length:rotation.size},(_,i)=>table.rows.filter(row=>row[1].split(', ').map(Number).includes(i+1)).length);
+    check(turns.every(turns=>turns===rotation.defenders),'Rondo defender workload is equal within every group');
+  }
+}
+for(const coaches of[1,2,3,4]){
+  const training=planner.adapt(thu,{players:30,coaches,pitch:'quarter'});
+  equal(training.planConfig.coaches,coaches,'Selected coach count is retained');
+  check(training.organizationNotes.length>0&&training.organizationNotes[0].includes('Tréner 1'),'Every coach configuration offers an explicit organization proposal');
+}
+for(const dimensions of[[35,90],[120,25],[105,68]]){
+  const training=planner.adapt(thu,{players:30,width:dimensions[0],height:dimensions[1],pitch:'full'});
+  const areas=training.quarterPitch.stages['football-warmup'].areas;
+  check(areas.every(area=>area.x>=2&&area.y>=2&&area.x+area.w<=dimensions[0]-2&&area.y+area.h<=dimensions[1]-2),'Edited dimensions retain the selected physical boundaries');
+}
+equal(JSON.stringify(thu),plannerSource,'Planner cannot alter the archived canonical training');
+check(planner.adapt(mon,{players:30})===mon&&planner.adapt(tue,{players:14})===tue,'Earlier approved sessions remain their original archived versions');
+equal(library.items(data.trainings).length,18,'Library indexes all eighteen saved exercises without duplication');
+equal(library.filter(data.trainings).length,3,'Library preserves all three training dates');
+check(library.items(data.trainings).every(item=>item.topics.length&&item.topics.every(topic=>library.topics[topic])),'Every archived activity has valid persistent topic metadata');
+check(library.filter(data.trainings,{topic:'duels',mode:'drills'}).every(item=>item.topics.includes('duels')),'Topic filter returns only the requested skill');
+equal(library.filter(data.trainings,{topic:'duels',mode:'drills'}).length,1,'Library finds the actual saved 1v1 exercise');
+check(library.filter(data.trainings,{query:'klucka',mode:'drills'}).length>0,'Library search works without Slovak diacritics');
+check(library.filter(data.trainings,{query:'29.10.2026',mode:'drills'}).every(item=>item.training.date==='2026-10-29'),'Library date search opens the expected training day');
+equal(library.filter(data.trainings,{query:'29.10.2026',mode:'drills'}).length,6,'Date search includes all six activities of the saved day');
+for(const size of[3,7,8])for(const key of['football-pass','football-rondo']){
+  const scene=FootballScenes.build(key,{size});
+  for(const transfer of scene.transfers){const ball=FootballScenes.sample(scene.tracks.ball,transfer.settled),receiver=FootballScenes.sample(scene.tracks[transfer.to],transfer.settled);check(Math.hypot(ball.x-receiver.x,ball.y-receiver.y)<12,'New group sizes complete each pass at the actual receiving player');}
+}
+equal(Object.keys(planner.normalize({players:20,privateNotes:'not-used'})).sort().join(','),'coaches,height,pitch,players,width','Public configuration retains only its five public planning fields');
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);

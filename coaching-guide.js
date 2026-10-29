@@ -80,7 +80,7 @@ const CoachingGuideModel = {
           if (block.coneSetup.extra) body.append(details('Ďalšie pokyny ku kužeľom', block.coneSetup.extra));
         }
         if (layoutMap) {
-          const map = node('details', 'guide-disclosure'); map.open = true; map.append(node('summary', '', 'Mapa celej 1/4 ihriska'), layoutMap.cloneNode(true));
+          const map = node('details', 'guide-disclosure'); map.open = true; map.append(node('summary', '', training.planConfig?'Mapa celej pracovnej plochy':'Mapa celej 1/4 ihriska'), layoutMap.cloneNode(true));
           if (stage) map.append(node('p', '', stage.instructions)); body.append(map);
         }
         body.append(details('Podrobné rozloženie', block.space));

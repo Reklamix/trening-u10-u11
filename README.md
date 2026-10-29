@@ -1,6 +1,6 @@
 # Tréningy U10 / U11
 
-Mobilný sprievodca spoločným tréningom. Na ihrisku zobrazuje jednu činnosť; podrobnosti sa otvárajú až kliknutím. Obsahuje časovač, dokončenie bloku a prechod na ďalší, prehľad celku a checklist pomôcok.
+Mobilný tréningový plánovač: najprv zhrnutie zamerania, podmienok a pomôcok, potom príprava ihriska a jednotlivé cvičenia. Knižnica triedi uložené tréningy aj cvičenia podľa tém a dátumov. Časovač, dokončenie a súkromná časť zostávajú.
 
 Web: https://reklamix.github.io/trening-u10-u11/
 
@@ -10,7 +10,19 @@ Web: https://reklamix.github.io/trening-u10-u11/
 
 V príprave má každý krok aj ručne spustenú ukážku. **Prehrať presun** posúva modré kužele z pôvodných miest po skupinách; **Ukázať pridanie** postupne zobrazuje nové oranžové kužele tam, kde ich treba položiť. Zelené zostávajú. Najprv je vždy statický nákres. Predvolené je **0,5× a zapnuté opakovanie**, dostupné aj 0,25× a 1×; voľby zostávajú pri prepínaní krokov. Pauza, Od začiatku, Nákres a posuvník času umožňujú ukážku prejsť pomaly. Ukážka nemení tréningový časovač ani neprepína kroky sama. Zmena kroku, zavretie alebo odchod aplikácie do pozadia prehrávanie zastaví.
 
-Nad štvrtkovým nákresom vyberáš skutočnú skupinu A1/A2/B1/B2 aj s počtom hráčov (rozohriatie má zóny A/B). Predvolene je prvá skupina, pri 19 deťoch A1 s 5 hráčmi; B2 má 4. Výber v návode Striedanie sa prenáša do animácie a naopak. **Rozmiestnenie** otvorí celú plochu 35 × 25 m s rozmermi jednotlivých ihrísk, hráčmi a kužeľmi; zvýraznená je zvolená skupina. Kliknutie na označenie skupiny v mape ju vyberie aj pre animáciu. Postavenie hráčov je orientačné, hranice a kužele vychádzajú zo schváleného rozloženia.
+Nad štvrtkovým nákresom vyberáš skutočnú skupinu A1/A2/B1/B2 aj s počtom hráčov (rozohriatie má zóny A/B). Predvolene je prvá skupina, pri 19 deťoch A1 s 5 hráčmi; B2 má 4. Výber v návode Striedanie sa prenáša do animácie a naopak. **Rozmiestnenie** otvorí celú vybranú pracovnú plochu (predvolene 35 × 25 m) s rozmermi jednotlivých ihrísk, hráčmi a kužeľmi; zvýraznená je zvolená skupina. Kliknutie na označenie skupiny v mape ju vyberie aj pre animáciu. Postavenie hráčov je orientačné, hranice a kužele vychádzajú zo schváleného rozloženia.
+
+## Podmienky a knižnica
+
+Úvod bez odkazu na konkrétny blok otvorí **Prehľad**. Postup: zameranie a podmienky → zoznam pomôcok → **Pripraviť ihrisko** → **Prejsť na cvičenia**. Existujúci odkaz s `blok` otvorí priamo dané cvičenie. Presné rozmery sú zbalené pod pracovným rozmerom; po zmene použi **Použiť a uložiť**.
+
+`training-planner.js` tvorí pracovný variant štvrtka z nedotknutého zdroja v trainings.json. Rondo3–6 má jedného obrancu,7–8 dvoch s rovnakou záťažou v skupine; všetky série trvajú4:30. Skupina3 má kratšiu hru a dlhší oddych. V skupine7 sa neutrálny v zónach mení po45s hry. Dávky sú v návode a tabuľkách. Ide o organizačný návrh, ktorý tréner dolaďuje podľa úrovne detí.
+
+Nastavenia sa ukladajú v tomto prehliadači pre každý dátum (`training-config-v1`). Zdieľaný URL obsahuje `pocet`, `plocha=quarter|half|full`, `treneri`, `dlzka` a `sirka`; kolega tak otvorí rovnaký variant. Tieto podmienky sú verejné. Súkromný obsah, heslo, poznámky, checklist a dokončenie sa neprenášajú. GitHub Pages nemá zápis z formulára do spoločného repozitára; obsah a kategórie sú trvalo vo verejnom zdroji, lokálne podmienky sa medzi zariadeniami prenesú odkazom.
+
+`TrainingLibrary.topics` a `TrainingLibrary.tags` v training-planner.js sú trvalé tematické zaradenie: prihrávky, prvý dotyk, pohyb bez lopty, vedenie/kľučky, súboje, rozhodovanie/prečíslenie, rozohrávka, koordinácia/rýchlosť, malé hry, záver. Cvičenie môže mať viac tém. Pri novom type cvičenia pridaj jeho témy; knižnica automaticky načíta nové tréningy zo zdrojových dát. Historické pondelkové a utorkové plány zostávajú pôvodné; novú rodinu prispôsobiteľných tréningov treba výslovne doplniť s vlastnými dávkami a kontrolami.
+
+Zásady variácií počtu a priestoru: [FIFA Training Centre – Different pitches](https://www.fifatrainingcentre.com/en/practice/grassroots/8-to-12/different-pitches.php). Konkrétne rozloženia a dávky sú vlastný návrh tohto plánovača.
 
 ## Pridanie ďalšieho tréningu
 
@@ -43,6 +55,9 @@ V priečinku repozitára:
 ```sh
 node --check app.js
 node --check football.js
+node --check training-planner.js
+node --check coaching-guide.js
+node --check pitch-setup.js
 node tests/validate.mjs
 ```
 
@@ -54,10 +69,10 @@ Spusť v tomto priečinku `python -m http.server 8765` a otvor `http://localhost
 
 ## Zdieľanie a mobil
 
-- **Archív** v hornej lište otvorí všetky uložené tréningy od najnovšieho. Vyber konkrétny dátum alebo použi **Zobraziť všetky dni**; kliknutím otvoríš pôvodný celý tréning. Každý deň má vlastný trvalý odkaz `#trening=RRRR-MM-DD`.
-- Štvrtok **29. 10. 2026, 18:00–19:15**: odhad 20 detí, pracovný variant bez brankárov, výber 16–24. Používateľ spresnil štvrtinu na približne **35 × 25 m**; pôvodný predpoklad 50 × 30 m je nahradený. Po obvode 2 m voľna, stredný aj priečny koridor 3 m. Rozohriatie 2 × 21 × 14 m; technika/rondo 4 × 12 × 9 m; zóny a záver 4 × 14 × 9 m. Záver sú štyri minihry 2v2, podľa počtu + 1 alebo 2 N, s dvomi kužeľovými bránkami na plochu. Každý zostáva aktívny. N sa menia po 2 minútach hry. Žiadne spájanie do 5v5 ani rozširovanie mimo pridelenej plochy.
-- **Kužele a méty** sú v živých štvrtkových schémach väčšie, oranžové s tmavým obrysom a bielym pruhom. Pod prehrávaním je klikateľný počet v nákrese/spolu a rozloženie z `coneSetup` v trainings.json. Rozohriatie 8, prihrávky 16, rondo 16 (rovnaké plochy), koncové zóny 32, minihry 32 vrátane kužeľových bránok (rovnaké méty presunúť), pokojný záver 0. Rozloženie celej štvrtiny sa otvára cez **Celá 1/4** pod nákresom a vychádza z `quarterPitch.stages`. Živá schéma preberá rozmery z rovnakých údajov. Pôvodný PNG návrh zostáva v archíve assets, vo štvrtkovom rozhraní sa naň už neodkazuje. Štyri vnútorné méty v zónach ležia na bočných čiarach 2 m od koncov. Počty zahŕňajú všetky súčasné plochy a nemenia sa s dochádzkou.
-- Pri úvodnom **vedení lopty** sa po Prehrať pohybujú všetci zobrazení hráči súčasne, každý s vlastnou loptou. Vlnovky zobrazujú aktuálny smer každého hráča; trasy sú príklad voľného vedenia, nie povinné stanovištia. Obe zóny A/B rešpektujú dochádzku 16–24, ukážka sa opakuje bez skoku a stojí, kým ju tréner ručne nespustí.
+- **Archív** v hornej lište otvorí všetky uložené tréningy od najnovšieho. Vyber konkrétny dátum alebo použi **Zobraziť všetky dni**; kliknutím otvoríš pôvodný celý tréning. Každý deň má vlastný trvalý odkaz `#trening=RRRR-MM-DD`. **Knižnica** navyše filtruje celé tréningy alebo jednotlivé cvičenia podľa témy, názvu a dátumu (aj bez diakritiky).
+- Štvrtok **29. 10. 2026, 18:00–19:15**: prispôsobiteľný výber **14–30 detí bez brankárov**, 1–4 tréneri, štvrtina/polovica/celé ihrisko. Potvrdená štvrtina je približne35×25m; predvoľby50×35 a70×50m sú pracovné, rozmery sa dajú prepísať (35–120 ×25–90m). Štyri skupiny po3–8: 3 hrá1v1+N,4–6 hrá2v2(+N),7–8 hrá3v3(+N). Väčší počet na štvrtine má viditeľné organizačné odporúčanie. Na veľkej ploche sa využije kompaktná zóna najviac47×39m, aby stanovištia neboli zbytočne ďaleko; priechody≥3m/obvod≥2m. Každý nákres, mapa, rotácia a pomôcky vychádzajú z rovnakého variantu. Pôvodné uložené JSON/PDF ani šifry sa nemenia.
+- **Kužele a méty** sú v živých štvrtkových schémach väčšie, oranžové s tmavým obrysom a bielym pruhom. Pod prehrávaním je klikateľný počet v nákrese/spolu a rozloženie z `coneSetup` v trainings.json. Rozohriatie 8, prihrávky 16, rondo 16 (rovnaké plochy), koncové zóny 32, minihry 32 vrátane kužeľových bránok (rovnaké méty presunúť), pokojný záver 0. Rozloženie vybranej plochy sa otvára cez **Rozmiestnenie** pri výbere skupiny a vychádza z prispôsobených `quarterPitch.stages`. Živá schéma preberá rozmery z rovnakých údajov. Pôvodný PNG návrh zostáva v archíve assets, vo štvrtkovom rozhraní sa naň už neodkazuje. Štyri vnútorné méty v zónach ležia na bočných čiarach 2 m od koncov. Počty zahŕňajú všetky súčasné plochy a nemenia sa s dochádzkou.
+- Pri úvodnom **vedení lopty** sa po Prehrať pohybujú všetci zobrazení hráči súčasne, každý s vlastnou loptou. Vlnovky zobrazujú aktuálny smer každého hráča; trasy sú príklad voľného vedenia, nie povinné stanovištia. Obe zóny A/B rešpektujú dochádzku 14–30 a nadväzujú na skupiny A1/A2 a B1/B2, ukážka sa opakuje bez skoku a stojí, kým ju tréner ručne nespustí.
 - **Prehrať / Pauza / Od začiatku / Ďalší krok** ovládajú celú spomalenú ukážku. Prihrávkové cvičenie a rondo prejdú cez všetkých prihrávajúcich späť na začiatok. Priebežný krok/čas a zelené **Ukážka dokončená** označujú koniec, potom je dostupné **Prehrať znova**. **Rýchlosť animácie** ponúka 0,25× / 0,5× / 1× / 1,5× (predvolene 0,5×), zmena rýchlosti zachová polohu. **Opakovať dokola** je predvolene zapnuté; po stlačení Prehrať sa celá ukážka opakuje, kým ju tréner nepozastaví alebo opakovanie nevypne. Nákres je nad ovládaním a pri otvorení stojí; automatické prehrávanie je vypnuté. Vypnutie nechá aktuálny obeh dohrať. Rýchlosť a opakovanie ostávajú pri resete, zväčšení aj zmene zobrazenej skupiny/ihriska; nová činnosť začína s predvolenými hodnotami. Posuvník umožní presný posun; **Zväčšiť** otvorí dialóg a prehrávanie pokračuje aj pri otvorení či zatvorení. Prehrávanie sa spúšťa len výslovným tlačidlom, aj pri preferencii redukovaného pohybu je možné použiť ručné kroky. Odchod z časti/na pozadie pauzuje; tréningový časovač sa nemení. Pokojný záver je statický.
 - Tréningy sú trvalo uložené v `trainings.json` na GitHube a nezmiznú vymazaním údajov mobilu. Ďalšie dni pridávaj do tohto zoznamu, staré zachovaj. Samotné otvorenie archívu nič neprepisuje ani nevytvára nový tréning.
 - Rozloženie reaguje na šírku aj výšku obrazovky: mobil má jeden stĺpec, veľký počítač schému vedľa pokynov. Nízka obrazovka na šírku má kompaktnejšie ovládanie a dialógy sa posúvajú vo vlastnom okne.
@@ -86,7 +101,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu pri `styles.css?v=7`, `app.js?v=7` a pri zmene modulu aj `football.js?v=2` v index.html, aby sa po obnovení nezmiešali nové a staré súbory z vyrovnávacej pamäte. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv12/footballv11/coaching-guidev3/pitch-setupv3/training-plannerv1/CSSv15. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 
