@@ -24,6 +24,8 @@ Používateľ odhaduje pri plných30 deťoch približne polovicu s potrebou zák
 
 Náročnosť možno meniť aj **priamo v cvičení pod výberom skupiny**. Pri rozohriatí má zóna A samostatné voľby A1/A2 a B má B1/B2; pri ďalších činnostiach meníš práve zvolenú skupinu. Zmena sa hneď použije a uloží pre danú skupinu v celom tomto tréningu, vrátane Prehľadu a zdieľaného odkazu. Návod, pokyn a nákres sa zosúladia; ukážka sa vráti na stojaci začiatok, rýchlosť a opakovanie ostanú. Blok, skupina, tréningový časovač aj dokončenie sa nemenia. Staršie plány a pokojný záver nové voľby nemajú.
 
+**Počty skupín** sú rozbaľovací editor priamo pri cvičení, aj pri rozohriatí. Uprav A1/A2/B1/B2 (3–8 v každej) a použi rozdelenie. Pri presune uprav obe skupiny, aby celkový počet zostal. Pri príchode/odchode tlačidlo výslovne ukáže nový súčet, napr. **Použiť: 25 detí spolu**; zmení aj dochádzku. Súčet mimo14–30 sa nedá použiť. `TrainingPlanner.regroup` kontroluje počty pred uložením; nedopĺňa ani nevyvažuje ostatné skupiny potichu. Nákresy, animácia, celková mapa, warmup A/B, pomôcky, skupinové striedanie, Prehľad aj URL sa prispôsobia. Náročnosti, tréneri, rozmery, vybraná skupina/blok, časovač a dokončenie zostávajú; ukážka sa zastaví na začiatku s rovnakou rýchlosťou/opakovaním. Rozdelenie platí pre celý vybraný tréning a pamätá si ho toto zariadenie.
+
 Nastavenia sa ukladajú v tomto prehliadači pre každý dátum (`training-config-v1`). Zdieľaný URL obsahuje `pocet`, `plocha=quarter|half|full`, `treneri`, `dlzka`, `sirka`, štyri hodnoty `skupiny` a štyri voľby `urovne` (`base|standard|challenge`); kolega tak otvorí rovnaký variant. Tieto súhrnné podmienky sú verejné, neukladajú mená ani individuálne hodnotenia. Staršie odkazy bez nových polí fungujú s pôvodným Upevnením. Súkromný obsah, heslo, poznámky, checklist a dokončenie sa neprenášajú. GitHub Pages nemá zápis z formulára do spoločného repozitára; obsah a kategórie sú trvalo vo verejnom zdroji, lokálne podmienky sa medzi zariadeniami prenesú odkazom.
 
 `TrainingLibrary.topics` a `TrainingLibrary.tags` v training-planner.js sú trvalé tematické zaradenie: prihrávky, prvý dotyk, pohyb bez lopty, vedenie/kľučky, súboje, rozhodovanie/prečíslenie, rozohrávka, koordinácia/rýchlosť, malé hry, záver. Cvičenie môže mať viac tém. Pri novom type cvičenia pridaj jeho témy; knižnica automaticky načíta nové tréningy zo zdrojových dát. Historické pondelkové a utorkové plány zostávajú pôvodné; novú rodinu prispôsobiteľných tréningov treba výslovne doplniť s vlastnými dávkami a kontrolami.
@@ -107,7 +109,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv14/footballv13/coaching-guidev4/pitch-setupv3/training-plannerv2/CSSv17. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv15/footballv14/coaching-guidev4/pitch-setupv3/training-plannerv3/CSSv18. Samotné pridanie tréningu tento krok nepotrebuje.
 
 ## Obsah a rozsah
 

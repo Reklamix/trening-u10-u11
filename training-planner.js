@@ -11,6 +11,11 @@ const TrainingPlanner = {
     return{players,coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90),groupSizes:sizes.length===4&&sizes.every(n=>Number.isInteger(n)&&n>=3&&n<=8)&&sizes.reduce((a,b)=>a+b,0)===players?sizes:this.groups(players),levels:Array.from({length:4},(_,i)=>Object.hasOwn(this.levels,levels[i])?levels[i]:'standard')};
   },
   groups(total){return Array.from({length:4},(_,index)=>Math.floor(total/4)+(index<total%4?1:0));},
+  regroup(input,sizes){
+    if(!Array.isArray(sizes)||sizes.length!==4||!sizes.every(n=>Number.isInteger(n)&&n>=3&&n<=8))return null;
+    const players=sizes.reduce((sum,n)=>sum+n,0);if(players<14||players>30)return null;
+    return this.normalize({...input,players,groupSizes:sizes});
+  },
   halfBasics(total){const a=Math.ceil(total/2),b=Math.floor(total/2);return{groupSizes:[Math.ceil(a/2),Math.floor(a/2),Math.ceil(b/2),Math.floor(b/2)],levels:['base','base','standard','standard']};},
   form(size){const team=size===3?1:size>=7?3:2;return{team,neutral:size-2*team,label:`${team} na ${team}${size-2*team?' + '+(size-2*team)+' N':''}`};},
   organization(config,groups){

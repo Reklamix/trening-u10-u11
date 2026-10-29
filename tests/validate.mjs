@@ -543,5 +543,23 @@ for(const [index,level]of skillTraining.planConfig.levels.entries())for(const so
 }
 equal(JSON.stringify(planner.normalize({players:30,groupSizes:[3,3,3,3],levels:['unknown']})),JSON.stringify(planner.normalize({players:30})),'Invalid shared group settings fall back to a complete valid plan');
 equal(JSON.stringify(thu),plannerSource,'All skill adaptations leave the canonical source untouched');
+const regroupSource=planner.normalize({players:24,coaches:3,pitch:'half',width:52,height:36,levels:['base','challenge','base','standard']}),regroupBefore=JSON.stringify(regroupSource);
+for(const sizes of[[5,7,6,6],[7,6,6,6],[5,6,6,6],[3,3,4,4],[8,8,7,7],[3,8,3,8]]){
+  const before=JSON.stringify(sizes),config=planner.regroup(regroupSource,sizes),total=sizes.reduce((sum,n)=>sum+n,0),training=planner.adapt(thu,config);
+  equal(config.players,total,'Inline group edit updates attendance to the exact sum');
+  equal(JSON.stringify(config.groupSizes),before,'Inline group edit never silently balances other groups');
+  equal(JSON.stringify(config.levels),JSON.stringify(regroupSource.levels),'Count changes preserve every skill profile');
+  equal([config.coaches,config.pitch,config.width,config.height].join(','),'3,half,52,36','Count changes preserve coach and pitch settings');
+  equal(training.duration,75,'Regrouping preserves the full session duration');
+  for(const block of training.blocks.slice(0,5)){
+    const areas=FootballScenes.groups(block.diagram,total,training.quarterPitch);
+    equal(areas.reduce((sum,area)=>sum+area.count,0),total,'Regrouped maps include every attendee, including warmup zones');
+    for(const area of areas){const scene=FootballScenes.build(block.diagram,{total,size:area.count,pitchIndex:area.index,area});equal(scene.nodes.filter(node=>node.kind==='player').length,area.count,'Each regrouped animation uses its actual new count');}
+  }
+  const rondo=training.blocks[2];for(const size of new Set(sizes)){const rotation=rondo.rotation.find(r=>r.size===size),table=rondo.tables.find(t=>t.groupSize===size);equal(rotation.rounds,table.rows.length,'New group size resolves the complete matching rotation');equal(rotation.rounds*(rotation.playSeconds+rotation.restSeconds)+rotation.bufferSeconds,270,'Changed rondo rotation still fits its full series');}
+  equal(JSON.stringify(sizes),before,'Regrouping does not modify the supplied draft counts');
+}
+for(const invalid of[[3,3,3,3],[8,8,8,7],[2,7,7,8],[9,5,5,5],[5.5,6.5,6,6],[6,6,6],null])equal(planner.regroup(regroupSource,invalid),null,'Invalid inline totals or sizes cannot be applied');
+equal(JSON.stringify(regroupSource),regroupBefore,'Regrouping cannot modify the previous saved configuration');
 
 console.log(`PASS: ${assertions} checks; ${data.trainings.length} trainings; timing, rotations, counts, public content and local assets.`);
