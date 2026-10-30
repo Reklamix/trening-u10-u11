@@ -146,7 +146,6 @@ const PitchSetupMotion = {
       for(const[name,value]of[['Po kroku',step.total],['Pridaj',step.added.length],['Presuň',step.moves.length],['Bokom',step.stored]]){
         const item=el('div');item.append(el('span','',name),el('strong','',String(value)));facts.append(item);
       }
-      body.append(facts);
       const scale=Math.max(1,layout.width/35),map=svg('svg',{viewBox:`${-3*scale} ${-4*scale} ${layout.width+6*scale} ${layout.height+7*scale}`,role:'img','aria-label':`Príprava krok ${index+1}: ${step.title}`,class:'setup-map'});
       map.append(svg('rect',{x:0,y:0,width:layout.width,height:layout.height,fill:'#e5eddd',stroke:'#173b31','stroke-width':.25}),svg('rect',{x:layout.corridor.x,y:0,width:layout.corridor.width,height:layout.height,fill:'#e7d5b7'}));
       const text=(x,y,value,size=1.4)=>svg('text',{x,y,'text-anchor':'middle','font-size':size*scale,fill:'#173b31','font-weight':650,'paint-order':'stroke',stroke:'white','stroke-width':.35},value);
@@ -165,10 +164,18 @@ const PitchSetupMotion = {
       step.kept.forEach(p=>cone(p,'kept','#216a4b'));
       const added=step.added.map(p=>cone(p,'added','#f47700')),moved=step.moves.map(({to})=>cone(to,'moved','#16729c'));
       body.append(map);
+      const area=step.map.areas[0],shortActions=[
+        `Rozlož ${step.added.length} kužeľov: dve zóny ${area.length} × ${area.width} m. Priechod 3 m, obvod 2 m voľný.`,
+        `Presuň ${step.moves.length} rohov podľa šípok a pridaj ${step.added.length}. Vzniknú štyri plochy ${area.length} × ${area.width} m.`,
+        `Presuň ${step.moves.length} rohov: ľavé o 1 m doľava, pravé o 1 m doprava. Rozmer ${area.length} × ${area.width} m.`,
+        `Pridaj ${step.added.length} mét: štyri na každú plochu, 2 m od oboch koncov.`,
+        `Presuň ${step.moves.length} zónových mét na osem bránok širokých 2 m. Rohy nechaj na mieste.`
+      ];
+      body.append(el('p','setup-action',shortActions[index]));
       const motion=PitchSetupMotion.create(step);clock=new FootballTimeline(motion.duration);clock.setRate(rate);clock.setLoop(repeat);
       let animated=false;
       const controls=el('div','setup-motion-controls'),play=el('button','button'),restart=el('button','secondary-button','Od začiatku'),drawing=el('button','secondary-button','Nákres');
-      for(const button of[play,restart,drawing])button.type='button';controls.append(play,restart,drawing);
+      for(const button of[play,restart,drawing])button.type='button';controls.append(play,drawing);
       const settings=el('div','setup-motion-settings'),speedLabel=el('label','','Rýchlosť ukážky'),speed=el('select');speed.setAttribute('aria-label','Rýchlosť presunu kužeľov');
       for(const[value,label]of[[.25,'0,25× · veľmi pomaly'],[.5,'0,5× · pomaly'],[1,'1× · normálne']]){const option=el('option','',label);option.value=value;speed.append(option);}speed.value=String(rate);speedLabel.append(speed);
       const repeatLabel=el('label','setup-motion-repeat'),loop=el('input');loop.type='checkbox';loop.checked=repeat;repeatLabel.append(loop,document.createTextNode('Opakovať dokola'));settings.append(speedLabel,repeatLabel);
@@ -186,7 +193,7 @@ const PitchSetupMotion = {
         const playing=clock.origin!==null;
         play.textContent=playing?'Pauza':animated?(frame.complete?'Prehrať znova':'Pokračovať'):(step.moves.length?'Prehrať presun':'Ukázať pridanie');
         drawing.setAttribute('aria-pressed',String(!animated));
-        const message=!animated?'Najprv nákres. Ukážku spustíš tlačidlom.':frame.complete?'Ukážka dokončená. Kužele sú na nových miestach.':`${playing?'':'Pozastavené · '}${frame.area}: ${frame.phase==='presun'?'presun z pôvodných miest':frame.phase==='pridanie'?'pridanie nových mét':'kontrola nových miest'}.`;
+        const message=!animated?`Nákres · ${String(rate).replace('.',',')}× · ${repeat?'opakovanie':'bez opakovania'}`:frame.complete?'Hotovo · kužele sú na nových miestach.':`${playing?'':'Pauza · '}${frame.area}: ${frame.phase==='presun'?'presun kužeľov':frame.phase==='pridanie'?'pridanie mét':'kontrola miest'}.`;
         if(status.textContent!==message)status.textContent=message;
         seek.value=String(time);output.textContent=`${time.toFixed(1)} / ${motion.duration.toFixed(1)} s`;
       };
@@ -197,18 +204,18 @@ const PitchSetupMotion = {
       speed.addEventListener('change',()=>{rate=Number(speed.value);clock.setRate(rate);updateMotion();});
       loop.addEventListener('change',()=>{repeat=loop.checked;clock.setLoop(repeat);updateMotion();});
       seek.addEventListener('input',()=>{const value=Number(seek.value);pauseMotion();animated=true;clock.seek(value);updateMotion();});
-      body.append(controls,settings,status,timeline);updateMotion();
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)body.append(el('p','setup-motion-note','Pri obmedzenom pohybe môžeš použiť posuvník času alebo tlačidlo Nákres.'));
-      const legend=el('p','setup-legend','Oranžové = pridaj · modré = presuň sem · zelené = nechaj. Prázdny krúžok a šípka ukazujú presun z pôvodného miesta.');body.append(legend);
-      body.append(el('p','setup-action',step.action));
-      if(step.kit)body.append(el('p','setup-kit',step.kit));
-      const extra=el('details','setup-details');extra.append(el('summary','','Rozdelenie práce a ďalšie pokyny'),el('p','',step.coach),el('p','',step.extra));body.append(extra);
+      body.append(controls,status);updateMotion();
+      const extra=el('details','setup-details');extra.append(el('summary','','Podrobnosti a možnosti'),nav,facts,settings,restart,timeline);
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)extra.append(el('p','setup-motion-note','Pri obmedzenom pohybe použi posuvník alebo Nákres.'));
+      const legend=el('p','setup-legend','Oranžové = pridaj · modré = presuň · zelené = nechaj. Krúžok a šípka ukazujú pôvodné miesto.');extra.append(legend,el('p','',step.action));
+      if(step.kit)extra.append(el('p','setup-kit',step.kit));
+      extra.append(el('p','',step.coach),el('p','',step.extra));body.append(extra);
       const previous=el('button','secondary-button','← Späť');previous.type='button';previous.disabled=index===0;
       previous.addEventListener('click',()=>{index--;render();(index?footer.firstElementChild:footer.lastElementChild).focus();});
-      const last=index===steps.length-1,next=el('button','button',last?'Zavrieť prípravu':'Ďalší krok →');next.type='button';next.addEventListener('click',()=>{if(last)close();else{index++;render();footer.lastElementChild.focus();}});footer.append(previous,next);
+      const last=index===steps.length-1,next=el('button','button',last?'Príprava hotová':'Hotovo → ďalej');next.type='button';next.addEventListener('click',()=>{if(last)close();else{index++;render();footer.lastElementChild.focus();}});footer.append(previous,next);
     }
     select.addEventListener('change',()=>{index=Number(select.value);render();});
-    dialog.append(header,nav,body,footer);document.body.append(dialog);active=dialog;
+    dialog.append(header,body,footer);document.body.append(dialog);active=dialog;
     const onVisibility=()=>{if(document.hidden)pauseMotion();};document.addEventListener('visibilitychange',onVisibility);window.addEventListener('pagehide',pauseMotion);
     dialog.addEventListener('close',()=>{disposeMotion();document.removeEventListener('visibilitychange',onVisibility);window.removeEventListener('pagehide',pauseMotion);dialog.remove();if(active===dialog)active=null;if(returnFocus?.isConnected)returnFocus.focus();},{once:true});render();dialog.showModal();
   }

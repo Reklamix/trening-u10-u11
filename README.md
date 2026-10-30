@@ -8,9 +8,15 @@ Web: https://reklamix.github.io/trening-u10-u11/
 
 Adaptívny štvrtkový tréning podporuje **10–30 hráčov**, štyri skupiny po **2–8**. Pri10 sú skupiny3+3+2+2. Dvojica namiesto ronda prihráva bez obrancu (2×60s práce/60s oddychu +30s do série4:30); v koncových zónach hrá1v1 šesťkrát60/60s a v minihre štyri úseky2min hry/2min oddychu. Nákresy, animácie, pomôcky aj návody zobrazujú iba skutočných hráčov. Varianty3–8 a uložené staršie tréningy zostávajú zachované.
 
-Vybraný návrh 1 používa celá aplikácia: úvod, pomôcky, knižnica, organizácia, osobný plán, archív aj sprievodcovia prípravou. Spoločná vrstva `app-shell.css?v=2` nadväzuje na schválenú kartu cvičenia; zachováva svetlé pozadie, Inter, zelené tlačidlá a Bootstrap Icons. `app.js?v=23` nemení adresu webu, parametre odkazov, uložené tréningy ani šifrované osobné plány.
+Vybraný návrh 1 používa celá aplikácia: úvod, pomôcky, knižnica, organizácia, osobný plán, archív aj sprievodcovia prípravou. Spoločná vrstva `app-shell.css?v=3` nadväzuje na schválenú kartu cvičenia; zachováva svetlé pozadie, Inter, zelené tlačidlá a Bootstrap Icons. `app.js?v=26` nemení adresu webu, parametre odkazov, uložené tréningy ani šifrované osobné plány.
 
 Na úvode sú rovno podmienky a vizuálne pomôcky s počtami. Dve veľké tlačidlá otvoria prípravu ihriska alebo prvé cvičenie. Nastavenia, zameranie s organizáciou a časový plán sa rozbaľujú samostatne. Kliknutie na pomôcku ju priamo na úvode označí/odznačí ako pripravenú; počet pripravených položiek a samostatný checklist sa priebežne zosynchronizujú bez zmeny stránky. Stav sa ukladá pre daný deň v prehliadači. Tlačidlo Podrobnosti otvorí celý checklist s rozložením. Celkový čas, priestor a tréneri sú tlačidlá otvárajúce príslušný panel; priestor a tréneri zaostria konkrétne nastavenie. Presné rozpisy počtov a pokyny k rozloženiu zostávajú v checkliste. Bránky z kužeľov sa nepripočítavajú k métam druhýkrát.
+
+## Príprava a podmienky jedným palcom
+
+Príprava ukazuje len aktuálny nákres, krátky pokyn, Prehrať/Nákres, stav animácie a veľké **Hotovo → ďalej**. Po piatom kroku **Príprava hotová** zavrie sprievodcu. Čas kroku zostáva viditeľný; nákres je najprv statický. Pod **Podrobnosti a možnosti** sú pôvodné úplné pokyny, počty, legenda, rozdelenie práce, výber kroku, rýchlosť, opakovanie, reset a posuvník. Predvolene0,5× a opakovanie zapnuté; voľby držia medzi krokmi. Geometria a časovanie presunov sa nemenia.
+
+Podmienky sú rozdelené na tlačidlá **Ihrisko / Tréneri / Skupiny**. Predvoľby priestoru a počtu trénerov sú tlačidlá, vlastné rozmery sa rozbalia. Pri skupinách sa upravuje jedna A1/A2/B1/B2 naraz: Menej/Viac alebo číslo, plus tlačidlá náročnosti. Návrh sa ukladá až cez **Hotovo · uložiť**, potom sa panel zavrie. Chybný súčet sa neuloží; neplatné číslo otvorí príslušnú skupinu/panel. Pôvodné hodnoty, URL, uloženie podľa dňa aj skratka Polovica na základy ostávajú zachované.
 
 ## Čitateľné cvičenie
 

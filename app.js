@@ -571,10 +571,33 @@ const PersonalPlans = [
     writeLocal(storageKeys.gear,state.gear);
     syncEquipmentState();
   }
+  function showPlanTab(tab) {
+    $('plan-form').querySelectorAll('[data-plan-panel]').forEach(panel=>{panel.hidden=panel.dataset.planPanel!==tab;});
+    $('plan-form').querySelectorAll('[data-plan-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.planTab===tab)));
+  }
+  function showPlanGroup(index) {
+    $('plan-groups').dataset.activeGroup=String(index);
+    $('plan-groups').querySelectorAll('[data-group-card]').forEach(card=>{card.hidden=Number(card.dataset.groupCard)!==index;});
+    $('plan-group-picker').querySelectorAll('button').forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));
+  }
+  function syncPlanDraft(dirty=false) {
+    $('plan-form').querySelectorAll('[data-plan-control]').forEach(button=>button.setAttribute('aria-pressed',String($(button.dataset.planControl).value===button.dataset.planValue)));
+    const counts=[...$('plan-groups').querySelectorAll('[data-group-size]')],sum=counts.reduce((total,input)=>total+Number(input.value),0);
+    $('plan-group-total').textContent=`Spolu ${sum} / ${state.attendance} detí · 2–8 v skupine`;
+    $('plan-group-picker').querySelectorAll('button').forEach((button,i)=>{button.textContent=['A1','A2','B1','B2'][i]+' · '+counts[i].value;});
+    $('plan-groups').querySelectorAll('[data-group-card]').forEach(card=>{
+      const count=card.querySelector('[data-group-size]'),level=card.querySelector('[data-group-level]');
+      card.querySelectorAll('[data-count-delta]').forEach(button=>{button.disabled=Number(button.dataset.countDelta)<0?Number(count.value)<=2:Number(count.value)>=8;});
+      card.querySelectorAll('[data-level-value]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.levelValue===level.value)));
+    });
+    if(sum===state.attendance)$('plan-group-error').hidden=true;
+    if(dirty)$('plan-saved').textContent='Potvrď Hotovo · uložiť.';
+  }
   function openSummaryPanel(id,focusId) {
     const panel=$(id);
     document.querySelectorAll('#overview-view>.shell-disclosure').forEach(other=>{other.open=other===panel;});
-    const target=focusId?$(focusId):panel.querySelector('summary');
+    if(focusId==='plan-pitch'||focusId==='plan-coaches')showPlanTab(focusId==='plan-pitch'?'pitch':'coaches');
+    const target=focusId?document.querySelector(`[data-plan-control="${focusId}"][aria-pressed=true]`)||$(focusId):panel.querySelector('summary');
     target.focus({preventScroll:true});
     panel.scrollIntoView({block:'nearest',behavior:'instant'});
   }
@@ -639,11 +662,24 @@ const PersonalPlans = [
     $('conditions-summary').textContent=config?`${config.players} detí · ${config.coaches} ${config.coaches===1?'tréner':'tréneri'}`:'';
     const facts=[[training.duration+' min','Celkový čas','stopwatch','timeline-panel'],[config?config.width+' × '+config.height+' m':training.category,'Priestor','bounding-box',config?'conditions-panel':'organization-panel',config?'plan-pitch':null],[config?String(config.coaches):training.coaches,'Tréneri','people-fill',config?'conditions-panel':'organization-panel',config?'plan-coaches':null]];
     $('summary-facts').replaceChildren(...facts.map(([value,label,icon,panel,focusId])=>{const tile=el('button'),img=el('img');tile.type='button';tile.setAttribute('aria-controls',panel);tile.setAttribute('aria-expanded',String($(panel).open));img.src='./assets/bootstrap-icons/'+icon+'.svg';img.alt='';const text=el('span');text.append(el('small','',label),el('strong','',value));tile.append(img,text);tile.addEventListener('click',()=>openSummaryPanel(panel,focusId));return tile;}));
-    if(config){$('plan-pitch').value=config.pitch;$('plan-coaches').value=String(config.coaches);$('plan-width').value=config.width;$('plan-height').value=config.height;$('plan-dimensions-label').textContent=`Pracovné rozmery ${config.width} × ${config.height} m · upraviť`;}
+    if(config){$('plan-pitch').value=config.pitch;$('plan-coaches').value=String(config.coaches);$('plan-width').value=config.width;$('plan-height').value=config.height;$('plan-dimensions-label').textContent=`Rozmery ${config.width} × ${config.height} m · upraviť`;}
     $('plan-groups').replaceChildren();$('plan-group-error').hidden=true;
-    if(config)config.groupSizes.forEach((size,index)=>{const card=el('div','plan-group-card'),title=el('strong','',['A1','A2','B1','B2'][index]),countLabel=el('label','','Detí'),count=el('input');count.type='number';count.min='2';count.max='8';count.step='1';count.required=true;count.value=size;count.dataset.groupSize=index;count.setAttribute('aria-label','Detí v skupine '+title.textContent);countLabel.append(count);const levelLabel=el('label','','Náročnosť'),level=el('select');level.dataset.groupLevel=index;level.setAttribute('aria-label','Náročnosť '+title.textContent);Object.entries(TrainingPlanner.levels).forEach(([value,label])=>{const option=el('option','',label);option.value=value;level.append(option);});level.value=config.levels[index];levelLabel.append(level);const fields=el('div','plan-group-fields');fields.append(countLabel,levelLabel);card.append(title,fields);$('plan-groups').append(card);});
+    $('plan-group-picker').replaceChildren();
+    if(config)config.groupSizes.forEach((size,index)=>{
+      const name=['A1','A2','B1','B2'][index],pick=el('button');pick.type='button';pick.addEventListener('click',()=>showPlanGroup(index));$('plan-group-picker').append(pick);
+      const card=el('div','plan-group-card');card.dataset.groupCard=index;card.append(el('strong','',name));
+      const countLabel=el('label','','Detí v skupine'),count=el('input');count.type='number';count.min='2';count.max='8';count.step='1';count.required=true;count.value=size;count.dataset.groupSize=index;count.setAttribute('aria-label','Detí v skupine '+name);
+      const stepper=el('div','plan-count-stepper');
+      for(const [delta,label]of[[-1,'Menej'],[1,'Viac']]){const button=el('button','secondary-button',label);button.type='button';button.dataset.countDelta=delta;button.setAttribute('aria-label',label+' detí v '+name);button.addEventListener('click',()=>{count.value=String(Math.max(2,Math.min(8,Number(count.value)+delta)));count.removeAttribute('aria-invalid');syncPlanDraft(true);});if(delta<0)stepper.append(button,count);else stepper.append(button);}
+      countLabel.append(stepper);card.append(countLabel);count.addEventListener('input',()=>syncPlanDraft(true));
+      const level=el('select');level.dataset.groupLevel=index;level.setAttribute('aria-label','Náročnosť '+name);level.hidden=true;
+      const choices=el('div','plan-choice-row');choices.setAttribute('aria-label','Náročnosť '+name);
+      Object.entries(TrainingPlanner.levels).forEach(([value,label])=>{const option=el('option','',label);option.value=value;level.append(option);const button=el('button','',label);button.type='button';button.dataset.levelValue=value;button.addEventListener('click',()=>{level.value=value;syncPlanDraft(true);});choices.append(button);});
+      level.value=config.levels[index];card.append(el('p','step-label','Náročnosť'),level,choices);$('plan-groups').append(card);
+    });
+    if(config){syncPlanDraft();showPlanGroup(Number($('plan-groups').dataset.activeGroup)||0);}
     $('summary-timeline-title').textContent=`Časový plán · ${training.duration} minút`;
-    $('plan-saved').textContent=configSaved?'Podmienky sa ukladajú pre tento deň v zariadení. Zdieľaný odkaz obsahuje počet detí, plochu, trénerov aj rozdelenie a náročnosť skupín.':'Prehliadač neuložil podmienky. Zachovaj si ich cez Zdieľať; odkaz obsahuje rovnaký variant.';
+    $('plan-saved').textContent=configSaved?'Uložené pre tento tréning.':'Uloženie zlyhalo. Zachovaj si variant cez Zdieľať.';
     const notes=training.organizationNotes||[training.players,training.coaches];
     const list=el('ul');notes.forEach(note=>list.append(el('li','',note)));$('plan-recommendation').replaceChildren(list);
     $('summary-equipment').replaceChildren(...training.equipment.map(item=>{const button=el('button','summary-gear');button.type='button';button.dataset.gear=item.name;const text=el('span'),status=el('span','summary-gear-status');status.setAttribute('aria-hidden','true');text.append(el('strong','',item.name),el('small','',compactQuantity(item)),status);button.append(kitImage(item.name),text);button.addEventListener('click',()=>setEquipmentReady(item.name,!checkedGear().includes(item.name)));return button;}));
@@ -701,7 +737,7 @@ const PersonalPlans = [
     const block=activeBlock().id,section=state.view==='field'?null:state.view;
     const next=TrainingPlanner.adapt(source,config);state.selected=next;state.attendance=config.players;
     history.replaceState(null,'',linkFor(source.id,block,section));render(next);renderActive();setView(state.view);
-    message(configSaved?'Podmienky uložené. Organizácia, pomôcky, príprava aj cvičenia sú prispôsobené.':'Podmienky sú použité, ale prehliadač ich neuložil. Zachovaj si zdieľaný odkaz.');
+    message(configSaved?'Podmienky uložené.':'Podmienky sú použité, ale prehliadač ich neuložil. Zachovaj si zdieľaný odkaz.');
   }
   function setView(view) {
     if(view!=='field')window.FootballBoard?.pause();
@@ -910,9 +946,12 @@ const PersonalPlans = [
     if(window.FootballBoard?.supports(activeBlock().diagram))renderDiagram();
     if (state.detail === 'rotations') renderDetail();
   });
-  $('plan-pitch').addEventListener('change',()=>{const preset=TrainingPlanner.pitches[$('plan-pitch').value];$('plan-width').value=preset.width;$('plan-height').value=preset.height;$('plan-dimensions-label').textContent=`Pracovné rozmery ${preset.width} × ${preset.height} m · upraviť`;});
-  $('plan-half-basics').addEventListener('click',()=>{const preset=TrainingPlanner.halfBasics(state.attendance);document.querySelectorAll('[data-group-size]').forEach((input,i)=>{input.value=preset.groupSizes[i];input.removeAttribute('aria-invalid');});document.querySelectorAll('[data-group-level]').forEach((select,i)=>select.value=preset.levels[i]);$('plan-group-error').hidden=true;message('Pripravené rozdelenie približne na polovicu. Potvrď tlačidlom Použiť a uložiť.');});
-  $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav počty v skupinách, spolu musia byť ${state.attendance}. Každá skupina má 2–8 detí.`;$('plan-group-error').closest('details').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});});
+  document.querySelectorAll('[data-plan-tab]').forEach(button=>button.addEventListener('click',()=>{showPlanTab(button.dataset.planTab);$('conditions-panel').scrollIntoView({block:'start',behavior:'instant'});}));
+  document.querySelectorAll('[data-plan-control]').forEach(button=>button.addEventListener('click',()=>{const select=$(button.dataset.planControl);select.value=button.dataset.planValue;select.dispatchEvent(new Event('change',{bubbles:true}));syncPlanDraft(true);}));
+  $('plan-form').addEventListener('invalid',event=>{const card=event.target.closest('[data-group-card]');if(card){showPlanTab('groups');showPlanGroup(Number(card.dataset.groupCard));}else{showPlanTab('pitch');const details=event.target.closest('details');if(details)details.open=true;}},true);
+  $('plan-pitch').addEventListener('change',()=>{const preset=TrainingPlanner.pitches[$('plan-pitch').value];$('plan-width').value=preset.width;$('plan-height').value=preset.height;$('plan-dimensions-label').textContent=`Rozmery ${preset.width} × ${preset.height} m · upraviť`;});
+  $('plan-half-basics').addEventListener('click',()=>{const preset=TrainingPlanner.halfBasics(state.attendance);document.querySelectorAll('[data-group-size]').forEach((input,i)=>{input.value=preset.groupSizes[i];input.removeAttribute('aria-invalid');});document.querySelectorAll('[data-group-level]').forEach((select,i)=>select.value=preset.levels[i]);$('plan-group-error').hidden=true;syncPlanDraft(true);message('Polovica na základy pripravená. Potvrď Hotovo · uložiť.');});
+  $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav rozdelenie na ${state.attendance}.`;showPlanTab('groups');$('conditions-panel').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});$('conditions-panel').open=false;$('conditions-panel').querySelector('summary').focus({preventScroll:true});});
   $('summary-start').addEventListener('click',()=>navigate('field',0));
   $('summary-setup').addEventListener('click',()=>window.PitchSetup.open(state.selected));
   $('show-equipment').addEventListener('click',()=>navigate('equipment'));
