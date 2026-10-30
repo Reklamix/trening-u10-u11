@@ -110,3 +110,20 @@ Functional evidence:
 - Browser console errors/warnings:0. All browser automation used hidden DOM-only IAB; no system mouse/keyboard/focus takeover.
 
 Limitations: native OS share sheet, physical-device keyboard/system text enlargement, and decrypting the private plan were not exercised. Share logic, vault data/crypto, and reduced-motion behavior are unchanged. No P0/P1/P2 remains; publication is authorized to the existing GitHub Pages address.
+
+## Equal equipment, static preparation and timed phases — 30 October 2026
+
+User-scoped follow-up to 902260e. Checklist cells now have equal width and height within each responsive grid (three columns, two below361px), including the two longer items. Quantities and check state remain unchanged; no fixed content height or truncation was added. Exercise equipment grids also use equal rows.
+
+Preparation is static and directly selectable by all six exercises. Rondo retains all16corners from passing, zones combine the16corner moves and16new zone markers into one32-cone map, and games reuse those markers for goals. Start/end times identify the selected exercise. Opening from an exercise selects its own setup. Original setup geometry and data remain; the old motion model is preserved for compatibility but no playback UI is mounted.
+
+Exercise phase cards derive from the existing full sequence actualSeconds, not the accelerated preview length. Warm-up is exactly three main phases (120s mobility,180s dribbling,3×60s passing with2×30s recovery and60s water). Continuous tactical halves merge into one playing duration; rounds separated by recovery retain their repetition counts. Each real work/setup/rest/water segment belongs to one card; the end hold is not additional training time. The current card, cue and rest/water label update with the actual animation phase, including defender/neutral changes. Selecting a card shows its start diagram. Postup opens the current card, with original detailed rules in a disclosure. The redundant Aktuálna fáza animácie heading was removed. Timing, tracks, independent training timer, settings, archived content and vault data are unchanged.
+
+Verification evidence:
+-375×812: five checklist cells each104×174.67px;320×568: five cells136.5×157.875px;1440×900:184.3125×141.078125px. No horizontal overflow.
+-Static setup at375: zones32cones (16moves+16added), direct Rondo selection has no moves. At320, opening preparation from exercise3 selects Rondo; fixed footer buttons bottom547inside568px. No animation controls are mounted.
+-All six exercise phase plans inspected at24players. Warm-up phase3 remains selected during30s recovery and labels it explicitly; next/previous and running/paused animation behavior retained. Selecting phase2 and Back returned to Postup. At28players, seven-player zones changed the visible cue from blue/right/N1 to dark/left/N2 within the same round; merged work duration90s. Landscape844×390 Postup brings the current card to about12px from top; Hotovo bottom380px. Console errors/warnings zero.
+-Automated checks include phase coverage with no omitted/duplicated time; original block totals; one current-card mapping for every work/rest/water phase; warm-up grouping; uninterrupted mini-game work duration; six setup maps with every cone exactly once. Matrix10–30players × quarter/half/full × base/standard/challenge.
+-Changed-script syntax, validate.mjs and sequences.mjs results and final public captures are recorded in canonical project notes. Live proof: phase-equipment-live.png, phase-preparation-live.png and phase-steps-live.png in the existing visualization folder.
+
+Not exercised: physical phones, OS text scaling/reduced-motion settings, native share sheet and vault decryption; those flows are unchanged. Browser work used hidden DOM APIs, without shared desktop input.

@@ -2,6 +2,33 @@
 
 // Presentation of the approved exercise variants; no changes to the saved session.
 const ExerciseBrief = {
+  phasePlan(scene){
+    const groups=[];
+    for(const [index,phase]of(scene.phases||[]).entries()){
+      if(!phase.actualSeconds)continue;
+      if(phase.kind==='work'||phase.kind==='setup'){
+        const title=phase.name.replace(/ · (?:kolo|časť) .*/,'').replace(/^Prihrávky \d\/3$/,'Prihrávky');
+        if(!groups.length||groups[groups.length-1].title!==title)groups.push({title,start:phase.start,end:phase.end,first:index,last:index,parts:[],cue:phase.cue});
+      }
+      const group=groups[groups.length-1];
+      if(!group)continue;
+      group.parts.push({...phase,index});group.last=index;group.end=phase.end;
+    }
+    return groups;
+  },
+  duration(seconds){return seconds%60===0?`${seconds/60} min`:seconds>60?`${Math.floor(seconds/60)} min ${seconds%60} s`:`${seconds} s`;},
+  phaseDoses(group){
+    const categories=[['work','Práca'],['setup','Ukážka / organizácia'],['rest','Oddych'],['water','Voda']];
+    const doses=categories.flatMap(([kind,label])=>{
+      const values=[];let previousKind=null;
+      for(const part of group.parts){if(part.kind===kind){if(kind==='work'&&previousKind===kind)values[values.length-1]+=part.actualSeconds;else values.push(part.actualSeconds);}previousKind=part.kind;}
+      if(!values.length)return [];
+      const counts=new Map();for(const value of values)counts.set(value,(counts.get(value)||0)+1);
+      return [{kind,label:kind==='setup'&&group.title.startsWith('Otázka')?'Rozhovor':label,value:[...counts].map(([seconds,count])=>(count>1?`${count} × `:'')+this.duration(seconds)).join(' + ')}];
+    });
+    if(!doses.some(dose=>dose.kind==='rest'||dose.kind==='water'))doses.push({kind:'rest',label:'Oddych',value:'Bez prestávky'});
+    return doses;
+  },
   slogans:{'football-warmup':'Malé dotyky, hlava hore.','football-pass':'Prihraj a ukáž sa znova.','football-rondo':'Ukáž sa vedľa obrancu.','football-zones':'Prihraj do pohybu.','football-mini-games':'Prihraj, ponúkni sa, zakonči.','football-finish':'Čo sa ti dnes podarilo?'},
   build(training,block,index=0){
     if(!training?.planConfig||!this.slogans[block.diagram])return null;

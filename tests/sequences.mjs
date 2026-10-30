@@ -3,10 +3,18 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 const source=JSON.parse(read('trainings.json')).trainings.find(t=>t.id==='2026-10-29');
-const {planner,scenes,sequences}=runInNewContext(read('football.js').split('// FOOTBALL_BROWSER')[0]+'\n'+read('training-planner.js')+'\n'+read('football-sequence.js')+'\n({planner:TrainingPlanner,scenes:FootballScenes,sequences:FootballSequences})');
+const {planner,scenes,sequences,brief,setup}=runInNewContext(read('football.js').split('// FOOTBALL_BROWSER')[0]+'\n'+read('training-planner.js')+'\n'+read('football-sequence.js')+'\n'+read('exercise-brief.js')+'\n'+read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0]+'\n({planner:TrainingPlanner,scenes:FootballScenes,sequences:FootballSequences,brief:ExerciseBrief,setup:PitchSetupPlan})');
 let checks=0;
 for(const total of Array.from({length:21},(_,i)=>i+10))for(const pitch of ['quarter','half','full'])for(const level of ['base','standard','challenge']){
   const training=planner.adapt(source,{players:total,pitch,levels:[level,level,level,level]});
+  const preparation=setup.forExercises(training);
+  assert.equal(preparation.steps.length,training.blocks.length,'Each exercise has one directly selectable preparation diagram');
+  for(const step of preparation.steps){
+    const points=items=>items.map(p=>`${p.area}:${p.x},${p.y}`).sort().join('|');
+    assert.equal(points([...step.kept,...step.added,...step.moves.map(move=>move.to)]),points(step.map.cones),'Combining zone preparation keeps every real target cone exactly once');
+    assert.ok(training.blocks.some(block=>block.id===step.blockId),'Preparation links to the real exercise');
+  }
+  assert.equal(preparation.steps[2].moves.length+preparation.steps[2].added.length,0,'Rondo reuses passing setup without invented work');
   for(const block of training.blocks){
     const areas=scenes.groups(block.diagram,total,training.quarterPitch);
     for(const [index,area]of (areas.length?areas:[null]).entries()){
@@ -15,6 +23,13 @@ for(const total of Array.from({length:21},(_,i)=>i+10))for(const pitch of ['quar
       assert.equal(people.length,area?.count??total,'All actual children are present');
       assert.equal(scene.phases.reduce((sum,p)=>sum+p.actualSeconds,0),(block.end-block.start)*60,'All work, rest and setup doses sum to the original block');
       assert.equal(scene.phases.at(-1).kind,'end');
+      const phasePlan=brief.phasePlan(scene),parts=phasePlan.flatMap(group=>group.parts);
+      assert.equal(parts.reduce((sum,part)=>sum+part.actualSeconds,0),(block.end-block.start)*60,'Visible grouped phases retain all work, breaks, water and setup');
+      assert.equal(new Set(parts.map(part=>part.index)).size,scene.phases.length-1,'Every animation phase maps to exactly one visible group');
+      for(let phaseIndex=0;phaseIndex<scene.phases.length-1;phaseIndex++)assert.equal(phasePlan.filter(group=>phaseIndex>=group.first&&phaseIndex<=group.last).length,1,'Highlight identifies exactly one phase card, including recovery');
+      for(const group of phasePlan){assert.ok(brief.phaseDoses(group).every(dose=>dose.label&&dose.value));assert.equal(scene.phases[group.first].start,group.start,'Selecting a grouped phase shows its real initial diagram');}
+      if(block.diagram==='football-mini-games')for(const group of phasePlan.slice(1))assert.equal(brief.phaseDoses(group).find(dose=>dose.kind==='work').value,area.count<=3?'2 min':'4 min','Two continuous tactical halves are one uninterrupted playing period');
+      if(block.diagram==='football-warmup'){assert.equal(phasePlan.length,3,'Warm-up remains three understandable main phases');assert.equal(phasePlan[2].parts.filter(part=>part.kind==='rest').length,2,'Passing includes both thirty-second breaks');assert.equal(phasePlan[2].parts.filter(part=>part.kind==='water')[0].actualSeconds,60,'Warm-up retains the final water minute');}
       for(const phase of scene.phases){
         assert.ok(phase.end>phase.start);
         for(const person of people){assert.equal(phase.roles[person.id].visible,true,'No child disappears during rotation');}
@@ -47,4 +62,4 @@ const cut=[[0,0,0],[1,10,0],[2,100,0,'cut'],[3,110,0]];
 assert.equal(scenes.sample(cut,1.5).x,10,'A formation change does not drag players across the pitch');
 assert.equal(scenes.sample(cut,2).x,100,'The new formation appears exactly at its phase boundary');
 assert.equal(scenes.sample(cut,2.5).x,105,'Normal action moves immediately after the cut');
-console.log(`PASS: ${checks} sequence phases; 10–30 players, all pitch presets and skill levels; original doses, roles, receivers, direct starts and logical cuts.`);
+console.log(`PASS: ${checks} sequence phases; 10–30 players, all pitch presets and skill levels; original doses, roles, receivers, direct starts and logical cuts; grouped phase coverage, work/rest/water totals and six static preparation maps.`);

@@ -239,7 +239,7 @@ const FootballPhaseNavigation={
     const uiIcon=name=>{const icon=html('img','card-ui-icon');icon.src='./assets/bootstrap-icons/'+name+'.svg';icon.alt='';return icon;};
     const groupBar=html('div','card-group-bar'),glance=html('section','card-glance'),quickFacts=html('div','card-quick-facts'),summary=html('section','exercise-summary');glance.setAttribute('aria-label','Čas a dávkovanie cvičenia');
     summary.id='exercise-summary';summary.tabIndex=-1;summary.setAttribute('aria-label','Popis a postup');
-    let topic='steps',instructionIndex=0,equipmentIndex=-1,timePart='work',instructionMode=false,heroAnchor='diagram';
+    let topic='steps',instructionIndex=0,equipmentIndex=-1,timePart='work',instructionMode=false,heroAnchor='diagram',phaseCards=[];
     const topicTrail=[];
     const topicState=()=>({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,scrollTop:root.scrollTop,pageScroll:window.scrollY});
     const preview=html('button','exercise-preview'),previewBody=html('span','card-short-description'),descriptionButton=html('span','card-description-button','Popis cvičenia →'),itemPager=html('div','exercise-item-pager'),modeButton=html('button','secondary-button exercise-mode-button','Ako to robiť →');modeButton.type='button';modeButton.addEventListener('click',()=>selectTopic('steps',{instructions:!instructionMode}));
@@ -338,9 +338,9 @@ const FootballPhaseNavigation={
       const before=topicState();topic='steps';instructionMode=false;heroAnchor=anchor;
       if(record&&JSON.stringify(before)!==JSON.stringify(topicState()))topicTrail.push(before);
       if(anchor==='procedure')pause();moreMenu.open=false;applyTopic();
-      const target=anchor==='procedure'?summary:figure;
+      const selectedPhase=summary.querySelector('.is-current'),target=anchor==='procedure'?(selectedPhase&&selectedPhase!==phaseCards[0]?.button?selectedPhase:summary):figure;
       if(root.scrollHeight>root.clientHeight+1&&getComputedStyle(root).overflowY!=='visible')root.scrollTo({top:anchor==='diagram'?0:Math.max(0,target.getBoundingClientRect().top-root.getBoundingClientRect().top+root.scrollTop-8),behavior:'instant'});
-      else (anchor==='diagram'?(root.closest('#field-view')||root):summary).scrollIntoView({block:'start',behavior:'instant'});
+      else (anchor==='diagram'?(root.closest('#field-view')||root):target).scrollIntoView({block:'start',behavior:'instant'});
       if(record)(anchor==='procedure'?summary:figure).focus({preventScroll:true});
     }
     function showTimer(){
@@ -368,8 +368,17 @@ const FootballPhaseNavigation={
       const doseGrid=html('div','exercise-dose-grid');
       for(const[label,value,hint,part]of[['Práca',data.timing.work,data.timing.workHint,'work'],['Oddych',data.timing.rest,data.timing.restHint,'rest'],['Opakovania',data.timing.repetitions.value,data.timing.repetitions.hint,'work']]){const button=html('button','card-dose');button.type='button';button.setAttribute('aria-label',label+': '+value+(hint?'. '+hint:'')+'. Celá dávka');const body=html('span');body.append(html('span','card-dose-label',label),html('strong','',value));if(hint)body.append(html('small','',hint));button.append(body);button.addEventListener('click',()=>selectTopic('time',{part}));doseGrid.append(button);}
       glance.append(doseGrid,html('p','exercise-dose-schedule',data.timing.schedule));if(data.timing.note)glance.append(html('p','exercise-dose-note',data.timing.note));
-      const visibleSteps=html('ol','exercise-summary-steps');data.steps.forEach(text=>visibleSteps.append(html('li','',text)));
-      summary.replaceChildren(html('h2','','Popis a postup'),html('p','exercise-summary-description',data.description),html('h3','','Aktuálna fáza animácie'),preview,html('h3','','Postup cvičenia'),visibleSteps);
+      const visibleSteps=html('ol','exercise-phase-list');phaseCards=[];
+      ExerciseBrief.phasePlan(scene).forEach((group,index)=>{
+        const item=html('li'),button=html('button','exercise-phase-card'),heading=html('span','phase-card-heading'),status=html('span','phase-card-status'),doses=html('span','phase-card-doses');button.type='button';
+        heading.append(html('span','phase-card-number',String(index+1)),html('strong','',group.title));
+        for(const dose of ExerciseBrief.phaseDoses(group)){const part=html('span','phase-card-dose');part.dataset.kind=dose.kind;part.append(html('small','',dose.label),html('strong','',dose.value));doses.append(part);}
+        const cue=html('span','phase-card-cue',group.cue);
+        button.append(heading,doses,cue,status);button.setAttribute('aria-label',`Fáza ${index+1}: ${group.title}. Zobraziť nákres`);
+        button.addEventListener('click',()=>{goToTime(group.start);jumpHero('diagram');});item.append(button);visibleSteps.append(item);phaseCards.push({button,status,cue,group});
+      });
+      const rules=html('details','exercise-phase-rules'),allSteps=html('ol');data.steps.forEach(text=>allSteps.append(html('li','',text)));rules.append(html('summary','','Celý postup a pravidlá'),allSteps);
+      summary.replaceChildren(html('h2','','Fázy cvičenia'),html('p','exercise-summary-description',data.description),visibleSteps,rules);syncPhaseCards(FootballPhaseNavigation.index(scene.phases||[],clock.time()));
       quickFacts.replaceChildren();const noun=(count,one,few,many)=>count===1?one:count>=2&&count<=4?few:many;for(const[label,value,hint,icon,action]of[['Plocha',selectedArea?`${selectedArea.length} × ${selectedArea.width} m`:'Pri trénerovi',`${config.width} × ${config.height} m spolu`,'bounding-box',()=>selectTopic('space')],['Deti',String(localCount),'z '+config.players,'people-fill',()=>selectTopic('space',{settings:true})],['Pomôcky',data.conesLocal?`${data.conesLocal} ${noun(data.conesLocal,'kužeľ','kužele','kužeľov')}`:'Voda',data.ballsLocal?`${data.ballsLocal} ${noun(data.ballsLocal,'lopta','lopty','lôpt')}`:'pre každého','cone-striped',()=>selectTopic('kit')]]){const button=html('button','card-quick-fact');button.type='button';const text=html('span');text.append(html('span','card-fact-label',label),html('strong','',value),html('small','',hint));const factIcon=uiIcon(icon);if(icon==='cone-striped')factIcon.src='./assets/card-cone.webp';button.append(factIcon,text);button.addEventListener('click',action);quickFacts.append(button);}
 
       const panels={};for(const key of['steps','space','time','coach','kit']){const panel=html('div','exercise-topic-panel');panel.id='exercise-panel-'+key;panel.dataset.panel=key;panel.setAttribute('role','region');panel.setAttribute('aria-label',{steps:'Postup cvičenia',space:'Plocha a skupiny',time:'Práca, oddych a striedanie',coach:'Pokyny trénera',kit:'Pomôcky cvičenia'}[key]);panels[key]=panel;briefRoot.append(panel);}
@@ -528,15 +537,21 @@ const FootballPhaseNavigation={
         if(node.kind==='ball'&&!focused)g.append(svgNode('circle',{cx:0,cy:0,r:1.5,fill:'#173b31'}));
         else if(node.kind!=='ball')g.append(svgNode('text',{x:0,y:.5,'text-anchor':'middle','dominant-baseline':'middle',fill:['N','T'].includes(node.team)?'#173b31':'white','font-size':r===7?7:9,'font-weight':650},node.label));
     }
+    function syncPhaseCards(index){
+      const phase=scene.phases?.[index];
+      for(const card of phaseCards){const selected=index>=card.group.first&&index<=card.group.last;card.button.classList.toggle('is-current',selected);if(selected)card.button.setAttribute('aria-current','step');else card.button.removeAttribute('aria-current');card.cue.textContent=selected?phase.cue:card.group.cue;card.status.textContent=selected?(phase.kind==='rest'?'Oddych · '+ExerciseBrief.duration(phase.actualSeconds):phase.kind==='water'?'Voda · '+ExerciseBrief.duration(phase.actualSeconds):'V nákrese'):'';}
+    }
     function render() {
       if(!clock)return;
       const time=clock.time();
       const phases=scene.phases||[],phaseIndex=FootballPhaseNavigation.index(phases,time),phase=phases[phaseIndex];
       if(phase){
         const dose=phase.actualSeconds%60===0?phase.actualSeconds/60+' min':phase.actualSeconds+' s';
-        phaseLabel.textContent=`${phaseIndex+1}/${phases.length} · ${phase.name}${phase.actualSeconds?' · '+dose+' v tréningu':''}`;
+        const cardIndex=phaseCards.findIndex(card=>phaseIndex>=card.group.first&&phaseIndex<=card.group.last),card=phaseCards[cardIndex];
+        phaseLabel.textContent=card?`Fáza ${cardIndex+1}/${phaseCards.length} · ${card.group.title} · ${phase.kind==='rest'?'oddych':phase.kind==='water'?'voda':phase.kind==='setup'?(card.group.title.startsWith('Otázka')?'rozhovor':'ukážka'):'práca'} ${dose}`:`${phase.name}${phase.actualSeconds?' · '+dose+' v tréningu':''}`;
         phaseBar.dataset.kind=phase.kind;phaseNext.disabled=phaseIndex===phases.length-1;phasePrevious.disabled=phaseIndex===0;
         if(phaseBar.dataset.phase!==String(phaseIndex)){
+          if(focused)syncPhaseCards(phaseIndex);
           phaseBar.dataset.phase=String(phaseIndex);previewBody.textContent=phase.cue;
           for(const node of scene.nodes){const role=phase.roles[node.id];if(!role)continue;const g=actors.get(node.id);g.setAttribute('visibility',role.visible?'visible':'hidden');paintActor(g,{...node,...role});}
         }

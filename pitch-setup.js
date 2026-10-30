@@ -89,6 +89,14 @@ const PitchSetupPlan = {
       previous=step.map.cones;
     }
     return { layout, steps:instructions };
+  },
+  forExercises(training){
+    const {layout,steps}=this.build(training),[warm,pass,expand,zones,games]=steps;
+    const unchanged=(step,action)=>({...step,moves:[],added:[],kept:step.map.cones,action,coach:training.organizationNotes.join(' '),extra:'Rozloženie z predchádzajúceho cvičenia zostáva. Méty nepridávaj ani nepresúvaj.'});
+    const views=[warm,pass,unchanged(pass,'Nechaj štyri plochy z prihrávok. Na rondo netreba presunúť žiadne kužele.'),{...zones,moves:expand.moves,kept:expand.kept,action:expand.action+' '+zones.action,coach:expand.coach.replace('Tento krok aj nasledujúci urobte','Úpravu rohov aj pridanie zónových mét urobte')},games,{...unchanged(games,'Zastav hru. Deti prejdú k trénerovi na pokojný záver. Pomôcky zbierajte až na pokyn, mimo prebiehajúcej hry.'),coach:'Celé mužstvo prejde k trénerovi. Pred zberom pomôcok zastavte všetky hry.'}];
+    const names=['Rozohriatie','Prihrávky','Rondo','Koncové zóny','Minihry','Záver'];
+    const start=training.startTime.split(':').map(Number),at=offset=>{const minutes=start[0]*60+start[1]+offset;return `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;};
+    return{layout,steps:views.map((step,index)=>({...step,blockId:training.blocks[index].id,title:names[index],when:`${at(training.blocks[index].start)}–${at(training.blocks[index].end)}`,shortAction:index===0?`Vyznač dve zóny ${warm.map.areas[0].length} × ${warm.map.areas[0].width} m. Rozlož 8 rohových kužeľov; priechod 3 m a obvod 2 m nechaj voľný.`:index===1?`Presuň ${pass.moves.length} pôvodných rohov podľa šípok a pridaj ${pass.added.length} mét. Štyri plochy ${pass.map.areas[0].length} × ${pass.map.areas[0].width} m.`:index===3?`Presuň ${expand.moves.length} rohov podľa šípok a pridaj ${zones.added.length} zónových mét: vždy 2 m od oboch koncov. Štyri plochy ${zones.map.areas[0].length} × ${zones.map.areas[0].width} m.`:index===4?`Rohy nechaj. Presuň ${games.moves.length} zónových mét na osem bránok širokých 2 m.`:step.action}))};
   }
 };
 
@@ -120,27 +128,21 @@ const PitchSetupMotion = {
   const svg=(tag,attrs={},text)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;};
   let active=null;
   function close(){if(active?.open)active.close();}
-  function open(training){
+  function open(training,blockId){
     close();window.FootballBoard?.pause();
-    const {layout,steps}=PitchSetupPlan.build(training),returnFocus=document.activeElement;
+    const {layout,steps}=PitchSetupPlan.forExercises(training),returnFocus=document.activeElement;
     const dialog=el('dialog','pitch-setup');dialog.setAttribute('aria-labelledby','setup-title');
     const header=el('header','setup-header'),title=el('h2','','Príprava ihriska');title.id='setup-title';
     const dismiss=el('button','setup-close','×');dismiss.type='button';dismiss.setAttribute('aria-label','Zavrieť prípravu');dismiss.addEventListener('click',close);
     header.append(title,dismiss);
-    const nav=el('div','setup-nav'),label=el('label','','Vyber krok prípravy'),select=el('select');select.setAttribute('aria-label','Vyber krok prípravy');
-    steps.forEach((step,index)=>{const option=el('option','',`${index+1}. ${step.title}`);option.value=index;select.append(option);});
-    label.append(select);nav.append(label);
+    const nav=el('nav','setup-exercise-tabs');nav.setAttribute('aria-label','Príprava pre cvičenie');
+    steps.forEach((step,value)=>{const button=el('button','',step.title);button.type='button';button.dataset.setupExercise=value;button.addEventListener('click',()=>{index=value;render();});nav.append(button);});
     const body=el('div','setup-body'),footer=el('footer','setup-footer');
-    let index=0,rate=.5,repeat=true,clock=null,animationFrame=null,updateMotion=null;
-    function pauseMotion(){
-      if(animationFrame!==null)cancelAnimationFrame(animationFrame);animationFrame=null;
-      if(clock)clock.pause();updateMotion?.();
-    }
-    function disposeMotion(){pauseMotion();updateMotion=null;clock=null;}
+    let index=Math.max(0,steps.findIndex(step=>step.blockId===blockId));
     function render(){
-      disposeMotion();
-      const step=steps[index];select.value=String(index);body.replaceChildren();footer.replaceChildren();body.scrollTop=0;
-      const progress=el('p','setup-progress',`Krok ${index+1} z ${steps.length} · ${step.when}`);progress.setAttribute('role','status');
+      const step=steps[index];body.replaceChildren();footer.replaceChildren();body.scrollTop=0;
+      for(const button of nav.children)button.setAttribute('aria-pressed',String(Number(button.dataset.setupExercise)===index));
+      const progress=el('p','setup-progress',`${index+1} / ${steps.length} · ${step.when}`);progress.setAttribute('role','status');
       body.append(progress,el('h3','setup-step-title',step.title));
       const facts=el('div','setup-facts');
       for(const[name,value]of[['Po kroku',step.total],['Pridaj',step.added.length],['Presuň',step.moves.length],['Bokom',step.stored]]){
@@ -164,49 +166,8 @@ const PitchSetupMotion = {
       step.kept.forEach(p=>cone(p,'kept','#216a4b'));
       const added=step.added.map(p=>cone(p,'added','#f47700')),moved=step.moves.map(({to})=>cone(to,'moved','#16729c'));
       body.append(map);
-      const area=step.map.areas[0],shortActions=[
-        `Rozlož ${step.added.length} kužeľov: dve zóny ${area.length} × ${area.width} m. Priechod 3 m, obvod 2 m voľný.`,
-        `Presuň ${step.moves.length} rohov podľa šípok a pridaj ${step.added.length}. Vzniknú štyri plochy ${area.length} × ${area.width} m.`,
-        `Presuň ${step.moves.length} rohov: ľavé o 1 m doľava, pravé o 1 m doprava. Rozmer ${area.length} × ${area.width} m.`,
-        `Pridaj ${step.added.length} mét: štyri na každú plochu, 2 m od oboch koncov.`,
-        `Presuň ${step.moves.length} zónových mét na osem bránok širokých 2 m. Rohy nechaj na mieste.`
-      ];
-      body.append(el('p','setup-action',shortActions[index]));
-      const motion=PitchSetupMotion.create(step);clock=new FootballTimeline(motion.duration);clock.setRate(rate);clock.setLoop(repeat);
-      let animated=false;
-      const controls=el('div','setup-motion-controls'),play=el('button','button'),restart=el('button','secondary-button','Od začiatku'),drawing=el('button','secondary-button','Nákres');
-      for(const button of[play,restart,drawing])button.type='button';controls.append(play,drawing);
-      const settings=el('div','setup-motion-settings'),speedLabel=el('label','','Rýchlosť ukážky'),speed=el('select');speed.setAttribute('aria-label','Rýchlosť presunu kužeľov');
-      for(const[value,label]of[[.25,'0,25× · veľmi pomaly'],[.5,'0,5× · pomaly'],[1,'1× · normálne']]){const option=el('option','',label);option.value=value;speed.append(option);}speed.value=String(rate);speedLabel.append(speed);
-      const repeatLabel=el('label','setup-motion-repeat'),loop=el('input');loop.type='checkbox';loop.checked=repeat;repeatLabel.append(loop,document.createTextNode('Opakovať dokola'));settings.append(speedLabel,repeatLabel);
-      const status=el('p','setup-motion-status');status.setAttribute('role','status');
-      const timeline=el('details','setup-motion-timeline');timeline.append(el('summary','','Prejsť na čas ukážky'));
-      const output=el('output','setup-motion-time');output.setAttribute('aria-live','off');
-      const seek=el('input');seek.type='range';seek.min='0';seek.max=motion.duration;seek.step='.01';seek.setAttribute('aria-label','Priebeh presunu kužeľov');timeline.append(output,seek);
-      updateMotion=()=>{
-        const time=animated?clock.time():motion.duration,frame=PitchSetupMotion.sample(motion,time);
-        if(animated&&frame.complete&&clock.origin!==null&&!clock.loop)clock.pause();
-        moved.forEach((element,i)=>{const point=frame.moves[i],to=step.moves[i].to;element.setAttribute('transform',`translate(${point.x-to.x} ${point.y-to.y})`);});
-        added.forEach((element,i)=>element.setAttribute('opacity',String(frame.added[i])));
-        map.querySelectorAll('[data-setup-route]').forEach(route=>route.setAttribute('opacity',!animated||frame.complete||route.getAttribute('data-setup-route')===frame.area?'1':'.2'));
-        map.querySelectorAll('[data-setup-area]').forEach(area=>area.setAttribute('fill',animated&&!frame.complete&&area.getAttribute('data-setup-area')===frame.area?'#e8edb5':'#f6f8f1'));
-        const playing=clock.origin!==null;
-        play.textContent=playing?'Pauza':animated?(frame.complete?'Prehrať znova':'Pokračovať'):(step.moves.length?'Prehrať presun':'Ukázať pridanie');
-        drawing.setAttribute('aria-pressed',String(!animated));
-        const message=!animated?`Nákres · ${String(rate).replace('.',',')}× · ${repeat?'opakovanie':'bez opakovania'}`:frame.complete?'Hotovo · kužele sú na nových miestach.':`${playing?'':'Pauza · '}${frame.area}: ${frame.phase==='presun'?'presun kužeľov':frame.phase==='pridanie'?'pridanie mét':'kontrola miest'}.`;
-        if(status.textContent!==message)status.textContent=message;
-        seek.value=String(time);output.textContent=`${time.toFixed(1)} / ${motion.duration.toFixed(1)} s`;
-      };
-      const tick=()=>{updateMotion();if(clock.origin!==null)animationFrame=requestAnimationFrame(tick);else animationFrame=null;};
-      play.addEventListener('click',()=>{if(clock.origin!==null)pauseMotion();else{animated=true;clock.play();updateMotion();animationFrame=requestAnimationFrame(tick);}});
-      restart.addEventListener('click',()=>{pauseMotion();animated=true;clock.seek(0);updateMotion();});
-      drawing.addEventListener('click',()=>{pauseMotion();animated=false;clock.seek(0);updateMotion();});
-      speed.addEventListener('change',()=>{rate=Number(speed.value);clock.setRate(rate);updateMotion();});
-      loop.addEventListener('change',()=>{repeat=loop.checked;clock.setLoop(repeat);updateMotion();});
-      seek.addEventListener('input',()=>{const value=Number(seek.value);pauseMotion();animated=true;clock.seek(value);updateMotion();});
-      body.append(controls,status);updateMotion();
-      const extra=el('details','setup-details');extra.append(el('summary','','Podrobnosti a možnosti'),nav,facts,settings,restart,timeline);
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)extra.append(el('p','setup-motion-note','Pri obmedzenom pohybe použi posuvník alebo Nákres.'));
+      body.append(el('p','setup-action',step.shortAction));
+      const extra=el('details','setup-details');extra.append(el('summary','','Podrobnosti rozloženia'),facts);
       const legend=el('p','setup-legend','Oranžové = pridaj · modré = presuň · zelené = nechaj. Krúžok a šípka ukazujú pôvodné miesto.');extra.append(legend,el('p','',step.action));
       if(step.kit)extra.append(el('p','setup-kit',step.kit));
       extra.append(el('p','',step.coach),el('p','',step.extra));body.append(extra);
@@ -214,10 +175,8 @@ const PitchSetupMotion = {
       previous.addEventListener('click',()=>{index--;render();(index?footer.firstElementChild:footer.lastElementChild).focus();});
       const last=index===steps.length-1,next=el('button','button',last?'Príprava hotová':'Hotovo → ďalej');next.type='button';next.addEventListener('click',()=>{if(last)close();else{index++;render();footer.lastElementChild.focus();}});footer.append(previous,next);
     }
-    select.addEventListener('change',()=>{index=Number(select.value);render();});
-    dialog.append(header,body,footer);document.body.append(dialog);active=dialog;
-    const onVisibility=()=>{if(document.hidden)pauseMotion();};document.addEventListener('visibilitychange',onVisibility);window.addEventListener('pagehide',pauseMotion);
-    dialog.addEventListener('close',()=>{disposeMotion();document.removeEventListener('visibilitychange',onVisibility);window.removeEventListener('pagehide',pauseMotion);dialog.remove();if(active===dialog)active=null;if(returnFocus?.isConnected)returnFocus.focus();},{once:true});render();dialog.showModal();
+    dialog.append(header,nav,body,footer);document.body.append(dialog);active=dialog;
+    dialog.addEventListener('close',()=>{dialog.remove();if(active===dialog)active=null;if(returnFocus?.isConnected)returnFocus.focus();},{once:true});render();dialog.showModal();
   }
   window.PitchSetup={supports:training=>PitchSetupPlan.supports(training),open,close};
 })();
