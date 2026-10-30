@@ -194,7 +194,15 @@ check(html.includes('<details id="backup-options"') && !html.includes('<details 
 check(!readdirSync(root).some(name => /osobny|tahak|syna/i.test(name)), 'No personal file deployed');
 
 const footballPure=read('football.js').split('// FOOTBALL_BROWSER')[0];
-const {FootballTimeline,FootballScenes}=runInNewContext(footballPure+'\n({FootballTimeline,FootballScenes})',{performance:{now:()=>0}});
+const {FootballTimeline,FootballScenes,FootballPhaseNavigation}=runInNewContext(footballPure+'\n({FootballTimeline,FootballScenes,FootballPhaseNavigation})',{performance:{now:()=>0}});
+const phaseNavigationCases=[{start:0,ready:0},{start:3,ready:3},{start:9,ready:9},{start:12,ready:12}];
+equal(FootballPhaseNavigation.target(phaseNavigationCases,2,-1),null,'First animation phase has no previous phase');
+equal(FootballPhaseNavigation.target(phaseNavigationCases,8,-1),0,'Back from mid-phase goes to the previous phase, not the start of the current phase');
+equal(FootballPhaseNavigation.target(phaseNavigationCases,9,-1),3,'Back at a phase boundary goes exactly one phase back');
+equal(FootballPhaseNavigation.target(phaseNavigationCases,12,-1),9,'Back from completion goes to the preceding phase');
+equal(FootballPhaseNavigation.target(phaseNavigationCases,8,1),9,'Forward and back use the same phase boundaries');
+equal(FootballPhaseNavigation.target(phaseNavigationCases,13,1),null,'Last animation phase has no next phase');
+equal(FootballPhaseNavigation.target([],0,-1),null,'Missing phase data never leaves the exercise unexpectedly');
 const quarter=thu.quarterPitch;
 for(const attendance of thu.attendanceCases)for(const block of thu.blocks.filter(b=>b.diagram!=='football-finish')){
   const groups=FootballScenes.groups(block.diagram,attendance.total,quarter);

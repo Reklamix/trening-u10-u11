@@ -140,9 +140,11 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv27/footballv24/football-sequencev3/exercise-briefv5/coaching-guidev4/pitch-setupv4/training-plannerv5/CSSv24/exercise-cardv2/app-shellv3. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv28/footballv25/football-sequencev3/exercise-briefv5/coaching-guidev4/pitch-setupv4/training-plannerv5/CSSv24/exercise-cardv3/app-shellv3. Samotné pridanie tréningu tento krok nepotrebuje.
 
 Štvrtkové cvičenia majú na hlavnej obrazovke nákres s ručným Prehrať, aktuálnu fázu s tlačidlom Ďalšia fáza, krátky pokyn, Práca/Oddych a Hotovo → ďalej. Postup, Nastaviť, Čas a Pomôcky otvoria podrobnosti; Úvod je stále hore. Menu obsahuje výber cvičenia a pokyny trénera. Na nízkom mobile sa skryjú doplnkové údaje hlavičky a výber skupiny zostáva v Nastaviť.
+
+Animácia má šípky Predchádzajúca fáza/Ďalšia fáza (na mobile veľké ikony, názvy sú dostupné čítačke aj v popise tlačidla). Vrátia presne jednu fázu a zachovajú prehrávanie/pauzu, rýchlosť a opakovanie; na prvom/poslednom kroku sa príslušná šípka vypne. Horné Späť vráti jeden bod postupu, predchádzajúci panel alebo fázu; na začiatku cvičenia predchádzajúcu stránku aplikácie. Pri priamom odkaze bez histórie zostane v aplikácii (predošlé cvičenie, pri prvom úvod). Úvod je samostatné tlačidlo bez šípky. Panely s ľavou šípkou používajú rovnaké Späť, priamy Nákres zostáva v menu.
 
 Rozohriatie ukazuje voľný pohyb naprieč spoločnou zónou, medzi spoluhráčmi, s obchádzaním a zmenou smeru. Každé dieťa prechádza rôznymi časťami priestoru; úvodné rozloženie neoznačuje osobné stanovištia. Rovnaký pohyb bez lopty sa používa pri rozhýbaní, s vlastnou loptou pri vedení. Pohyb pokračuje dopredu, bez hromadného pretáčania dráh späť. Dvojice/trojice sú až nasledujúca fáza prihrávok. Kontrola pohybu: `node tests/warmup-motion.mjs`.
 
