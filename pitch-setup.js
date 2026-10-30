@@ -140,7 +140,7 @@ const PitchSetupMotion = {
     const body=el('div','setup-body'),footer=el('footer','setup-footer');
     let index=Math.max(0,steps.findIndex(step=>step.blockId===blockId));
     function render(){
-      const step=steps[index];body.replaceChildren();footer.replaceChildren();body.scrollTop=0;
+      const step=steps[index],scrollTop=body.scrollTop,detailsOpen=Boolean(body.querySelector('.setup-details')?.open),actionHeight=body.querySelector('.setup-action')?.getBoundingClientRect().height||0,detailsHeight=body.querySelector('.setup-details')?.getBoundingClientRect().height||0;body.replaceChildren();footer.replaceChildren();
       for(const button of nav.children)button.setAttribute('aria-pressed',String(Number(button.dataset.setupExercise)===index));
       const progress=el('p','setup-progress',`${index+1} / ${steps.length} · ${step.when}`);progress.setAttribute('role','status');
       body.append(progress,el('h3','setup-step-title',step.title));
@@ -166,17 +166,17 @@ const PitchSetupMotion = {
       step.kept.forEach(p=>cone(p,'kept','#216a4b'));
       const added=step.added.map(p=>cone(p,'added','#f47700')),moved=step.moves.map(({to})=>cone(to,'moved','#16729c'));
       body.append(map);
-      body.append(el('p','setup-action',step.shortAction));
-      const extra=el('details','setup-details');extra.append(el('summary','','Podrobnosti rozloženia'),facts);
+      const action=el('p','setup-action',step.shortAction);action.style.minHeight=actionHeight+'px';body.append(action);
+      const extra=el('details','setup-details');extra.open=detailsOpen;if(detailsOpen)extra.style.minHeight=detailsHeight+'px';extra.addEventListener('toggle',()=>{if(!extra.open)extra.style.minHeight='';});extra.append(el('summary','','Podrobnosti rozloženia'),facts);
       const legend=el('p','setup-legend','Oranžové = pridaj · modré = presuň · zelené = nechaj. Krúžok a šípka ukazujú pôvodné miesto.');extra.append(legend,el('p','',step.action));
       if(step.kit)extra.append(el('p','setup-kit',step.kit));
       extra.append(el('p','',step.coach),el('p','',step.extra));body.append(extra);
       const previous=el('button','secondary-button','← Späť');previous.type='button';previous.disabled=index===0;
-      previous.addEventListener('click',()=>{index--;render();(index?footer.firstElementChild:footer.lastElementChild).focus();});
-      const last=index===steps.length-1,next=el('button','button',last?'Príprava hotová':'Hotovo → ďalej');next.type='button';next.addEventListener('click',()=>{if(last)close();else{index++;render();footer.lastElementChild.focus();}});footer.append(previous,next);
+      previous.addEventListener('click',()=>{index--;render();(index?footer.firstElementChild:footer.lastElementChild).focus({preventScroll:true});});
+      const last=index===steps.length-1,next=el('button','button',last?'Príprava hotová':'Hotovo → ďalej');next.type='button';next.addEventListener('click',()=>{if(last)close();else{index++;render();footer.lastElementChild.focus({preventScroll:true});}});footer.append(previous,next);body.scrollTop=scrollTop;
     }
     dialog.append(header,nav,body,footer);document.body.append(dialog);active=dialog;
-    dialog.addEventListener('close',()=>{dialog.remove();if(active===dialog)active=null;if(returnFocus?.isConnected)returnFocus.focus();},{once:true});render();dialog.showModal();
+    dialog.addEventListener('close',()=>{dialog.remove();if(active===dialog)active=null;if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});},{once:true});render();dialog.showModal();
   }
   window.PitchSetup={supports:training=>PitchSetupPlan.supports(training),open,close};
 })();

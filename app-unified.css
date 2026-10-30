@@ -104,3 +104,17 @@
   .summary-journey button {font-size:11px}
 }
 @media(max-height:650px) {.pitch-setup .setup-map {height:145px}}
+/* Switching local controls must not move the page or resize the diagram. */
+html {scrollbar-gutter:stable}
+html:has(.exercise-focus) {scrollbar-gutter:auto}
+.exercise-focus .exercise-flow,.exercise-focus .exercise-info,
+.pitch-setup .setup-body,#timer-panel {scrollbar-gutter:stable;overflow-anchor:none}
+.phase-choice-copy strong {overflow-wrap:anywhere}
+.timer-display .timer-phase {min-height:2.6em}
+.timer-display #timer-scope,.timer-display #timer-next {min-height:2.9em}
+.timer-display #timer-state {min-height:3em}
+.timer-panel .timer-actions button {min-height:56px;padding-block:8px;line-height:1.25}
+@media(max-width:400px) {.phase-choice-copy strong {font-size:11px}}
+@media(max-height:650px) {
+  .timer-panel .timer-actions {position:sticky;bottom:0;z-index:2;background:#fff;padding:8px 0;margin-bottom:0}
+}

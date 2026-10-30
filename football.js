@@ -239,7 +239,7 @@ const FootballPhaseNavigation={
     const uiIcon=name=>{const icon=html('img','card-ui-icon');icon.src='./assets/bootstrap-icons/'+name+'.svg';icon.alt='';return icon;};
     const groupBar=html('div','card-group-bar'),glance=html('section','card-glance'),quickFacts=html('div','card-quick-facts'),summary=html('section','exercise-summary'),phaseDetail=html('div','phase-detail');glance.setAttribute('aria-label','Čas a dávkovanie cvičenia');
     summary.id='exercise-summary';summary.tabIndex=-1;summary.setAttribute('aria-label','Popis a postup');
-    let topic='steps',instructionIndex=0,equipmentIndex=-1,timePart='work',instructionMode=false,heroAnchor='diagram',phaseCards=[],fullPlanOpen=false;
+    let topic='steps',instructionIndex=0,equipmentIndex=-1,timePart='work',instructionMode=false,heroAnchor='diagram',phaseCards=[],fullPlanOpen=false,phaseDetailWidth=0;
     const topicTrail=[];
     const topicState=()=>({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen,timerDoseOpen:document.getElementById('field-view').classList.contains('timer-dose-open'),timerPanelOpen:document.getElementById('timer-panel').open,scrollTop:root.scrollTop,pageScroll:window.scrollY});
     const restoreTimerView=state=>{document.getElementById('field-view').classList.toggle('timer-dose-open',Boolean(state.timerDoseOpen));document.getElementById('timer-panel').open=Boolean(state.timerPanelOpen);};
@@ -324,12 +324,12 @@ const FootballPhaseNavigation={
     let actors=new Map(),arrowLayers=[];
     function focusControl(element){element.focus({preventScroll:true});if(focused){const box=element.getBoundingClientRect();if(box.top<12||box.bottom>innerHeight-150)element.scrollIntoView({block:'nearest',behavior:'instant'});}}
     function selectTopic(key,settings={}){
-      const before=topicState();
+      const before=topicState(),sameTopic=topic===key;
       topic=key;if(settings.instructions!==undefined)instructionMode=settings.instructions;if(settings.part)timePart=settings.part;
       if(key==='time'){document.getElementById('field-view').classList.toggle('timer-dose-open',Boolean(settings.part));document.getElementById('timer-panel').open=!settings.part;}
       else{document.getElementById('field-view').classList.remove('timer-dose-open');document.getElementById('timer-panel').open=false;}
       if(JSON.stringify(before)!==JSON.stringify(topicState()))topicTrail.push(before);
-      if(key!=='steps'||instructionMode)pause();moreMenu.open=false;applyTopic();briefRoot.scrollTop=0;
+      if(key!=='steps'||instructionMode)pause();moreMenu.open=false;applyTopic();if(!sameTopic)briefRoot.scrollTop=0;
       if(settings.settings){tweaks.open=true;focusControl(areaSelect||tweaks.querySelector('summary'));}
     }
     function navigateTopic(key){
@@ -342,14 +342,11 @@ const FootballPhaseNavigation={
       document.getElementById('timer-panel').open=false;document.getElementById('field-view').classList.remove('timer-dose-open');
       if(record&&JSON.stringify(before)!==JSON.stringify(topicState()))topicTrail.push(before);
       if(anchor==='procedure')pause();moreMenu.open=false;applyTopic();
-      const target=anchor==='procedure'?summary:figure;
-      if(root.scrollHeight>root.clientHeight+1&&getComputedStyle(root).overflowY!=='visible')root.scrollTo({top:anchor==='diagram'?0:Math.max(0,target.getBoundingClientRect().top-root.getBoundingClientRect().top+root.scrollTop-8),behavior:'instant'});
-      else (anchor==='diagram'?(root.closest('#field-view')||root):target).scrollIntoView({block:'start',behavior:'instant'});
       if(record)(anchor==='procedure'?summary:figure).focus({preventScroll:true});
     }
     function showTimer(){
-      const toggle=document.getElementById('timer-toggle');document.getElementById('timer-panel').open=true;toggle.focus({preventScroll:true});
-      const box=toggle.getBoundingClientRect();if(box.top<12||box.bottom>innerHeight-160)toggle.scrollIntoView({block:'center',behavior:'instant'});
+      const toggle=document.getElementById('timer-toggle'),panel=document.getElementById('timer-panel');panel.open=true;
+      const box=toggle.getBoundingClientRect();(box.top>=12&&box.bottom<=innerHeight-140?toggle:panel.querySelector('summary')).focus({preventScroll:true});
     }
     function applyTopic(){
       root.dataset.topic=topic;root.dataset.instructions=String(instructionMode);
@@ -378,7 +375,7 @@ const FootballPhaseNavigation={
         const button=html('button','phase-choice'),label=html('span','phase-choice-copy');button.type='button';
         const shortTitle=group.title.startsWith('Ukážka')?'Ukážka':group.title.startsWith('Organizácia')?'Príprava':group.title==='Vedenie lopty'?'Vedenie':group.title==='Pokojná chôdza'?'Chôdza':group.title.startsWith('Otázka')?'Rozhovor':group.title.replace(/\/\d+$/,'');
         label.append(html('strong','',shortTitle),html('small','',ExerciseBrief.duration(group.parts.reduce((sum,part)=>sum+part.actualSeconds,0))));button.append(html('span','phase-choice-number',String(index+1)),label);button.setAttribute('aria-label',`Fáza ${index+1}: ${group.title}. Zobraziť nákres`);button.setAttribute('aria-controls','exercise-visual');
-        button.addEventListener('click',()=>{goToTime(group.start);jumpHero('diagram');});phaseNav.append(button);phaseCards.push({button,group});
+        button.addEventListener('click',()=>{topicTrail.length=0;goToTime(group.start);});phaseNav.append(button);phaseCards.push({button,group});
       });
       phaseNav.style.setProperty('--phase-count',phaseCards.length);phaseNav.classList.toggle('has-many',phaseCards.length>3);
       const rules=html('details','exercise-full-plan'),allSteps=html('ol');data.steps.forEach(text=>allSteps.append(html('li','',text)));rules.append(html('summary','','Celý rozpis a pravidlá'),glance,html('p','exercise-summary-description',data.description),allSteps);rules.open=fullPlanOpen;rules.addEventListener('toggle',()=>{if(rules.isConnected)fullPlanOpen=rules.open;});
@@ -404,7 +401,7 @@ const FootballPhaseNavigation={
       const kit=card('Pomôcky'),gear=html('div','exercise-kit-overview'),detail=html('div','exercise-kit-detail');detail.id='exercise-kit-detail';kit.classList.add('exercise-kit');
       const titles={ball:'Lopty',cone:'Kužele',bibs:'Rozlišovačky',gates:'Bránky',timer:'Stopky',signal:'Píšťalka',water:'Voda'};
       const showEquipment=index=>{equipmentIndex=index;detail.replaceChildren();detail.hidden=index<0;for(const[order,button]of [...gear.children].entries())button.setAttribute('aria-expanded',String(order===index));if(index<0)return;const item=data.visualKit[index];detail.append(html('h3','',item.title),html('p','',item.detail));if(item.kind==='cone'&&data.conesTotal)detail.append(html('p','small-note',data.conePlacement));};
-      for(const[index,item]of data.visualKit.entries()){const tile=html('button','exercise-kit-choice');tile.type='button';tile.dataset.equipment=item.kind;tile.setAttribute('aria-controls',detail.id);tile.setAttribute('aria-label',`${item.title}: ${item.value}. Podrobnosti`);tile.append(equipmentIcon(item.kind),html('span','exercise-kit-name',titles[item.kind]),html('strong','exercise-kit-count',item.value));tile.addEventListener('click',()=>{topicTrail.push(topicState());showEquipment(equipmentIndex===index?-1:index);if(!detail.hidden)detail.scrollIntoView({block:'nearest',behavior:'instant'});});gear.append(tile);}kit.append(gear,detail);showEquipment(equipmentIndex);const all=html('details','exercise-more');all.append(html('summary','','Celý zoznam'),list('ul',data.kit));if(data.conesTotal)all.append(html('p','small-note',data.conePlacement));kit.append(all);panels.kit.append(kit);
+      for(const[index,item]of data.visualKit.entries()){const tile=html('button','exercise-kit-choice');tile.type='button';tile.dataset.equipment=item.kind;tile.setAttribute('aria-controls',detail.id);tile.setAttribute('aria-label',`${item.title}: ${item.value}. Podrobnosti`);tile.append(equipmentIcon(item.kind),html('span','exercise-kit-name',titles[item.kind]),html('strong','exercise-kit-count',item.value));tile.addEventListener('click',()=>{topicTrail.push(topicState());showEquipment(equipmentIndex===index?-1:index);});gear.append(tile);}kit.append(gear,detail);showEquipment(equipmentIndex);const all=html('details','exercise-more');all.append(html('summary','','Celý zoznam'),list('ul',data.kit));if(data.conesTotal)all.append(html('p','small-note',data.conePlacement));kit.append(all);panels.kit.append(kit);
       applyTopic();
     }
     function selection(){return{index:pitchIndex,count:options.size,label:areas[pitchIndex]?.label,areas};}
@@ -545,6 +542,10 @@ const FootballPhaseNavigation={
       const phase=scene.phases?.[index];
       const current=phaseCards.find(card=>index>=card.group.first&&index<=card.group.last);
       for(const card of phaseCards){const selected=card===current;card.button.classList.toggle('is-current',selected);card.button.setAttribute('aria-pressed',String(selected));if(selected)card.button.setAttribute('aria-current','step');else card.button.removeAttribute('aria-current');}
+      const width=phaseDetail.getBoundingClientRect().width;
+      if(width&&phaseDetailWidth&&Math.abs(width-phaseDetailWidth)>1)phaseDetail.style.minHeight='';
+      if(width)phaseDetailWidth=width;
+      phaseDetail.style.minHeight=Math.max(parseFloat(phaseDetail.style.minHeight)||0,phaseDetail.getBoundingClientRect().height)+'px';
       phaseDetail.replaceChildren();
       if(!current){phaseDetail.append(html('p','phase-current-cue',phase?.cue||''));return;}
       const doses=html('div','phase-current-doses');
@@ -590,7 +591,7 @@ const FootballPhaseNavigation={
     });
     play.addEventListener('click',()=>{if(clock.origin!==null)pause();else{if(topic==='steps'&&!instructionMode)topicTrail.length=0;clock.play();render();frame=requestAnimationFrame(tick);}});
     function goToTime(value){const playing=clock.origin!==null;pause();clock.seek(value);if(playing&&value<scene.duration){clock.play();frame=requestAnimationFrame(tick);}render();}
-    function previousPhase(){const target=FootballPhaseNavigation.target(scene.phases||[],clock.time(),-1);if(target===null)return false;topicTrail.length=0;goToTime(target);jumpHero('diagram',false);return true;}
+    function previousPhase(){const target=FootballPhaseNavigation.target(scene.phases||[],clock.time(),-1);if(target===null)return false;topicTrail.length=0;goToTime(target);return true;}
     function backStep(){
       const before=document.activeElement,inside=root.contains(before);
       if(topic==='steps'&&instructionMode&&instructionIndex>0){instructionIndex--;renderBrief();if(inside)focusControl(briefRoot.querySelector('[data-panel="steps"] .card-back-visual'));return true;}
@@ -601,7 +602,7 @@ const FootballPhaseNavigation={
     }
     next.addEventListener('click',()=>{const nextStep=scene.steps.find(s=>s.time>clock.time()+.02);goToTime(nextStep?nextStep.time:scene.duration);});
     phasePrevious.addEventListener('click',previousPhase);
-    phaseNext.addEventListener('click',()=>{const target=FootballPhaseNavigation.target(scene.phases||[],clock.time(),1);if(target!==null){topicTrail.length=0;goToTime(target);jumpHero('diagram',false);}});
+    phaseNext.addEventListener('click',()=>{const target=FootballPhaseNavigation.target(scene.phases||[],clock.time(),1);if(target!==null){topicTrail.length=0;goToTime(target);}});
     reset.addEventListener('click',()=>{pause();clock.seek(0);render();});
     scrub.addEventListener('input',()=>{const value=scrub.value;pause();clock.seek(value);render();});
     speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));if(focused)playback.rate=Number(speed.value);render();});

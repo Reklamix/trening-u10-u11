@@ -590,6 +590,7 @@ const PersonalPlans = [
     syncEquipmentState();
   }
   function showPlanTab(tab) {
+    const form=$('plan-form');if($('conditions-panel').open)form.style.minHeight=Math.max(parseFloat(form.style.minHeight)||0,form.getBoundingClientRect().height)+'px';
     $('plan-form').querySelectorAll('[data-plan-panel]').forEach(panel=>{panel.hidden=panel.dataset.planPanel!==tab;});
     $('plan-form').querySelectorAll('[data-plan-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.planTab===tab)));
   }
@@ -960,6 +961,9 @@ const PersonalPlans = [
   $('open-archive').addEventListener('click', () => { $('archive-date').value = ''; renderArchive(); $('archive-dialog').showModal(); });
   $('archive-date').addEventListener('input', renderArchive);
   $('archive-all').addEventListener('click', () => { $('archive-date').value = ''; renderArchive(); });
+  const pointerControl=event=>event.target.closest?.('button,summary');
+  document.addEventListener('pointerdown',event=>{const control=pointerControl(event);if(control&&!control.disabled)control.focus({preventScroll:true});},{capture:true});
+  document.addEventListener('mousedown',event=>{const control=pointerControl(event);if(event.button===0&&control&&!control.disabled){event.preventDefault();control.focus({preventScroll:true});}},{capture:true});
   document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); $('main').focus(); $('main').scrollIntoView({ block: 'start' }); });
   $('attendance').addEventListener('change', event => {
     if(state.selected.planConfig){applyPlan({players:Number(event.target.value)});return;}
@@ -968,7 +972,8 @@ const PersonalPlans = [
     if(window.FootballBoard?.supports(activeBlock().diagram))renderDiagram();
     if (state.detail === 'rotations') renderDetail();
   });
-  document.querySelectorAll('[data-plan-tab]').forEach(button=>button.addEventListener('click',()=>{showPlanTab(button.dataset.planTab);$('conditions-panel').scrollIntoView({block:'start',behavior:'instant'});}));
+  document.querySelectorAll('[data-plan-tab]').forEach(button=>button.addEventListener('click',()=>{showPlanTab(button.dataset.planTab);}));
+  $('conditions-panel').addEventListener('toggle',()=>{if(!$('conditions-panel').open)$('plan-form').style.minHeight='';});
   document.querySelectorAll('[data-plan-control]').forEach(button=>button.addEventListener('click',()=>{const select=$(button.dataset.planControl);select.value=button.dataset.planValue;select.dispatchEvent(new Event('change',{bubbles:true}));syncPlanDraft(true);}));
   $('plan-form').addEventListener('invalid',event=>{const card=event.target.closest('[data-group-card]');if(card){showPlanTab('groups');showPlanGroup(Number(card.dataset.groupCard));}else{showPlanTab('pitch');const details=event.target.closest('details');if(details)details.open=true;}},true);
   $('plan-pitch').addEventListener('change',()=>{const preset=TrainingPlanner.pitches[$('plan-pitch').value];$('plan-width').value=preset.width;$('plan-height').value=preset.height;$('plan-dimensions-label').textContent=`Rozmery ${preset.width} × ${preset.height} m · upraviť`;});

@@ -162,3 +162,19 @@ Verification:
 -Final syntax/validation and live deployment evidence are recorded in canonical notes. Screenshots: unified-overview-live.png, unified-equipment-live.png, unified-preparation-live.png and interval-timer-live.png in the existing visualization folder.
 
 Not exercised: physical mobile speaker/silent mode, lock-screen/background suspension, OS text scaling/reduced-motion, native share sheet and vault decryption. Browser viewport checks and deterministic audio scheduling tests do not establish physical audibility or accessibility certification.
+
+## Stable local switching — 30 October 2026
+
+User requested that the image must not jump when switching buttons. Current-run baseline at375×812 reproduced an application-driven31px shift: Postup set exercise scroll31/diagram top159, selecting phase2 reset scroll0/diagram top190. Capture stable-layout-before.png is in the evidence folder.
+
+Fix scope: removed automatic vertical scrolling from hero/phase switching, settings tabs and equipment details; kept explicit page navigation, keyboard access and Back restoration. Same-topic detail tabs preserve their scroll. Local scrolling containers reserve scrollbar space and disable scroll anchoring; the exercise uses its internal gutter rather than two viewport gutters. Phase detail and open setup content retain their needed height, with phase-width changes allowed to reflow. Setup preserves scroll and open details, and restores focus without scroll. Settings form retains its needed height until closed. Pointer focus avoids browser default refocusing scroll; keyboard navigation remains intact. Timer label slots and action heights are stable, with sticky actions on short screens. No model, dose, animation track, timer/audio logic or vault data changed.
+
+The UX Content Jumping entry directly matched this problem: stable space/content containers rather than inserted text shifting nearby controls. Verification separates native/browser-automation focus reveal from activation. The DOM locator may reveal a focused button before activation; after explicit focus, Space provides an unambiguous before/after measurement of the actual app handler. Early screenshots measured an unfinished native PageDown scroll and were rejected as scroll-retention evidence.
+
+Accepted evidence:
+-375×812 phase3, next, previous and phase2 activation: page, exercise scroll, diagram top/width and phase-tab top unchanged (all deltas0). Diagram width328px; tested focused scroll positions18/31px. Postup itself no longer forced31px scrolling. Pointer clicks still change phases and native summaries still toggle.
+-320×568 phase3: page0, exercise scroll57, diagram left12/top55/width281 before and after; completion bottom558, no horizontal overflow.1440×900 phase-next diagram top198/width379.55 unchanged.844×390 phase-next page339/diagram top−149/left34.5 unchanged; that initial page scroll was an explicit focus reveal, not created by activation.
+-Settings Tréneri/Skupiny/Ihrisko activation retained page396/396/412 and tab top315/315/299 respectively. Timer work→pause/reset ready retained toggle top407.77px/width174. Tiny timer actions initially fell below the pane after line reservation; sticky actions corrected Start bottom409 within panel bottom418, above nav434.
+-Setup direct0/1/3/4 choices retained map top281.8/width299 and body scroll0. Open details remained open with unchanged map/body position on selecting Rondo. Focus restoration and closing work. Console errors/warnings zero.
+
+Final syntax/regression and publication evidence are in canonical notes. Public proof stable-switching-live.png is in the existing evidence folder. Physical-device focus/scroll and OS keyboard behavior were not tested; viewport/DOM keyboard/pointer checks do not establish universal browser behavior. Existing manual timer and audio model are unchanged.
