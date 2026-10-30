@@ -9,13 +9,13 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123d35'/%3E%3Crect x='15' y='10' width='34' height='44' rx='2' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M15 32h34' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./styles.css?v=24">
   <link rel="stylesheet" href="./exercise-card.css?v=1">
-  <link rel="stylesheet" href="./app-shell.css?v=1">
+  <link rel="stylesheet" href="./app-shell.css?v=2">
   <script src="./football.js?v=21" defer></script>
   <script src="./training-planner.js?v=5" defer></script>
   <script src="./exercise-brief.js?v=4" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
   <script src="./pitch-setup.js?v=3" defer></script>
-  <script src="./app.js?v=21" defer></script>
+  <script src="./app.js?v=23" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -56,7 +56,7 @@
       <section id="overview-view" class="view" hidden aria-labelledby="training-title">
         <p class="eyebrow">Trénerova karta · Prehľad</p><h1 id="training-title"></h1>
         <div id="summary-facts" class="summary-facts" aria-label="Dnešné podmienky"></div>
-        <section class="summary-kit"><div class="section-heading"><h2>Nachystať na tréning</h2><button id="show-equipment" type="button" class="text-button">Checklist →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
+        <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky · označ pripravené</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
         <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">1 · Pripraviť ihrisko →</button><button id="summary-start" class="button" type="button">2 · Začať cvičenia →</button></div>
         <details id="conditions-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/gear.svg" alt="">Nastaviť podmienky<span id="conditions-summary"></span></summary>
         <form id="plan-form" class="plan-card" hidden>
@@ -73,8 +73,8 @@
           <p class="small-note">35 × 25 m je pôvodne potvrdená štvrtina. Predvoľby polovice a celého ihriska sú orientačné; rozmery uprav podľa skutočnosti.</p></details>
           <button class="button" type="submit">Použiť a uložiť</button><p id="plan-saved" class="small-note"></p>
         </form></details>
-        <details class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/people-fill.svg" alt="">Zameranie a organizácia</summary><div class="disclosure-body"><p id="training-focus" class="muted"></p><div id="training-topics" class="topic-chips"></div><p id="training-cue" class="active-cue"></p><div id="plan-recommendation"></div><button id="show-coaching" type="button" class="text-button">Spoločné pokyny trénerov →</button></div></details>
-        <details class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/stopwatch.svg" alt=""><span id="summary-timeline-title">Časový plán</span></summary><div class="disclosure-body">
+        <details id="organization-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/people-fill.svg" alt="">Zameranie a organizácia</summary><div class="disclosure-body"><p id="training-focus" class="muted"></p><div id="training-topics" class="topic-chips"></div><p id="training-cue" class="active-cue"></p><div id="plan-recommendation"></div><button id="show-coaching" type="button" class="text-button">Spoločné pokyny trénerov →</button></div></details>
+        <details id="timeline-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/stopwatch.svg" alt=""><span id="summary-timeline-title">Časový plán</span></summary><div class="disclosure-body">
         <div id="grouping" class="grouping"></div><p id="completion-count" class="small-note"></p><div id="overview-blocks" class="overview-blocks"></div>
         <button id="reset-progress" class="text-button" type="button">Zrušiť označenie dokončených častí</button>
         </div></details>

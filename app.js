@@ -552,6 +552,32 @@ const PersonalPlans = [
     const equals=item.quantity.lastIndexOf('=');
     return equals>=0?item.quantity.slice(equals+1).trim():item.quantity;
   }
+  function syncEquipmentState() {
+    const ready=new Set(checkedGear()),count=state.selected.equipment.filter(item=>ready.has(item.name)).length;
+    const progress=`Pripravené: ${count} z ${state.selected.equipment.length}`;
+    $('equipment-progress').textContent=progress;
+    $('summary-equipment-progress').textContent=progress;
+    $('summary-equipment').querySelectorAll('[data-gear]').forEach(button=>{
+      const selected=ready.has(button.dataset.gear);
+      button.setAttribute('aria-pressed',String(selected));
+      button.querySelector('.summary-gear-status').textContent=selected?'Pripravené':'Označiť';
+    });
+    $('equipment-list').querySelectorAll('input[data-gear]').forEach(input=>{input.checked=ready.has(input.dataset.gear);});
+  }
+  function setEquipmentReady(name,ready) {
+    const values=new Set(checkedGear());
+    if(ready)values.add(name);else values.delete(name);
+    state.gear[state.selected.id]=[...values];
+    writeLocal(storageKeys.gear,state.gear);
+    syncEquipmentState();
+  }
+  function openSummaryPanel(id,focusId) {
+    const panel=$(id);
+    document.querySelectorAll('#overview-view>.shell-disclosure').forEach(other=>{other.open=other===panel;});
+    const target=focusId?$(focusId):panel.querySelector('summary');
+    target.focus({preventScroll:true});
+    panel.scrollIntoView({block:'nearest',behavior:'instant'});
+  }
   function renderEquipment() {
     const checked = checkedGear();
     $('equipment-progress').textContent = 'Pripravené: ' + checked.length + ' z ' + state.selected.equipment.length;
@@ -560,16 +586,11 @@ const PersonalPlans = [
       const label = el('label', 'equipment-card');
       const input = el('input');
       input.type = 'checkbox';
+      input.dataset.gear=item.name;
       input.checked = checked.includes(item.name);
       const content = el('span');
       content.append(el('strong', '', item.name), el('small', '', item.quantity));
-      input.addEventListener('change', () => {
-        const values = new Set(checkedGear());
-        if (input.checked) values.add(item.name); else values.delete(item.name);
-        state.gear[state.selected.id] = [...values];
-        writeLocal(storageKeys.gear, state.gear);
-        $('equipment-progress').textContent = 'Pripravené: ' + values.size + ' z ' + state.selected.equipment.length;
-      });
+      input.addEventListener('change',()=>setEquipmentReady(item.name,input.checked));
       label.append(input, kitImage(item.name), content);
       const details=el('details','equipment-help');details.append(el('summary','','Ako použiť a rozložiť'),el('p','',item.detail));
       card.append(label,details);return card;
@@ -616,8 +637,8 @@ const PersonalPlans = [
     $('plan-form').hidden=!config;
     $('conditions-panel').hidden=!config;
     $('conditions-summary').textContent=config?`${config.players} detí · ${config.coaches} ${config.coaches===1?'tréner':'tréneri'}`:'';
-    const facts=[[training.duration+' min','Trvanie','stopwatch'],[config?config.width+' × '+config.height+' m':training.category,'Priestor','bounding-box'],[config?String(config.coaches):training.coaches,'Tréneri','people-fill']];
-    $('summary-facts').replaceChildren(...facts.map(([value,label,icon])=>{const tile=el('div'),img=el('img');img.src='./assets/bootstrap-icons/'+icon+'.svg';img.alt='';const text=el('span');text.append(el('small','',label),el('strong','',value));tile.append(img,text);return tile;}));
+    const facts=[[training.duration+' min','Celkový čas','stopwatch','timeline-panel'],[config?config.width+' × '+config.height+' m':training.category,'Priestor','bounding-box',config?'conditions-panel':'organization-panel',config?'plan-pitch':null],[config?String(config.coaches):training.coaches,'Tréneri','people-fill',config?'conditions-panel':'organization-panel',config?'plan-coaches':null]];
+    $('summary-facts').replaceChildren(...facts.map(([value,label,icon,panel,focusId])=>{const tile=el('button'),img=el('img');tile.type='button';tile.setAttribute('aria-controls',panel);tile.setAttribute('aria-expanded',String($(panel).open));img.src='./assets/bootstrap-icons/'+icon+'.svg';img.alt='';const text=el('span');text.append(el('small','',label),el('strong','',value));tile.append(img,text);tile.addEventListener('click',()=>openSummaryPanel(panel,focusId));return tile;}));
     if(config){$('plan-pitch').value=config.pitch;$('plan-coaches').value=String(config.coaches);$('plan-width').value=config.width;$('plan-height').value=config.height;$('plan-dimensions-label').textContent=`Pracovné rozmery ${config.width} × ${config.height} m · upraviť`;}
     $('plan-groups').replaceChildren();$('plan-group-error').hidden=true;
     if(config)config.groupSizes.forEach((size,index)=>{const card=el('div','plan-group-card'),title=el('strong','',['A1','A2','B1','B2'][index]),countLabel=el('label','','Detí'),count=el('input');count.type='number';count.min='2';count.max='8';count.step='1';count.required=true;count.value=size;count.dataset.groupSize=index;count.setAttribute('aria-label','Detí v skupine '+title.textContent);countLabel.append(count);const levelLabel=el('label','','Náročnosť'),level=el('select');level.dataset.groupLevel=index;level.setAttribute('aria-label','Náročnosť '+title.textContent);Object.entries(TrainingPlanner.levels).forEach(([value,label])=>{const option=el('option','',label);option.value=value;level.append(option);});level.value=config.levels[index];levelLabel.append(level);const fields=el('div','plan-group-fields');fields.append(countLabel,levelLabel);card.append(title,fields);$('plan-groups').append(card);});
@@ -625,7 +646,8 @@ const PersonalPlans = [
     $('plan-saved').textContent=configSaved?'Podmienky sa ukladajú pre tento deň v zariadení. Zdieľaný odkaz obsahuje počet detí, plochu, trénerov aj rozdelenie a náročnosť skupín.':'Prehliadač neuložil podmienky. Zachovaj si ich cez Zdieľať; odkaz obsahuje rovnaký variant.';
     const notes=training.organizationNotes||[training.players,training.coaches];
     const list=el('ul');notes.forEach(note=>list.append(el('li','',note)));$('plan-recommendation').replaceChildren(list);
-    $('summary-equipment').replaceChildren(...training.equipment.map(item=>{const button=el('button','summary-gear');button.type='button';const text=el('span');text.append(el('strong','',item.name),el('small','',compactQuantity(item)));button.append(kitImage(item.name),text);button.addEventListener('click',()=>{navigate('equipment');const target=[...$('equipment-list').querySelectorAll('.equipment-card')].find(card=>card.textContent.includes(item.name));target?.scrollIntoView({block:'center'});target?.querySelector('input')?.focus({preventScroll:true});});return button;}));
+    $('summary-equipment').replaceChildren(...training.equipment.map(item=>{const button=el('button','summary-gear');button.type='button';button.dataset.gear=item.name;const text=el('span'),status=el('span','summary-gear-status');status.setAttribute('aria-hidden','true');text.append(el('strong','',item.name),el('small','',compactQuantity(item)),status);button.append(kitImage(item.name),text);button.addEventListener('click',()=>setEquipmentReady(item.name,!checkedGear().includes(item.name)));return button;}));
+    syncEquipmentState();
     $('summary-setup').hidden=!window.PitchSetup?.supports(training);
   }
   function renderCatalog(){
@@ -894,6 +916,9 @@ const PersonalPlans = [
   $('summary-start').addEventListener('click',()=>navigate('field',0));
   $('summary-setup').addEventListener('click',()=>window.PitchSetup.open(state.selected));
   $('show-equipment').addEventListener('click',()=>navigate('equipment'));
+  ['timeline-panel','conditions-panel','organization-panel'].forEach(id=>$(id).addEventListener('toggle',()=>{
+    $('summary-facts').querySelectorAll('[aria-controls]').forEach(button=>button.setAttribute('aria-expanded',String($(button.getAttribute('aria-controls')).open)));
+  }));
   $('show-coaching').addEventListener('click',()=>navigate('coaching'));
   ['catalog-mode','catalog-topic'].forEach(id=>$(id).addEventListener('change',renderCatalog));
   $('catalog-query').addEventListener('input',renderCatalog);
@@ -920,7 +945,7 @@ const PersonalPlans = [
   });
   $('review-training').addEventListener('click', () => navigate('overview'));
   $('reset-progress').addEventListener('click', () => { state.done[state.selected.id] = []; writeLocal(storageKeys.done, state.done); renderProgress(); renderActive(); });
-  $('reset-equipment').addEventListener('click', () => { state.gear[state.selected.id] = []; writeLocal(storageKeys.gear, state.gear); renderEquipment(); });
+  $('reset-equipment').addEventListener('click', () => { state.gear[state.selected.id] = []; writeLocal(storageKeys.gear, state.gear); syncEquipmentState(); });
   $('timer-toggle').addEventListener('click', () => { const clock = currentClock(); if (clock.deadline !== null && clock.remaining() > 0) clock.pause(); else clock.start(); updateTimer(); });
   $('timer-reset').addEventListener('click', () => { currentClock().reset(); updateTimer(); });
   $('restore-form').addEventListener('submit', restoreVault);
