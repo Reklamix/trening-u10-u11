@@ -68,10 +68,10 @@ const FootballSequences = {
     };
     if(key==='football-warmup'){
       const mobilize={...base,tracks:{},arrows:[],nodes:base.nodes.map(node=>({...node}))};
-      for(const node of players){const dx=(Number(node.label)%2?1:-1)*base.pitch.w*.025;mobilize.tracks[node.id]=[[0,node.x,node.y],[2,node.x+dx,node.y],[4,node.x,node.y]];}
-      mobilize.nodes=mobilize.nodes.filter(node=>node.kind!=='ball');mobilize.duration=4;
-      action('Rozhýbanie',120,mobilize,{cue:'Ľahký pohyb, členky, bedrá a zmeny smeru. Lopty zatiaľ stoja.'});
-      action('Vedenie lopty',180,base,{seconds:9,cue:'Všetci vedú vlastnú loptu. Meň smer, zrýchli do voľna a rozhliadni sa.'});
+      for(const node of players)mobilize.tracks[node.id]=base.tracks[node.id];
+      mobilize.nodes=mobilize.nodes.filter(node=>node.kind!=='ball');mobilize.duration=base.duration;
+      action('Rozhýbanie',120,mobilize,{seconds:18,cue:'Ľahký pohyb medzi spoluhráčmi, zmeny smeru a rozhýbanie. Lopty zatiaľ stoja.'});
+      action('Vedenie lopty',180,base,{seconds:25,cue:'Každý vedie svoju loptu medzi spoluhráčmi. Hlava hore, vyhni sa im a zrýchli do voľna.'});
       const pass={...base,nodes:[],tracks:{},arrows:[],duration:8,transfers:[]},counts=config.groupSizes.slice(index*2,index*2+2);let offset=0,podIndex=0;
       counts.forEach((count,group)=>{
         const pods=Array.from({length:Math.floor(count/2)},()=>2);if(count%2)pods[pods.length-1]=3;
