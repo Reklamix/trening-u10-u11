@@ -118,3 +118,11 @@ html:has(.exercise-focus) {scrollbar-gutter:auto}
 @media(max-height:650px) {
   .timer-panel .timer-actions {position:sticky;bottom:0;z-index:2;background:#fff;padding:8px 0;margin-bottom:0}
 }
+
+/* One compact, always available control for the same exercise clock. */
+.exercise-clock {display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;padding:7px 10px;margin:0 0 8px;border:1px solid #d7e2d3;border-radius:12px;background:#edf3e6;overflow-anchor:none}
+.exercise-clock-copy {display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+#exercise-clock-phase {min-width:0;flex:1;font-size:12px;line-height:1.3;color:#385841;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#exercise-clock-value {font-size:26px;line-height:1;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-1px;color:#214d35;flex:none}
+.exercise-clock #exercise-clock-toggle {width:112px;min-height:44px;flex:none;padding:7px 9px;margin:0;border-radius:9px;font-size:13px;line-height:1.2}
+@media(min-width:900px) {.exercise-clock-copy {flex:none;gap:24px}#exercise-clock-phase {flex:none;max-width:400px}.exercise-clock {justify-content:flex-start}.exercise-clock #exercise-clock-toggle {margin-left:auto}}

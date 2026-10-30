@@ -408,6 +408,12 @@ const PersonalPlans = [
     const value = clockText(snapshot.remaining);
     $('timer-value').textContent = value;
     $('timer-preview').textContent = value;
+    $('exercise-clock-value').textContent=value;
+    $('exercise-clock-phase').textContent=snapshot.part.name;
+    $('exercise-clock-phase').title=clock.scope+' · '+snapshot.part.name;
+    $('exercise-clock-toggle').textContent=clock.waiting?'Ďalšia séria':clock.deadline!==null&&remaining>0?'Pauza':remaining===0?'Znova':clock.started?'Pokračovať':'Spustiť';
+    $('exercise-clock-toggle').setAttribute('aria-label',clock.waiting?'Spustiť ďalšiu sériu':clock.deadline!==null&&remaining>0?'Pozastaviť časovač':remaining===0?'Spustiť cvičenie znova':clock.started?'Pokračovať v časovači':'Spustiť časovač');
+    $('exercise-clock-toggle').setAttribute('aria-pressed',String(clock.deadline!==null&&remaining>0));
     $('timer-scope').textContent=clock.scope+' · cvičenie zostáva '+clockText(snapshot.overall);
     $('timer-config-note').hidden=!clock.started||clock.signature===clockSignature();
     $('timer-phase').textContent=snapshot.part.name;
@@ -1019,14 +1025,16 @@ const PersonalPlans = [
   $('review-training').addEventListener('click', () => navigate('overview'));
   $('reset-progress').addEventListener('click', () => { state.done[state.selected.id] = []; writeLocal(storageKeys.done, state.done); renderProgress(); renderActive(); });
   $('reset-equipment').addEventListener('click', () => { state.gear[state.selected.id] = []; writeLocal(storageKeys.gear, state.gear); syncEquipmentState(); });
-  $('timer-toggle').addEventListener('click',async()=>{
+  async function toggleExerciseClock(){
     const clock=currentClock();
     if(clock.deadline!==null&&clock.remaining()>0){clock.pause();window.TimerAudio.cancel();updateTimer();return;}
     const initial=clock.waiting||!clock.started||clock.remaining()===0;
-    $('timer-toggle').disabled=true;
+    $('timer-toggle').disabled=true;$('exercise-clock-toggle').disabled=true;
     try{const soundReady=await window.TimerAudio.unlock();if(currentClock()!==clock)return;clock.start();window.TimerAudio.bind(clock,initial);$('timer-audio-status').textContent=$('timer-sound').checked?(soundReady?'Zvuk je aktívny.':'Zvuk nie je dostupný. Skús Vyskúšať zvuk.'):'Zvuk je vypnutý.';updateTimer();}
-    finally{$('timer-toggle').disabled=false;}
-  });
+    finally{$('timer-toggle').disabled=false;$('exercise-clock-toggle').disabled=false;}
+  }
+  $('timer-toggle').addEventListener('click',toggleExerciseClock);
+  $('exercise-clock-toggle').addEventListener('click',toggleExerciseClock);
   $('timer-reset').addEventListener('click',()=>{currentClock().reset();window.TimerAudio.cancel();updateTimer();});
   $('timer-sound').addEventListener('change',async()=>{window.TimerAudio.setEnabled($('timer-sound').checked);const ready=$('timer-sound').checked?await window.TimerAudio.unlock():false;$('timer-audio-status').textContent=$('timer-sound').checked?(ready?'Zvuk je aktívny.':'Zvuk aktivuješ tlačidlom Spustiť.'):'Zvuk je vypnutý.';updateTimer();});
   $('timer-test').addEventListener('click',async()=>{$('timer-sound').checked=true;window.TimerAudio.setEnabled(true);$('timer-audio-status').textContent=await window.TimerAudio.test()?'Testovací tón prehratý. Zvuk je aktívny.':'Zvuk nie je dostupný v tomto prehliadači.';});

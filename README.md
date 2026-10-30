@@ -181,3 +181,7 @@ Utorkový tréning 27. 10. 2026 je podľa aktuálneho zadania bez brankárov. Pr
 Voliteľné `attendanceCases` obsahuje objekty `total` a `groups`; súčet skupín plus počet brankárov `keepers` sa rovná celkovému počtu (dnes keepers=0). Voliteľné `variantNotes` má pokyny pre veľkosť skupiny `4`, `5`, `6`; tabuľky 2 na 2 používajú `groupSize`. Schémy pre deň bez brankárov majú príponu `-no-keeper`.
 
 Schémy sú ilustračné; dávky a plné počty sú v texte a tabuľkách. Pôvodné súkromné PDF a čitateľný osobný plán dieťaťa nie sú súčasťou tohto repozitára; osobný plán je iba v šifrovanej obálke.
+
+## Časovač priamo pri cvičení
+
+`app.js?v=33` a `app-unified.css?v=3` zobrazujú kompaktný časovač priamo nad nákresom. Ukazuje zostávajúci čas aktuálneho meraného úseku, jeho názov a Spustiť/Pauza/Pokračovať/Ďalšia séria. Používa rovnaký IntervalClock aj zvuky ako podrobný panel Časovač; meranie sa nezdvojuje a výber animačnej fázy ho nepretáča. Podrobnosti, reset, dávkovanie a zvukové možnosti zostávajú v existujúcom paneli. Každú ďalšiu sériu naďalej spúšťa tréner.

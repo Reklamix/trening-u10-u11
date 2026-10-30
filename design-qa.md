@@ -178,3 +178,10 @@ Accepted evidence:
 -Setup direct0/1/3/4 choices retained map top281.8/width299 and body scroll0. Open details remained open with unchanged map/body position on selecting Rondo. Focus restoration and closing work. Console errors/warnings zero.
 
 Final syntax/regression and publication evidence are in canonical notes. Public proof stable-switching-live.png is in the existing evidence folder. Physical-device focus/scroll and OS keyboard behavior were not tested; viewport/DOM keyboard/pointer checks do not establish universal browser behavior. Existing manual timer and audio model are unchanged.
+
+## Timer beside the exercise — 30 October 2026
+
+- Scope: compact always-visible field clock above the diagram; existing design, doses, sound/manual gating and animation model retained. app33/unified3; interval-timer1 unchanged.
+- The inline and detailed controls share one handler/clock, including disabled state during audio unlock. Start entered 00:05, then work; inline pause and full panel both read 01:42/paused; full reset restored inline 00:05/Ready. No second schedule or animation coupling.
+- 375×812: inline button44px, diagram328×194.875. 320×568: clock296×60, button112×44, bottom CTA558; no horizontal overflow. 1440×900: clock760×60, diagram379.55×360; no horizontal overflow. Console warnings/errors0.
+- Syntax app.js, validate65898, interval schedules3591 and diff-check PASS. Physical mobile audio/lock-screen not repeated; browser DOM/viewport checks only. Live screenshot: inline-clock-live.png in the session visualization folder.
