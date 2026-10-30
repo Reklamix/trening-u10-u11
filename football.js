@@ -30,6 +30,7 @@ const FootballScenes = {
     if(time<=frames[0][0])return {x:frames[0][1],y:frames[0][2]};
     for(let i=1;i<frames.length;i++)if(time<=frames[i][0]){
       const a=frames[i-1],b=frames[i],u=(time-a[0])/(b[0]-a[0]);
+      if(b[3]==='cut'&&time<b[0])return{x:a[1],y:a[2]};
       return {x:a[1]+(b[1]-a[1])*u,y:a[2]+(b[2]-a[2])*u};
     }
     return {x:frames.at(-1)[1],y:frames.at(-1)[2]};
@@ -70,17 +71,17 @@ const FootballScenes = {
     };
     if(key==='football-warmup') {
       scene.pitch=pitch(45,40,270,25,20);
-      const n=area?.count??(pitchIndex?Math.ceil(total/2):Math.floor(total/2)); scene.localCount=n;scene.duration=24;
+      const n=area?.count??(pitchIndex?Math.ceil(total/2):Math.floor(total/2)); scene.localCount=n;scene.duration=18;scene.loopMode='cut';
       // Shared-space steering: each child travels to a different part of the area,
-      // adjusting around nearby children. Reverse the continuous routes on a turn
-      // signal to close the demonstration without a teleport at the loop boundary.
-      const positions=[],routes=[],goals=[],dt=.1,half=12,margin=16,gap=29;
+      // adjusting around nearby children. A short pre-roll disperses the static
+      // diagram; afterwards motion continues forward without a forced rewind.
+      const positions=[],routes=[],goals=[],dt=.1,preRoll=4,margin=16,gap=29;
       for(let i=0;i<n;i++){
         const u=(n>12?.13+(i%4)*.22:.16+(i%3)*.34)+.015*Math.sin(i*2.4),v=(n>12?.13+Math.floor(i/4)*.22:.14+Math.floor(i/3)*.24)+.015*Math.cos(i*1.7);
         const p=point(u,v);positions.push(p);routes.push([[0,p.x,p.y]]);goals.push(point(u<.5?.84:.16,(v>.5?.18:.72)+((i*.381966)%1)*.1));
       }
       const clamp=p=>({x:Math.max(scene.pitch.x+margin,Math.min(scene.pitch.x+scene.pitch.w-margin,p.x)),y:Math.max(scene.pitch.y+margin,Math.min(scene.pitch.y+scene.pitch.h-margin,p.y))});
-      for(let tick=1;tick<=half/dt;tick++){
+      for(let tick=1;tick<=(scene.duration+preRoll)/dt;tick++){
         const next=positions.map((p,i)=>{
           if(Math.hypot(goals[i].x-p.x,goals[i].y-p.y)<24)goals[i]=point(goals[i].x>scene.pitch.x+scene.pitch.w/2?.16:.84,.18+((i*.381966+tick*.173)%1)*.64);
           const dx=goals[i].x-p.x,dy=goals[i].y-p.y,d=Math.hypot(dx,dy)||1;let vx=dx/d*22,vy=dy/d*22;
@@ -94,14 +95,12 @@ const FootballScenes = {
         next.forEach((p,i)=>{positions[i]=p;routes[i].push([tick*dt,p.x,p.y]);});
       }
       routes.forEach((frames,i)=>{
-        const forward=[...frames];for(let j=forward.length-2;j>=0;j--)frames.push([scene.duration-forward[j][0],forward[j][1],forward[j][2]]);
-        // Start the static diagram inside the flow, already dispersed in the area.
-        const offset=40,shift=frames[offset][0],dispersed=frames.slice(offset).map(([t,x,y])=>[t-shift,x,y]).concat(frames.slice(1,offset+1).map(([t,x,y])=>[scene.duration-shift+t,x,y]));frames.splice(0,frames.length,...dispersed);
+        const dispersed=frames.filter(([t])=>t>=preRoll).map(([t,x,y])=>[t-preRoll,x,y]);frames.splice(0,frames.length,...dispersed);
         const ballId=i===0?'ball':'b'+i,u=(frames[0][1]-scene.pitch.x)/scene.pitch.w,v=(frames[0][2]-scene.pitch.y)/scene.pitch.h;
         add('p'+i,String(i+1),u,v);add(ballId,'',u+.025,v+.02,'A','ball');scene.tracks['p'+i]=frames;scene.tracks[ballId]=frames.map(([t,x,y])=>[t,x+scene.pitch.w*.025,y+scene.pitch.h*.02]);
         for(let t=0;t<scene.duration;t++){const a=FootballScenes.sample(frames,t),b=FootballScenes.sample(frames,Math.min(t+1,scene.duration));scene.arrows.push({kind:'dribble',number:i+1,points:[a,b],start:t,end:t+1,label:false});}
       });
-      step(0,'Všetci vedú vlastnú loptu naprieč spoločným priestorom.');step(4,'Rozhliadni sa, prejdi medzi spoluhráčmi a vyhni sa im.');step(8,'Na signál otoč smer a pokračuj s loptou.');step(14,'Krátke dotyky, hlava hore. Pohyb pokračuje v celej zóne.');step(20,'Znovu zmeň smer a zrýchli do voľného priestoru.');step(24,'Vedenie pokračuje; dráhy sú len ukážka.');
+      step(0,'Všetci vedú vlastnú loptu naprieč spoločným priestorom.');step(4,'Rozhliadni sa, prejdi medzi spoluhráčmi a vyhni sa im.');step(8,'Meň smer podľa voľného priestoru.');step(14,'Krátke dotyky, hlava hore. Pohyb pokračuje v celej zóne.');step(18,'Vedenie pokračuje; dráhy sú len ukážka.');
       scene.caption=`Zóna ${pitchIndex?'B':'A'}: ${n} detí. Obe zóny spolu ${total}. Všetci vedú loptu súčasne, každý svoju. Ukážkové dráhy nie sú povinné trasy ani stanovištia. Potom sa pracuje vo dvojiciach/trojici.`;
     } else if(key==='football-pass'&&area?.skill==='base') {
       const pods=Array.from({length:Math.floor(size/2)},()=>2);if(size%2)pods[pods.length-1]=3;
@@ -201,6 +200,7 @@ const FootballScenes = {
 // FOOTBALL_BROWSER
 (() => {
   let active=null;
+  const playback={rate:1,loop:true};
   const NS='http://www.w3.org/2000/svg';
   const colors={A:'#176ca2',B:'#c14e33',N:'#eed06b',T:'#d6dfd0'};
   const svgNode=(tag,attrs={},text)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;};
@@ -279,8 +279,8 @@ const FootballScenes = {
     for(const b of[play,next,reset])b.type='button';if(focused){controls.append(play,modeButton);figure.append(controls);}else controls.append(play,next,reset);
     const fineControls=html('div','football-controls exercise-animation-tools');if(focused)fineControls.append(next,reset);
     const settings=html('div','football-playback-settings'),speedLabel=html('label','football-select-label','Rýchlosť animácie'),speed=html('select');speed.setAttribute('aria-label','Rýchlosť animácie');
-    for(const[value,label]of[[.25,'0,25×'],[.5,'0,5×'],[1,'1×'],[1.5,'1,5×']]){const option=html('option','',label);option.value=value;speed.append(option);}speed.value='0.5';speedLabel.append(speed);
-    const repeatLabel=html('label','football-repeat'),repeat=html('input');repeat.type='checkbox';repeat.checked=true;repeatLabel.append(repeat,document.createTextNode('Opakovať dokola'));settings.append(speedLabel,repeatLabel);
+    for(const[value,label]of[[.25,'0,25×'],[.5,'0,5×'],[1,'1×'],[1.5,'1,5×']]){const option=html('option','',label);option.value=value;speed.append(option);}speed.value=focused?String(playback.rate):'0.5';speedLabel.append(speed);
+    const repeatLabel=html('label','football-repeat'),repeat=html('input');repeat.type='checkbox';repeat.checked=focused?playback.loop:true;repeatLabel.append(repeat,document.createTextNode('Opakovať dokola'));settings.append(speedLabel,repeatLabel);
     const scrub=html('input','football-scrub');scrub.type='range';scrub.min='0';scrub.step='.01';scrub.setAttribute('aria-label','Priebeh animovanej ukážky');
     const note=html('p','small-note','Animáciu spustíš tlačidlom Prehrať. Tréningový časovač sa nemení.');
     const legend=html('details','diagram-help');legend.append(html('summary','','Futbalové značky a celý plán'));
@@ -524,12 +524,13 @@ const FootballScenes = {
       dialog.showModal();
     });
     play.addEventListener('click',()=>{if(clock.origin!==null)pause();else{clock.play();render();frame=requestAnimationFrame(tick);}});
-    next.addEventListener('click',()=>{pause();const nextStep=scene.steps.find(s=>s.time>clock.time()+.02);clock.seek(nextStep?nextStep.time:scene.duration);render();});
-    phaseNext.addEventListener('click',()=>{pause();const phase=scene.phases?.find(phase=>phase.start>clock.time()+.02);clock.seek(phase?.ready??phase?.start??scene.duration);render();});
+    function goToTime(value){const playing=clock.origin!==null;pause();clock.seek(value);if(playing&&value<scene.duration){clock.play();frame=requestAnimationFrame(tick);}render();}
+    next.addEventListener('click',()=>{const nextStep=scene.steps.find(s=>s.time>clock.time()+.02);goToTime(nextStep?nextStep.time:scene.duration);});
+    phaseNext.addEventListener('click',()=>{const phase=scene.phases?.find(phase=>phase.start>clock.time()+.02);goToTime(phase?.ready??phase?.start??scene.duration);});
     reset.addEventListener('click',()=>{pause();clock.seek(0);render();});
     scrub.addEventListener('input',()=>{const value=scrub.value;pause();clock.seek(value);render();});
-    speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));render();});
-    repeat.addEventListener('change',()=>{clock.setLoop(repeat.checked);render();});
+    speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));if(focused)playback.rate=Number(speed.value);render();});
+    repeat.addEventListener('change',()=>{clock.setLoop(repeat.checked);if(focused)playback.loop=repeat.checked;render();});
     active={pause,selection,selectArea,destroy:()=>{pause();moreMenu.remove();document.removeEventListener('click',closeMenuOutside);root.remove();if(layoutDialog){const dialog=layoutDialog;layoutDialog=null;dialog.close();dialog.remove();}if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
   }
   function clear(){active?.destroy();active=null;}

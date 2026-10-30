@@ -24,7 +24,9 @@ for(const total of Array.from({length:21},(_,i)=>i+10))for(const pitch of ['quar
         for(const node of scene.nodes){const frames=scene.tracks[node.id];assert.ok(frames?.length);for(const time of [phase.start,phase.start+(phase.end-phase.start)/2,phase.end]){const p=scenes.sample(frames,time);assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y),'Finite motion for every child and ball');}}
         checks++;
       }
-      for(const node of scene.nodes){const frames=scene.tracks[node.id];for(let i=1;i<frames.length;i++)assert.ok(frames[i][0]>frames[i-1][0],'Timeline has no duplicate or backward keyframes');const end=scenes.sample(frames,scene.duration);assert.ok(Math.hypot(end.x-node.x,end.y-node.y)<1e-8);}
+      for(const node of scene.nodes){const frames=scene.tracks[node.id];for(let i=1;i<frames.length;i++)assert.ok(frames[i][0]>frames[i-1][0],'Timeline has no duplicate or backward keyframes');const end=scenes.sample(frames,scene.duration),finished=scenes.sample(frames,scene.phases.at(-1).start);assert.ok(Math.hypot(end.x-finished.x,end.y-finished.y)<1e-8,'Completion holds the final pose without an artificial return');}
+      assert.equal(scene.loopMode,'cut','Repetition restarts the diagram without pretending the actors run back');
+      for(const phase of scene.phases.filter(p=>p.kind==='work'))assert.equal(phase.ready,phase.start,'Action starts immediately without a preparation glide');
       // Every complete passing circuit still reaches the real receiver after role mapping.
       for(const pass of scene.transfers){const ball=scenes.sample(scene.tracks[pass.ballId],pass.arrive),receiver=scenes.sample(scene.tracks[pass.to],pass.arrive);assert.ok(Math.hypot(ball.x-receiver.x,ball.y-receiver.y)<scene.pitch.w*.08,'Ball reaches the mapped receiver');}
       if(block.diagram==='football-warmup'){
@@ -41,4 +43,8 @@ for(const total of Array.from({length:21},(_,i)=>i+10))for(const pitch of ['quar
   }
 }
 assert.equal(JSON.stringify(source),JSON.stringify(JSON.parse(read('trainings.json')).trainings.find(t=>t.id==='2026-10-29')),'Training archive remains unchanged');
-console.log(`PASS: ${checks} sequence phases; 10–30 players, all pitch presets and skill levels; original doses, roles, receivers and loop continuity.`);
+const cut=[[0,0,0],[1,10,0],[2,100,0,'cut'],[3,110,0]];
+assert.equal(scenes.sample(cut,1.5).x,10,'A formation change does not drag players across the pitch');
+assert.equal(scenes.sample(cut,2).x,100,'The new formation appears exactly at its phase boundary');
+assert.equal(scenes.sample(cut,2.5).x,105,'Normal action moves immediately after the cut');
+console.log(`PASS: ${checks} sequence phases; 10–30 players, all pitch presets and skill levels; original doses, roles, receivers, direct starts and logical cuts.`);

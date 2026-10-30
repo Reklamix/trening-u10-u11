@@ -29,7 +29,7 @@ for(let total=10;total<=30;total++)for(const pitch of ['quarter','half','full'])
     }
     const sequence=sequences.build(training,block,area.index,scene),dribbling=sequence.phases.find(p=>p.name==='Vedenie lopty');
     assert.equal(dribbling.actualSeconds,180,'The approved training dose is unchanged');
-    assert.ok(dribbling.end-dribbling.ready>=scene.duration,'Composing the exercise does not compress the large movement back into a tiny twitch');
+    assert.ok((dribbling.end-dribbling.ready)/scene.duration>=.8,'The quicker demo still shows the full route at readable speed');
     cases++;
   }
 }

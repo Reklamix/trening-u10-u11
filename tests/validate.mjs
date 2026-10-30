@@ -320,7 +320,8 @@ for(const total of thu.attendanceCases.map(c=>c.total)){
       const index=Number(n.id.slice(1)),ballTrack=warm.tracks[index===0?'ball':'b'+index];
       return Array.from({length:9},(_,i)=>i*.5).every(t=>{const player=FootballScenes.sample(warm.tracks[n.id],t),ball=FootballScenes.sample(ballTrack,t);return Math.hypot(player.x-ball.x,player.y-ball.y)<12;});
     }),'Every ball stays at its own moving player through direction changes');
-    check(warm.nodes.every(n=>{const frames=warm.tracks[n.id];return Math.hypot(frames[0][1]-frames.at(-1)[1],frames[0][2]-frames.at(-1)[2])<1e-9;}),'Repeating warmup joins without a position jump');
+    equal(warm.loopMode,'cut','Repeating the warmup explicitly restarts the diagram');
+    check(dribblers.some(n=>{const frames=warm.tracks[n.id];return Math.hypot(frames[0][1]-frames.at(-1)[1],frames[0][2]-frames.at(-1)[2])>60;}),'Warmup continues forward instead of forcing everybody back to their starting position');
     let separation=Infinity;
     for(let a=0;a<dribblers.length;a++)for(let b=a+1;b<dribblers.length;b++)for(let leg=0;leg<warm.tracks[dribblers[a].id].length-1;leg++){
       const first=warm.tracks[dribblers[a].id],second=warm.tracks[dribblers[b].id];

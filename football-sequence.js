@@ -14,11 +14,11 @@ const FootballSequences = {
     balls.forEach((node,i)=>out.nodes.push({...node,id:ballIds[i]}));
     for(const node of base.nodes.filter(node=>node.kind==='coach'))out.nodes.push({...node});
     const positions=new Map(out.nodes.map(node=>[node.id,{x:node.x,y:node.y}]));
-    const push=(id,time,p)=>{const frames=out.tracks[id]||(out.tracks[id]=[]);if(frames.at(-1)?.[0]===time)frames[frames.length-1]=[time,p.x,p.y];else frames.push([time,p.x,p.y]);};
+    const push=(id,time,p,cut=false)=>{const frames=out.tracks[id]||(out.tracks[id]=[]),frame=cut?[time,p.x,p.y,'cut']:[time,p.x,p.y];if(frames.at(-1)?.[0]===time){if(frames.at(-1)[3]==='cut')frame[3]='cut';frames[frames.length-1]=frame;}else frames.push(frame);};
     let roles=Object.fromEntries(out.nodes.map(node=>[node.id,{team:node.team,label:node.label,visible:true}]));
     const append=(name,actualSeconds,{scene=null,order=ids,seconds=3,mirror=false,kind='rest',cue=name}={})=>{
       if(actualSeconds<=0)return;
-      const start=out.duration,end=start+seconds,transition=Math.min(1,seconds/3),phase={name,actualSeconds,start,ready:start+(scene?transition:0),end,kind,cue,roles:{...roles}};
+      const start=out.duration,end=start+seconds,finishHold=scene?.duration?Math.min(.35,seconds/5):0,actionSeconds=seconds-finishHold,phase={name,actualSeconds,start,ready:start,end,kind,cue,roles:{...roles}};
       const mapping=new Map(),targets=new Map(),transform=p=>mirror?{x:2*base.pitch.x+base.pitch.w-p.x,y:p.y}:p;
       if(scene){
         sourcePlayers(scene).forEach((node,i)=>mapping.set(node.id,order[i]));
@@ -36,21 +36,21 @@ const FootballSequences = {
       for(const node of out.nodes){
         const id=node.id,old=positions.get(id),target=targets.get(id);push(id,start,old);
         if(target){
-          push(id,start+transition,target.p);
+          push(id,start,target.p,true);
           const frames=scene.tracks[target.source]||[[0,target.node.x,target.node.y],[scene.duration,target.node.x,target.node.y]];
-          for(const[t,x,y]of frames){const p=transform({x,y});push(id,start+transition+(seconds-transition)*t/(scene.duration||1),p);}
+          for(const[t,x,y]of frames){const p=transform({x,y});push(id,start+actionSeconds*t/(scene.duration||1),p);}
           positions.set(id,transform(FootballScenes.sample(frames,scene.duration)));
         }
         push(id,end,positions.get(id));
       }
       if(scene){
-        const scale=(seconds-transition)/(scene.duration||1);
-        for(const arrow of scene.arrows)out.arrows.push({...arrow,number:out.arrows.length+1,label:false,points:arrow.points.map(transform),start:start+transition+(arrow.start??0)*scale,end:Math.min(end,start+transition+(arrow.end??scene.duration)*scale)});
-        for(const transfer of scene.transfers||[])out.transfers.push({...transfer,from:mapping.get(transfer.from),to:mapping.get(transfer.to),ballId:ballIds[0],depart:start+transition+transfer.depart*scale,arrive:start+transition+transfer.arrive*scale,settled:start+transition+transfer.settled*scale});
+        const scale=actionSeconds/(scene.duration||1);
+        for(const arrow of scene.arrows)out.arrows.push({...arrow,number:out.arrows.length+1,label:false,points:arrow.points.map(transform),start:start+(arrow.start??0)*scale,end:Math.min(end,start+(arrow.end??scene.duration)*scale)});
+        for(const transfer of scene.transfers||[])out.transfers.push({...transfer,from:mapping.get(transfer.from),to:mapping.get(transfer.to),ballId:ballIds[0],depart:start+transfer.depart*scale,arrive:start+transfer.arrive*scale,settled:start+transfer.settled*scale});
       }
       out.phases.push(phase);out.steps.push({time:start,text:cue});out.duration=end;roles=phase.roles;
     };
-    const hold=(name,actualSeconds,kind='rest',cue=name)=>append(name,actualSeconds,{kind,cue,seconds:kind==='setup'?3:2});
+    const hold=(name,actualSeconds,kind='rest',cue=name)=>append(name,actualSeconds,{kind,cue,seconds:kind==='water'?1.2:kind==='setup'?1:.8});
     const action=(name,actualSeconds,scene=base,extra={})=>append(name,actualSeconds,{scene,kind:'work',cue:scene.steps[0]?.text||name,seconds:Math.max(5,Math.min(12,scene.duration+1)),...extra});
     const orderFor=(defenders=[],neutrals=[])=>{
       const assigned=new Set([...defenders,...neutrals]),others=ids.filter((_,i)=>!assigned.has(i));let attacker=0,defender=0,neutral=0;
@@ -68,10 +68,10 @@ const FootballSequences = {
     };
     if(key==='football-warmup'){
       const mobilize={...base,tracks:{},arrows:[],nodes:base.nodes.map(node=>({...node}))};
-      for(const node of players)mobilize.tracks[node.id]=base.tracks[node.id];
-      mobilize.nodes=mobilize.nodes.filter(node=>node.kind!=='ball');mobilize.duration=base.duration;
-      action('Rozhýbanie',120,mobilize,{seconds:18,cue:'Ľahký pohyb medzi spoluhráčmi, zmeny smeru a rozhýbanie. Lopty zatiaľ stoja.'});
-      action('Vedenie lopty',180,base,{seconds:25,cue:'Každý vedie svoju loptu medzi spoluhráčmi. Hlava hore, vyhni sa im a zrýchli do voľna.'});
+      for(const node of players)mobilize.tracks[node.id]=base.tracks[node.id].filter(([t])=>t<=6);
+      mobilize.nodes=mobilize.nodes.filter(node=>node.kind!=='ball');mobilize.duration=6;
+      action('Rozhýbanie',120,mobilize,{seconds:6,cue:'Ľahký pohyb medzi spoluhráčmi, zmeny smeru a rozhýbanie. Lopty zatiaľ stoja.'});
+      action('Vedenie lopty',180,base,{seconds:16,cue:'Každý vedie svoju loptu medzi spoluhráčmi. Hlava hore, vyhni sa im a zrýchli do voľna.'});
       const pass={...base,nodes:[],tracks:{},arrows:[],duration:8,transfers:[]},counts=config.groupSizes.slice(index*2,index*2+2);let offset=0,podIndex=0;
       counts.forEach((count,group)=>{
         const pods=Array.from({length:Math.floor(count/2)},()=>2);if(count%2)pods[pods.length-1]=3;
@@ -123,10 +123,11 @@ const FootballSequences = {
       action('Pokojná chôdza',60,{...base,duration:4,tracks:Object.fromEntries(players.map(node=>[node.id,[[0,node.x,node.y],[4,180+(node.x-180)*.85,145+(node.y-145)*.85]]]))},{cue:'Spomaľ, vydýchaj sa a prejdi k trénerovi.'});
       hold('Voda',60,'water');hold('Otázka a konkrétna pochvala',60,'setup');
     }else return base;
-    // Finish in the starting formation so repeating the whole sequence does not jump.
-    const start=out.duration;for(const node of out.nodes){push(node.id,start,positions.get(node.id));push(node.id,start+2,node);}
-    out.phases.push({name:'Cvičenie dokončené',actualSeconds:0,start,end:start+2,kind:'end',cue:key==='football-finish'?'Pokojný záver je dokončený. Môžeš dokončiť tréning.':'Ukážka prešla všetkými fázami. Pokračuj tlačidlom Hotovo → ďalej.',roles:out.phases[0].roles});
-    out.steps.push({time:start,text:'Cvičenie dokončené. Všetky fázy sú prejdené.'});out.duration+=2;
+    // A finished action stays finished. Repeating restarts the diagram with a cut;
+    // actors never run backwards just to restore the initial formation.
+    const start=out.duration;for(const node of out.nodes){push(node.id,start,positions.get(node.id));push(node.id,start+1.2,positions.get(node.id));}
+    out.phases.push({name:'Cvičenie dokončené',actualSeconds:0,start,end:start+1.2,kind:'end',cue:key==='football-finish'?'Pokojný záver je dokončený. Môžeš dokončiť tréning.':'Ukážka prešla všetkými fázami. Pokračuj tlačidlom Hotovo → ďalej.',roles});
+    out.steps.push({time:start,text:'Cvičenie dokončené. Všetky fázy sú prejdené.'});out.duration+=1.2;out.loopMode='cut';
     out.caption='Celé cvičenie v skrátenom čase: všetky fázy, prestávky a zmeny rolí. Herné akcie sú príklady, deti v hre rozhodujú samy.';
     return out;
   }
