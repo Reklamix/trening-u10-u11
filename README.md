@@ -89,6 +89,18 @@ Schémy: `warmup`, `coordination`, `duel`, `two-one`, `two-two`, `target`, `buil
 
 Tabuľka má `caption`, pole `headers` a pole riadkov `rows`. Každý riadok má rovnaký počet buniek ako hlavička.
 
+## Časovač sérií a zvuk
+
+Spustiť odpočíta5s na prípravu a potom meria skutočné fázy aktuálne zobrazenej skupiny. Posledných5sekúnd práce aj oddychu pípa raz za sekundu. Koniec práce, pripravenosť na ďalšiu sériu, štart a úplný koniec majú odlišné tóny. Po odmeraní oddychu čaká ďalšia séria na **Spustiť ďalšiu sériu**; tlačidlo pridá nový5s nástup. Vnútorné výmeny obrancov v jednej rondovej sérii a súvislé polovice minihry ostávajú plynulé. Úvodné a dodatočné nástupy ani čakanie nemenia schválenú tréningovú dávku. Na ďalšie cvičenie prechádza tréner cez Hotovo.
+
+Plán pochádza z FootballSequences.actualSeconds, nie zo zrýchlenej animácie. Práve bežiaci časovač si drží pôvodnú zostavu; po zmene podmienok to oznámi a Od začiatku načíta aktuálnu skupinu. Nákres, animácia a časovač sú nezávislé. Pauza zastaví čas aj naplánované zvuky. Staršie archívy majú celkový blok bez vymyslených sérií. Obnovenie stránky časovač resetuje, rovnako ako predtým.
+
+Zvuk sa zapne prvým Spustiť alebo Vyskúšať zvuk; dá sa vypnúť. Signály sú naplánované cez Web Audio s1.5s predstihom. Prehliadač potrebuje používateľské stlačenie ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices)). Podporované prehliadače sa počas bežiaceho odpočtu pokúsia udržať displej zapnutý; požiadavka sa môže odmietnuť alebo uvoľniť pri skrytí stránky ([MDN Wake Lock](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API)). Fyzickú hlasitosť, tichý režim a správanie uzamknutého mobilu treba overiť na danom zariadení. Aplikácia nesľubuje signály pri zamknutej či uspatej stránke a po návrate neprehráva staré upozornenia naraz.
+
+Zjednotený app-unified.css dopĺňa schválenú kartu cvičenia: kratší úvod, rovnaké polia pomôcok, zbalené úplné počty a rozloženie, číslovaný výber statickej prípravy a jednotné tlačidlá. Príprava nemá video a zachováva existujúce rozmery a kužele. Voľba Dávkovanie a striedanie otvorí pôvodný rozpis; Späť vráti jeden krok na časovač.
+
+Kontrola nového modelu a zvukového plánovača: `node tests/interval-timer.mjs`.
+
 ## Kontroly pred publikovaním
 
 V priečinku repozitára:
@@ -142,7 +154,7 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv30/footballv29/football-sequencev3/exercise-briefv7/coaching-guidev4/pitch-setupv5/training-plannerv5/CSSv24/exercise-cardv4/app-shellv3/ui-refinementsv2/exercise-layoutv1. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv31/footballv30/football-sequencev3/exercise-briefv7/coaching-guidev4/pitch-setupv6/training-plannerv5/CSSv24/exercise-cardv4/app-shellv3/ui-refinementsv2/exercise-layoutv1/app-unifiedv1/interval-timerv1. Samotné pridanie tréningu tento krok nepotrebuje.
 
 Spoločnú vizuálnu vrstvu definuje `ui-refinements.css`: zelená Trénerova karta, rovnaké povrchy a ovládacie prvky v prehľade, príprave, knižnici, pomôckach, dialógoch a osobnom pláne. Úvod zvýrazňuje trénerské heslo a hlavné akcie pred checklistom. Všetkých päť polí pomôcok má v danom rozložení rovnakú šírku aj výšku; na počítači má nastavenia v druhom stĺpci. Knižnica má tlačidlá Celé tréningy/Cvičenia, vyhľadávanie s viditeľnými popismi a kompaktnejšie náhľady. Dátum v hlavnom výbere je skrátený, archív naďalej uvádza plný dátum. Rozhranie používa svetlú tému a podporuje obmedzenie dekoratívnych prechodov cez prefers-reduced-motion.
 

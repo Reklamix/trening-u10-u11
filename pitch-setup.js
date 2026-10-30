@@ -133,10 +133,10 @@ const PitchSetupMotion = {
     const {layout,steps}=PitchSetupPlan.forExercises(training),returnFocus=document.activeElement;
     const dialog=el('dialog','pitch-setup');dialog.setAttribute('aria-labelledby','setup-title');
     const header=el('header','setup-header'),title=el('h2','','Príprava ihriska');title.id='setup-title';
-    const dismiss=el('button','setup-close','×');dismiss.type='button';dismiss.setAttribute('aria-label','Zavrieť prípravu');dismiss.addEventListener('click',close);
+    const dismiss=el('button','setup-close','← Späť');dismiss.type='button';dismiss.setAttribute('aria-label','Zavrieť prípravu');dismiss.addEventListener('click',close);
     header.append(title,dismiss);
     const nav=el('nav','setup-exercise-tabs');nav.setAttribute('aria-label','Príprava pre cvičenie');
-    steps.forEach((step,value)=>{const button=el('button','',step.title);button.type='button';button.dataset.setupExercise=value;button.addEventListener('click',()=>{index=value;render();});nav.append(button);});
+    steps.forEach((step,value)=>{const button=el('button','',`${value+1} · ${step.title}`);button.type='button';button.dataset.setupExercise=value;button.addEventListener('click',()=>{index=value;render();});nav.append(button);});
     const body=el('div','setup-body'),footer=el('footer','setup-footer');
     let index=Math.max(0,steps.findIndex(step=>step.blockId===blockId));
     function render(){

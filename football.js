@@ -241,7 +241,8 @@ const FootballPhaseNavigation={
     summary.id='exercise-summary';summary.tabIndex=-1;summary.setAttribute('aria-label','Popis a postup');
     let topic='steps',instructionIndex=0,equipmentIndex=-1,timePart='work',instructionMode=false,heroAnchor='diagram',phaseCards=[],fullPlanOpen=false;
     const topicTrail=[];
-    const topicState=()=>({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen,scrollTop:root.scrollTop,pageScroll:window.scrollY});
+    const topicState=()=>({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen,timerDoseOpen:document.getElementById('field-view').classList.contains('timer-dose-open'),timerPanelOpen:document.getElementById('timer-panel').open,scrollTop:root.scrollTop,pageScroll:window.scrollY});
+    const restoreTimerView=state=>{document.getElementById('field-view').classList.toggle('timer-dose-open',Boolean(state.timerDoseOpen));document.getElementById('timer-panel').open=Boolean(state.timerPanelOpen);};
     const preview=html('button','exercise-preview'),previewBody=html('span','card-short-description'),descriptionButton=html('span','card-description-button','Popis cvičenia →'),itemPager=html('div','exercise-item-pager'),modeButton=html('button','secondary-button exercise-mode-button','Ako to robiť →');modeButton.type='button';modeButton.addEventListener('click',()=>selectTopic('steps',{instructions:!instructionMode}));
     preview.type='button';preview.addEventListener('click',()=>selectTopic('steps',{instructions:true}));preview.append(uiIcon('people-fill'),descriptionButton,previewBody);
     const moreMenu=html('details','exercise-card-menu'),menuSummary=html('summary'),menuItems=html('div','card-menu-items');menuSummary.setAttribute('aria-label','Ďalšie možnosti cvičenia');menuSummary.append(uiIcon('three-dots'));moreMenu.append(menuSummary,menuItems);
@@ -325,6 +326,8 @@ const FootballPhaseNavigation={
     function selectTopic(key,settings={}){
       const before=topicState();
       topic=key;if(settings.instructions!==undefined)instructionMode=settings.instructions;if(settings.part)timePart=settings.part;
+      if(key==='time'){document.getElementById('field-view').classList.toggle('timer-dose-open',Boolean(settings.part));document.getElementById('timer-panel').open=!settings.part;}
+      else{document.getElementById('field-view').classList.remove('timer-dose-open');document.getElementById('timer-panel').open=false;}
       if(JSON.stringify(before)!==JSON.stringify(topicState()))topicTrail.push(before);
       if(key!=='steps'||instructionMode)pause();moreMenu.open=false;applyTopic();briefRoot.scrollTop=0;
       if(settings.settings){tweaks.open=true;focusControl(areaSelect||tweaks.querySelector('summary'));}
@@ -336,6 +339,7 @@ const FootballPhaseNavigation={
     }
     function jumpHero(anchor,record=true){
       const before=topicState();topic='steps';instructionMode=false;heroAnchor=anchor;
+      document.getElementById('timer-panel').open=false;document.getElementById('field-view').classList.remove('timer-dose-open');
       if(record&&JSON.stringify(before)!==JSON.stringify(topicState()))topicTrail.push(before);
       if(anchor==='procedure')pause();moreMenu.open=false;applyTopic();
       const target=anchor==='procedure'?summary:figure;
@@ -581,7 +585,7 @@ const FootballPhaseNavigation={
       expand.hidden=true;
       const dialog=html('dialog','football-focus'),close=html('button','secondary-button football-close','Späť k tréningu');close.type='button';
       dialog.setAttribute('aria-label','Zväčšená futbalová schéma');close.addEventListener('click',()=>dialog.close());dialog.append(close,root);document.body.append(dialog);focusDialog=dialog;
-      dialog.addEventListener('close',()=>{if(root.isConnected&&parent.isConnected){parent.append(root);({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen}=returnState);renderBrief();root.scrollTo({top:returnState.scrollTop||0,behavior:'instant'});window.scrollTo({top:returnState.pageScroll||0,behavior:'instant'});}dialog.remove();if(focusDialog===dialog)focusDialog=null;expand.hidden=false;if(root.isConnected)expand.focus({preventScroll:true});});
+      dialog.addEventListener('close',()=>{if(root.isConnected&&parent.isConnected){parent.append(root);({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen}=returnState);restoreTimerView(returnState);renderBrief();root.scrollTo({top:returnState.scrollTop||0,behavior:'instant'});window.scrollTo({top:returnState.pageScroll||0,behavior:'instant'});}dialog.remove();if(focusDialog===dialog)focusDialog=null;expand.hidden=false;if(root.isConnected)expand.focus({preventScroll:true});});
       dialog.showModal();
     });
     play.addEventListener('click',()=>{if(clock.origin!==null)pause();else{if(topic==='steps'&&!instructionMode)topicTrail.length=0;clock.play();render();frame=requestAnimationFrame(tick);}});
@@ -591,7 +595,7 @@ const FootballPhaseNavigation={
       const before=document.activeElement,inside=root.contains(before);
       if(topic==='steps'&&instructionMode&&instructionIndex>0){instructionIndex--;renderBrief();if(inside)focusControl(briefRoot.querySelector('[data-panel="steps"] .card-back-visual'));return true;}
       const previous=topicTrail.pop();
-      if(previous){pause();({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen}=previous);renderBrief();root.scrollTo({top:previous.scrollTop||0,behavior:'instant'});window.scrollTo({top:previous.pageScroll||0,behavior:'instant'});if(inside&&!before.isConnected)focusControl(topic==='steps'&&!instructionMode?(phasePrevious.disabled?play:phasePrevious):briefRoot.querySelector('[data-panel="'+topic+'"] .card-back-visual'));return true;}
+      if(previous){pause();({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen}=previous);restoreTimerView(previous);renderBrief();root.scrollTo({top:previous.scrollTop||0,behavior:'instant'});window.scrollTo({top:previous.pageScroll||0,behavior:'instant'});if(inside&&!before.isConnected)focusControl(topic==='steps'&&!instructionMode?(phasePrevious.disabled?play:phasePrevious):briefRoot.querySelector('[data-panel="'+topic+'"] .card-back-visual'));return true;}
       if(topic!=='steps'||instructionMode){pause();jumpHero('diagram',false);return true;}
       return previousPhase();
     }
@@ -602,8 +606,8 @@ const FootballPhaseNavigation={
     scrub.addEventListener('input',()=>{const value=scrub.value;pause();clock.seek(value);render();});
     speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));if(focused)playback.rate=Number(speed.value);render();});
     repeat.addEventListener('change',()=>{clock.setLoop(repeat.checked);if(focused)playback.loop=repeat.checked;render();});
-    active={pause,selection,selectArea,back:backStep,destroy:()=>{pause();moreMenu.remove();document.removeEventListener('click',closeMenuOutside);root.remove();if(layoutDialog){const dialog=layoutDialog;layoutDialog=null;dialog.close();dialog.remove();}if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
+    active={pause,selection,selectArea,showDoses:()=>selectTopic('time',{part:'work'}),back:backStep,destroy:()=>{pause();moreMenu.remove();document.removeEventListener('click',closeMenuOutside);root.remove();if(layoutDialog){const dialog=layoutDialog;layoutDialog=null;dialog.close();dialog.remove();}if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
   }
   function clear(){active?.destroy();active=null;}
-  window.FootballBoard={supports:key=>FootballScenes.keys.includes(key),mount,pause:()=>active?.pause(),selection:()=>active?.selection(),selectArea:index=>active?.selectArea(index),back:()=>active?.back()||false,clear};
+  window.FootballBoard={supports:key=>FootballScenes.keys.includes(key),mount,pause:()=>active?.pause(),selection:()=>active?.selection(),selectArea:index=>active?.selectArea(index),showDoses:()=>active?.showDoses(),back:()=>active?.back()||false,clear};
 })();

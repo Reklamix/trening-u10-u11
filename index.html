@@ -12,13 +12,15 @@
   <link rel="stylesheet" href="./app-shell.css?v=3">
   <link rel="stylesheet" href="./ui-refinements.css?v=2">
   <link rel="stylesheet" href="./exercise-layout.css?v=1">
-  <script src="./football.js?v=29" defer></script>
+  <link rel="stylesheet" href="./app-unified.css?v=1">
+  <script src="./football.js?v=30" defer></script>
   <script src="./training-planner.js?v=5" defer></script>
   <script src="./football-sequence.js?v=3" defer></script>
   <script src="./exercise-brief.js?v=7" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
-  <script src="./pitch-setup.js?v=5" defer></script>
-  <script src="./app.js?v=30" defer></script>
+  <script src="./pitch-setup.js?v=6" defer></script>
+  <script src="./interval-timer.js?v=1" defer></script>
+  <script src="./app.js?v=31" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -49,8 +51,8 @@
           <button type="button" data-detail="cues" aria-expanded="false" aria-controls="detail-panel">Pokyny</button>
         </div>
         <section id="detail-panel" class="detail-panel" hidden aria-label="Podrobnosti činnosti"></section>
-        <details id="timer-panel" class="timer-panel"><summary><span>Časovač bloku</span><span id="timer-preview" class="timer-preview">00:00</span></summary>
-          <div class="timer-body"><div><output id="timer-value" aria-label="Zostávajúci čas bloku" aria-live="off">00:00</output><p id="timer-state" role="status">Pripravený</p></div><div class="timer-actions"><button id="timer-toggle" type="button" class="button">Spustiť</button><button id="timer-reset" type="button" class="secondary-button">Od začiatku</button></div><p class="small-note">Meria celý blok vrátane prestávok. Na ďalšiu činnosť prejdeš ty.</p></div>
+        <details id="timer-panel" class="timer-panel"><summary><span>Časovač sérií</span><span id="timer-preview" class="timer-preview">00:00</span></summary>
+          <div class="timer-body"><div class="timer-display"><p id="timer-scope" class="small-note"></p><p id="timer-config-note" class="small-note" hidden>Časovač používa pôvodnú zostavu. Od začiatku načíta nové nastavenie.</p><p id="timer-phase" class="timer-phase"></p><output id="timer-value" aria-label="Zostávajúci čas aktuálnej fázy" aria-live="off">00:00</output><p id="timer-state" role="status" aria-atomic="true">Pripravený</p><p id="timer-next" class="small-note"></p><p id="timer-sound-state"></p></div><div class="timer-actions"><button id="timer-toggle" type="button" class="button">Spustiť</button><button id="timer-reset" type="button" class="secondary-button">Od začiatku</button></div><button id="timer-dose-toggle" class="text-button" type="button">Dávkovanie a striedanie →</button><details class="timer-options"><summary>Zvuk a možnosti</summary><label class="timer-sound-choice"><input id="timer-sound" type="checkbox" checked>Zvukové signály</label><button id="timer-test" class="secondary-button" type="button">Vyskúšať zvuk</button><p id="timer-audio-status" class="small-note" role="status">Zvuk aktivuješ tlačidlom Spustiť.</p><p class="small-note">Pípanie 5–1 s pred koncom práce aj oddychu. Krátky signál ukončí prácu, vyšší tón oznámi štart po tvojom spustení. Nechaj stránku otvorenú; nastav hlasitosť telefónu.</p></details><p class="small-note">Po práci sa odmeria oddych. Každú ďalšiu sériu spustíš ty tlačidlom; potom máš 5 s na prípravu. Na ďalšie cvičenie prejdeš tlačidlom Hotovo.</p></div>
         </details>
         <div class="step-actions"><button id="previous-block" type="button" class="secondary-button">← Späť</button><button id="complete-block" type="button" class="button">Hotovo → ďalej</button></div>
         <p id="next-preview" class="next-preview"></p>
@@ -107,6 +109,7 @@
         <p id="catalog-count" class="small-note" role="status"></p><div id="catalog-list" class="catalog-list"></div>
       </section>
       <section id="equipment-view" class="view" hidden aria-labelledby="equipment-title">
+        <nav class="section-toolbar" aria-label="Navigácia pomôcok"><a href="#overview" data-view="overview">← Úvod</a><button id="equipment-prepare" type="button" class="text-button">Pripraviť ihrisko →</button></nav>
         <p class="eyebrow">Pred odchodom</p><h1 id="equipment-title">Čo zobrať</h1><p id="equipment-progress" class="muted"></p><div id="equipment-list" class="equipment-list"></div><button id="reset-equipment" class="text-button" type="button">Zrušiť označenie pomôcok</button><p class="small-note">Označenie si pamätá iba tento prehliadač.</p>
       </section>
       <section id="coaching-view" class="view" hidden aria-labelledby="coaching-title">

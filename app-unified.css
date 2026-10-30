@@ -1,0 +1,106 @@
+/* The compact exercise language across preparation and the training overview. */
+.container[data-view=overview] > .session-meta,
+.container[data-view=equipment] > .session-picker,
+.container[data-view=equipment] > .session-meta {display:none}
+.container[data-view=equipment] > #open-pitch-setup {display:none}
+.container[data-view=overview] .session-picker {margin-bottom:14px}
+.overview-hero {padding:0;margin:0 0 12px;border:0;border-radius:0;background:none;box-shadow:none}
+.container:not(.exercise-focus) .overview-hero h1 {font-size:25px;line-height:1.2;margin-bottom:8px}
+.overview-hero > .eyebrow {display:none}
+.overview-hero .active-cue {font-size:14px;margin:0 0 12px;color:#526d58}
+.overview-hero .summary-facts {
+  margin:0;padding:5px 3px;min-height:54px;border:1px solid var(--line);
+  border-radius:13px;background:#fff;
+}
+.overview-hero .summary-facts img {display:none}
+.summary-facts small {font-size:11px}
+.summary-facts strong {font-size:14px}
+.summary-journey {margin-bottom:16px;gap:8px}
+.summary-journey button {min-height:48px;border-radius:12px;font-size:12px}
+.summary-kit .section-heading h2 {font-size:16px}
+.summary-gear-grid {grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:7px}
+.summary-gear,.summary-gear:nth-child(n+4),.summary-gear:nth-child(-n+3) {
+  min-height:104px;padding:8px 5px;gap:5px;border-radius:12px;box-shadow:none;
+}
+.summary-gear .shell-kit-image,.summary-gear:nth-child(-n+3) .shell-kit-image {width:24px;height:24px}
+.summary-gear strong {font-size:11px;line-height:1.3}
+.summary-gear small,.summary-gear:last-child small {font-size:12px;line-height:1.35}
+.summary-gear .summary-gear-status {font-size:10px;padding-top:3px}
+.shell-disclosure {margin-bottom:8px;border-radius:13px;box-shadow:none}
+.shell-disclosure > summary {min-height:50px;padding:12px;font-size:13px}
+.overview-tools .disclosure-body {font-size:14px;line-height:1.5}
+.section-toolbar {display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.section-toolbar a,.section-toolbar button {min-height:44px;display:flex;align-items:center;font-size:13px;text-decoration:none;font-weight:650}
+.container[data-view=equipment] h1 {font-size:25px;margin-bottom:6px}
+#equipment-progress {font-size:13px;margin-bottom:12px}
+.equipment-list {display:grid;grid-template-columns:1fr;gap:8px}
+.shell-equipment-item {border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.shell-equipment-item:has(input:checked) {border-color:#8da87f;background:#f0f6e9}
+.shell-equipment-item .equipment-card {
+  display:flex;align-items:center;gap:12px;min-height:68px;margin:0;padding:12px;
+  border:0;border-radius:0;background:transparent;box-shadow:none;
+}
+.equipment-card input {width:22px;height:22px;flex:none;accent-color:#326547}
+.equipment-card .shell-kit-image {width:30px;height:30px}
+.equipment-card > span {min-width:0;flex:1}
+.equipment-card strong {display:block;font-size:14px;line-height:1.4}
+.equipment-card small {display:block;font-size:13px;line-height:1.4;color:#55705c}
+.equipment-help {margin:0;padding:0 12px;border:0;border-top:1px solid #e4ece0;background:none}
+.equipment-help > summary {min-height:44px;padding:10px 0;font-size:12px;font-weight:650;color:#42634b}
+.equipment-help p {font-size:14px;line-height:1.5;margin-bottom:10px}
+.equipment-help .equipment-full-quantity {font-weight:650}
+.pitch-setup {border-radius:18px}
+.pitch-setup .setup-header {padding:10px 14px;gap:12px}
+.pitch-setup .setup-header h2 {font-size:21px;line-height:1.3;letter-spacing:-.4px}
+.pitch-setup .setup-close {width:auto;min-width:84px;min-height:44px;height:auto;margin:0;padding:8px;border-radius:10px;font-size:12px;white-space:nowrap}
+.setup-exercise-tabs {gap:6px;padding:8px 14px}
+.setup-exercise-tabs button {min-height:46px;font-size:12px;border-radius:11px}
+.setup-exercise-tabs button[aria-pressed=true] {background:#eaf2e1;border-color:#8aa27e}
+.pitch-setup .setup-body {padding:12px 14px;gap:8px}
+.pitch-setup .setup-progress {margin-bottom:6px;font-size:12px;color:#617863}
+.pitch-setup .setup-step-title {font-size:20px;margin-bottom:8px}
+.pitch-setup .setup-map {height:clamp(150px,29dvh,300px);border-radius:14px}
+.pitch-setup .setup-action {font-size:14px;line-height:1.5;padding:12px;margin:10px 0;background:#fff;border-radius:14px}
+.pitch-setup .setup-details {background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.pitch-setup .setup-details > summary {font-size:13px;min-height:44px}
+.pitch-setup .setup-footer {padding:10px 14px max(10px,env(safe-area-inset-bottom))}
+.pitch-setup .setup-footer button {min-height:48px;border-radius:12px}
+.catalog-card,.private-card,.personal-step,.archive-item {border-radius:14px;box-shadow:none}
+.timer-panel .timer-body {display:block;padding:14px}
+.timer-display {text-align:center;padding:12px;border-radius:13px;background:#f0f5e9}
+.timer-phase {font-size:17px;font-weight:700;line-height:1.3;margin:5px 0}
+.timer-display #timer-value {display:block;font-size:48px;line-height:1.2;font-weight:750;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.timer-display #timer-state {font-size:13px;margin:4px 0 8px}
+.timer-display #timer-scope,.timer-display #timer-next {font-size:12px;line-height:1.45;margin-bottom:0}
+#timer-sound-state {font-size:11px;color:#5b735f;line-height:1.4;margin:7px 0 0}
+.timer-panel[data-kind=rest] .timer-display,.timer-panel[data-kind=water] .timer-display {background:#e8f0e0}
+.timer-panel[data-kind=ready] .timer-display {background:#f4efdc}
+.timer-panel .timer-actions {display:grid;grid-template-columns:1.5fr 1fr;gap:8px;margin:10px 0}
+.timer-actions button {min-height:48px;margin:0;font-size:14px}
+.timer-options {border:0;border-bottom:1px solid var(--line);margin-bottom:10px}
+#timer-dose-toggle {width:100%;min-height:44px;margin:0 0 8px;font-size:13px}
+.exercise-focus #field-view:not(.timer-dose-open):has(.exercise-flow[data-topic=time]) #active-diagram {flex:0 0 0;min-height:0}
+.exercise-focus #field-view:not(.timer-dose-open) .exercise-flow[data-topic=time] > .exercise-info {display:none}
+.exercise-focus #field-view:has(.exercise-flow[data-topic=time]) #timer-panel {flex:1;min-height:0;max-height:none;overflow-y:auto;margin:0 0 4px;border-radius:14px;background:#fff}
+.exercise-focus #field-view:has(.exercise-flow[data-topic=time]) .timer-body {max-height:none;overflow:visible}
+.exercise-focus #field-view.timer-dose-open #timer-panel {flex:none}
+.exercise-focus #field-view:has(.exercise-flow[data-topic=time]) .activity-heading > div {flex:1;min-width:0}
+.timer-options > summary {min-height:44px;padding:10px 0;font-size:13px;font-weight:650}
+.timer-sound-choice {display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px}
+.timer-sound-choice input {width:22px;height:22px;accent-color:#326547}
+#timer-test {min-height:44px;margin:8px 0;width:100%;font-size:14px}
+@media(min-width:860px) {
+  .overview-hero {padding:0}
+  .overview-grid {grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr);gap:24px}
+  .overview-hero .summary-facts {margin:0}
+  .equipment-list {grid-template-columns:1fr 1fr;align-items:start}
+  .timer-panel .timer-body {max-width:540px;margin:auto}
+}
+@media(max-width:360px) {
+  .summary-gear-grid {grid-template-columns:repeat(3,minmax(0,1fr))}
+  .summary-gear,.summary-gear:nth-child(n+4),.summary-gear:nth-child(-n+3) {padding-inline:3px}
+  .summary-gear strong {font-size:10px}
+  .summary-gear small,.summary-gear:last-child small {font-size:11px}
+  .summary-journey button {font-size:11px}
+}
+@media(max-height:650px) {.pitch-setup .setup-map {height:145px}}

@@ -393,18 +393,31 @@ const PersonalPlans = [
   function checkedGear() { const value = state.gear[state.selected.id]; return Array.isArray(value) ? value : []; }
   function activeBlock() { return state.selected.blocks[state.blockIndex]; }
   function clockKey() { return state.selected.id + '/' + activeBlock().id; }
-  function currentClock() { const key = clockKey(); if (!state.clocks.has(key)) state.clocks.set(key, new TrainingClock((activeBlock().end - activeBlock().start) * 60000)); return state.clocks.get(key); }
+  function clockSignature(){return JSON.stringify([state.selected.planConfig||state.attendance,window.FootballBoard?.selection()?.index||0]);}
+  function currentClock() {
+    const key=clockKey(),index=window.FootballBoard?.selection()?.index||0,signature=clockSignature();
+    let clock=state.clocks.get(key);
+    if(!clock||!clock.started&&clock.signature!==signature){clock=new IntervalClock(TrainingIntervals.build(state.selected,activeBlock(),index));clock.signature=signature;state.clocks.set(key,clock);}
+    return clock;
+  }
   function clockText(milliseconds) { const seconds = Math.ceil(milliseconds / 1000); return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }
   function updateTimer() {
     if (!state.selected) return;
     const clock = currentClock();
-    const remaining = clock.remaining();
-    const value = clockText(remaining);
+    const remaining = clock.remaining(),snapshot=clock.snapshot();
+    const value = clockText(snapshot.remaining);
     $('timer-value').textContent = value;
     $('timer-preview').textContent = value;
-    const status = remaining === 0 ? 'Čas bloku uplynul' : clock.deadline !== null ? 'Beží' : clock.started ? 'Pozastavený' : 'Pripravený';
+    $('timer-scope').textContent=clock.scope+' · cvičenie zostáva '+clockText(snapshot.overall);
+    $('timer-config-note').hidden=!clock.started||clock.signature===clockSignature();
+    $('timer-phase').textContent=snapshot.part.name;
+    $('timer-panel').dataset.kind=snapshot.part.kind;
+    $('timer-next').textContent=snapshot.next?'Ďalej: '+snapshot.next.name+' · '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
+    const audioState=window.TimerAudio?.status();$('timer-sound-state').textContent=audioState==='off'?'Bez zvuku':audioState==='running'?'Zvuk aktivovaný':clock.started?'Zvuk neaktívny · vyskúšaj zvuk':'Zvuk sa zapne pri štarte';
+    const status = remaining === 0 ? 'Cvičenie dokončené' : clock.waiting?'Pripravené na ďalšiu sériu':clock.deadline !== null ? 'Beží' : clock.started ? 'Pozastavený' : 'Pripravený · 5 s na prípravu';
     if (status !== lastTimerState) { $('timer-state').textContent = status; lastTimerState = status; }
-    $('timer-toggle').textContent = clock.deadline !== null && remaining > 0 ? 'Pauza' : remaining === 0 ? 'Spustiť znova' : clock.started ? 'Pokračovať' : 'Spustiť';
+    $('timer-toggle').textContent = clock.waiting?'Spustiť ďalšiu sériu':clock.deadline !== null && remaining > 0 ? 'Pauza' : remaining === 0 ? 'Spustiť znova' : clock.started ? 'Pokračovať' : 'Spustiť';
+    window.TimerAudio?.update(clock);window.TimerAudio?.keepAwake(clock.deadline!==null&&remaining>0);
   }
   function attendanceCase() { return state.selected.attendanceCases?.find(x => x.total === state.attendance); }
   function updateSessionMeta() {
@@ -552,6 +565,11 @@ const PersonalPlans = [
     const equals=item.quantity.lastIndexOf('=');
     return equals>=0?item.quantity.slice(equals+1).trim():item.quantity;
   }
+  function overviewQuantity(item){
+    if(item.name.toLocaleLowerCase('sk').includes('rozliš')&&/^\d+ svetlých \+ \d+ tmavých(?: \+ \d+ odlišných pre N)?$/.test(item.quantity))return item.quantity.match(/\d+/g).join(' + ')+' ks';
+    if(item.name==='Organizácia'){const count=item.quantity.split(',').filter(value=>value.trim()).length;return count+' '+(count===1?'pomôcka':count<=4?'pomôcky':'pomôcok');}
+    return compactQuantity(item);
+  }
   function syncEquipmentState() {
     const ready=new Set(checkedGear()),count=state.selected.equipment.filter(item=>ready.has(item.name)).length;
     const progress=`Pripravené: ${count} z ${state.selected.equipment.length}`;
@@ -612,10 +630,10 @@ const PersonalPlans = [
       input.dataset.gear=item.name;
       input.checked = checked.includes(item.name);
       const content = el('span');
-      content.append(el('strong', '', item.name), el('small', '', item.quantity));
+      content.append(el('strong', '', item.name), el('small', '', overviewQuantity(item)));input.setAttribute('aria-label',item.name+': '+item.quantity);
       input.addEventListener('change',()=>setEquipmentReady(item.name,input.checked));
       label.append(input, kitImage(item.name), content);
-      const details=el('details','equipment-help');details.append(el('summary','','Ako použiť a rozložiť'),el('p','',item.detail));
+      const details=el('details','equipment-help');details.append(el('summary','','Počty a rozloženie'),el('p','equipment-full-quantity',item.quantity),el('p','',item.detail));
       card.append(label,details);return card;
     }));
   }
@@ -682,10 +700,10 @@ const PersonalPlans = [
     $('plan-saved').textContent=configSaved?'Uložené pre tento tréning.':'Uloženie zlyhalo. Zachovaj si variant cez Zdieľať.';
     const notes=training.organizationNotes||[training.players,training.coaches];
     const list=el('ul');notes.forEach(note=>list.append(el('li','',note)));$('plan-recommendation').replaceChildren(list);
-    $('summary-equipment').replaceChildren(...training.equipment.map(item=>{const button=el('button','summary-gear');button.type='button';button.dataset.gear=item.name;const text=el('span'),status=el('span','summary-gear-status');status.setAttribute('aria-hidden','true');text.append(el('strong','',item.name),el('small','',compactQuantity(item)),status);button.append(kitImage(item.name),text);button.addEventListener('click',()=>setEquipmentReady(item.name,!checkedGear().includes(item.name)));return button;}));
+    $('summary-equipment').replaceChildren(...training.equipment.map(item=>{const button=el('button','summary-gear');button.type='button';button.dataset.gear=item.name;button.setAttribute('aria-label',item.name+': '+item.quantity);const text=el('span'),status=el('span','summary-gear-status');status.setAttribute('aria-hidden','true');text.append(el('strong','',item.name),el('small','',overviewQuantity(item)),status);button.append(kitImage(item.name),text);button.addEventListener('click',()=>setEquipmentReady(item.name,!checkedGear().includes(item.name)));return button;}));
     syncEquipmentState();
     const canPrepare=Boolean(window.PitchSetup?.supports(training));
-    $('summary-setup').hidden=!canPrepare;$('summary-start').textContent=(canPrepare?'2 · ':'')+'Začať cvičenia →';
+    $('summary-setup').hidden=!canPrepare;$('equipment-prepare').hidden=!canPrepare;$('summary-start').textContent=(canPrepare?'2 · ':'')+'Začať cvičenia →';
   }
   function renderCatalog(){
     const mode=$('catalog-mode').value,items=TrainingLibrary.filter(state.trainings,{mode,topic:$('catalog-topic').value,query:$('catalog-query').value.trim()});
@@ -996,8 +1014,20 @@ const PersonalPlans = [
   $('review-training').addEventListener('click', () => navigate('overview'));
   $('reset-progress').addEventListener('click', () => { state.done[state.selected.id] = []; writeLocal(storageKeys.done, state.done); renderProgress(); renderActive(); });
   $('reset-equipment').addEventListener('click', () => { state.gear[state.selected.id] = []; writeLocal(storageKeys.gear, state.gear); syncEquipmentState(); });
-  $('timer-toggle').addEventListener('click', () => { const clock = currentClock(); if (clock.deadline !== null && clock.remaining() > 0) clock.pause(); else clock.start(); updateTimer(); });
-  $('timer-reset').addEventListener('click', () => { currentClock().reset(); updateTimer(); });
+  $('timer-toggle').addEventListener('click',async()=>{
+    const clock=currentClock();
+    if(clock.deadline!==null&&clock.remaining()>0){clock.pause();window.TimerAudio.cancel();updateTimer();return;}
+    const initial=clock.waiting||!clock.started||clock.remaining()===0;
+    $('timer-toggle').disabled=true;
+    try{const soundReady=await window.TimerAudio.unlock();if(currentClock()!==clock)return;clock.start();window.TimerAudio.bind(clock,initial);$('timer-audio-status').textContent=$('timer-sound').checked?(soundReady?'Zvuk je aktívny.':'Zvuk nie je dostupný. Skús Vyskúšať zvuk.'):'Zvuk je vypnutý.';updateTimer();}
+    finally{$('timer-toggle').disabled=false;}
+  });
+  $('timer-reset').addEventListener('click',()=>{currentClock().reset();window.TimerAudio.cancel();updateTimer();});
+  $('timer-sound').addEventListener('change',async()=>{window.TimerAudio.setEnabled($('timer-sound').checked);const ready=$('timer-sound').checked?await window.TimerAudio.unlock():false;$('timer-audio-status').textContent=$('timer-sound').checked?(ready?'Zvuk je aktívny.':'Zvuk aktivuješ tlačidlom Spustiť.'):'Zvuk je vypnutý.';updateTimer();});
+  $('timer-test').addEventListener('click',async()=>{$('timer-sound').checked=true;window.TimerAudio.setEnabled(true);$('timer-audio-status').textContent=await window.TimerAudio.test()?'Testovací tón prehratý. Zvuk je aktívny.':'Zvuk nie je dostupný v tomto prehliadači.';});
+  $('timer-dose-toggle').addEventListener('click',()=>{if(state.selected.planConfig)window.FootballBoard?.showDoses();else{state.detail='rotations';renderDetail();$('timer-panel').open=false;$('detail-panel').scrollIntoView({block:'start',behavior:'instant'});}});
+  $('timer-panel').addEventListener('toggle',()=>{if($('timer-panel').open)$('field-view').classList.remove('timer-dose-open');});
+  $('equipment-prepare').addEventListener('click',()=>window.PitchSetup.open(state.selected));
   $('restore-form').addEventListener('submit', restoreVault);
   $('private-plan-select').addEventListener('change',event=>{history.pushState({trainingBack:true},'',linkFor(event.target.value,null,'private'));onRoute();});
   $('personal-previous').addEventListener('click', () => { personalIndex--; renderPersonalStep(); });
