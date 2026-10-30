@@ -140,7 +140,11 @@ Ochrana obsahu závisí od hesla, zariadenia a dôveryhodného kódu stránky. Z
 
 GitHub **Settings → Pages → Deploy from a branch → main → / (root)**. HTTPS zostáva zapnuté. Návrat na staršiu verziu: vráť príslušný commit. Vypnutie webu: **Settings → Pages → Unpublish site**.
 
-Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv19/footballv20/exercise-briefv3/coaching-guidev4/pitch-setupv3/training-plannerv4/CSSv24/exercise-cardv1. Samotné pridanie tréningu tento krok nepotrebuje.
+Pri úprave rozhrania zvýš verziu príslušného skriptu alebo styles.css v index.html. Aktuálne appv27/footballv22/football-sequencev1/exercise-briefv5/coaching-guidev4/pitch-setupv4/training-plannerv5/CSSv24/exercise-cardv2/app-shellv3. Samotné pridanie tréningu tento krok nepotrebuje.
+
+Štvrtkové cvičenia majú na hlavnej obrazovke nákres s ručným Prehrať, aktuálnu fázu s tlačidlom Ďalšia fáza, krátky pokyn, Práca/Oddych a Hotovo → ďalej. Postup, Nastaviť, Čas a Pomôcky otvoria podrobnosti; Úvod je stále hore. Menu obsahuje výber cvičenia a pokyny trénera. Na nízkom mobile sa skryjú doplnkové údaje hlavičky a výber skupiny zostáva v Nastaviť.
+
+`football-sequence.js` skladá nezmenené základné akcie do celého cvičenia v skrátenom ukážkovom čase. Zahŕňa rozhýbanie/vedenie/prihrávky, každú sériu, oddych a vodu, všetky výmeny obrancov alebo neutrálnych a koniec. Čísla detí zostávajú stabilné; D/N označuje aktuálnu rolu. Pri rozohriatí sa dvojice/trojice skladajú v rámci pôvodných skupín. Herné akcie sú príklady, nie predpísaný pohyb počas celej voľnej hry. Údaj „v tréningu“ je skutočná dávka; rýchlosť mení iba ukážku. Opakovanie spúšťa znova celú sekvenciu. Tréningový časovač, archívne schémy a dáta sa nemenia. Overenie: `node tests/validate.mjs` a `node tests/sequences.mjs`.
 
 ## Obsah a rozsah
 

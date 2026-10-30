@@ -8,14 +8,15 @@
   <title>Tréningy U10 / U11</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123d35'/%3E%3Crect x='15' y='10' width='34' height='44' rx='2' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M15 32h34' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./styles.css?v=24">
-  <link rel="stylesheet" href="./exercise-card.css?v=1">
+  <link rel="stylesheet" href="./exercise-card.css?v=2">
   <link rel="stylesheet" href="./app-shell.css?v=3">
-  <script src="./football.js?v=21" defer></script>
+  <script src="./football.js?v=22" defer></script>
   <script src="./training-planner.js?v=5" defer></script>
-  <script src="./exercise-brief.js?v=4" defer></script>
+  <script src="./football-sequence.js?v=1" defer></script>
+  <script src="./exercise-brief.js?v=5" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
   <script src="./pitch-setup.js?v=4" defer></script>
-  <script src="./app.js?v=26" defer></script>
+  <script src="./app.js?v=27" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -34,7 +35,7 @@
     <p id="loading" class="loading" role="status">Pripravujem tréning…</p>
     <article id="training" hidden>
       <section id="field-view" class="view" aria-labelledby="activity-title">
-        <nav class="exercise-toolbar" aria-label="Navigácia tréningu"><a href="#overview" data-view="overview" aria-label="Späť na prehľad"><img class="card-ui-icon" src="./assets/bootstrap-icons/arrow-left.svg" alt=""><span>Prehľad</span></a><a href="#private" data-view="private">Moje</a></nav>
+        <nav class="exercise-toolbar" aria-label="Navigácia tréningu"><a href="#overview" data-view="overview" aria-label="Späť na úvodnú obrazovku"><img class="card-ui-icon" src="./assets/bootstrap-icons/arrow-left.svg" alt=""><span>Úvod</span></a><a href="#private" data-view="private">Moje</a></nav>
         <div class="exercise-session-header"><div class="card-session-date"><p id="card-date"></p><p id="card-time"></p></div><div class="card-session-side"><p id="card-total"></p><div class="card-session-stage"><span id="card-index"></span><nav id="block-rail" class="block-rail" aria-label="Vyber časť tréningu"></nav></div></div></div>
         <div class="activity-heading"><div><p id="block-meta" class="eyebrow"></p><h1 id="activity-title"></h1></div><button id="share-block" class="icon-button" type="button" aria-label="Zdieľať túto činnosť" title="Zdieľať túto činnosť"><img class="card-share-icon" src="./assets/bootstrap-icons/share.svg" alt=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m4 0 2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" transform="translate(2 0) scale(.85 1)"/></svg></button></div>
         <div id="active-diagram"></div>

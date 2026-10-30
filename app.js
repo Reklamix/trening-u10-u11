@@ -286,7 +286,7 @@ const PersonalPlans = [
   function addDiagram(parent, key, id, title) {
     if (window.FootballBoard?.supports(key)) {
       const selected=attendanceCase();
-      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,brief:state.selected.planConfig?index=>ExerciseBrief.build(state.selected,activeBlock(),index):null,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onPrivate:()=>navigate('private'),onSetup:()=>window.PitchSetup.open(state.selected),onGuideSection:section=>openCoachingGuide(section),onPitchChange:changePitch,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
+      window.FootballBoard.mount(parent, activeBlock(), {total:state.attendance,size:groupSize,areaIndex,groups:[...new Set(selected.groups)].sort(),sheet:state.selected.diagramSheet,quarterPitch:state.selected.quarterPitch,brief:state.selected.planConfig?index=>ExerciseBrief.build(state.selected,activeBlock(),index):null,groupBlock:index=>TrainingPlanner.forGroup(state.selected,activeBlock(),index),levelConfig:()=>state.selected.planConfig,planState:()=>state.selected,onPrivate:()=>navigate('private'),onBlock:index=>navigate('field',index),onSetup:()=>window.PitchSetup.open(state.selected),onGuideSection:section=>openCoachingGuide(section),onPitchChange:changePitch,onCountChange:changeGroupCounts,onLevelChange:changeGroupLevel,onGroupChange:(size,index)=>{groupSize=size;if(index!==undefined)areaIndex=index;renderGroupCue();renderDetail();},onGuide:window.CoachingGuide?.supports(activeBlock())?()=>openCoachingGuide('prepare'):null});
       return;
     }
     const draw = drawings[key]?.();
@@ -474,7 +474,7 @@ const PersonalPlans = [
     const last = state.blockIndex === state.selected.blocks.length - 1;
     const allDone = completed().length === state.selected.blocks.length;
     const lastDone = last && completed().includes(block.id);
-    $('complete-block').textContent = last ? lastDone ? 'Posledná časť hotová ✓' : 'Dokončiť tréning ✓' : state.selected.planConfig ? 'Hotovo →' : 'Hotovo → ďalej';
+    $('complete-block').textContent = last ? lastDone ? 'Posledná časť hotová ✓' : 'Dokončiť tréning ✓' : 'Hotovo → ďalej';
     $('complete-block').disabled = lastDone;
     const next = state.selected.blocks[state.blockIndex + 1];
     $('next-preview').textContent = next ? 'Nasleduje: ' + next.title + ' · ' + (next.end - next.start) + ' min' : 'Posledná časť tréningu.';

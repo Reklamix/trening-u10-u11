@@ -216,9 +216,10 @@ const FootballScenes = {
     preview.type='button';preview.addEventListener('click',()=>selectTopic('steps',{instructions:true}));preview.append(uiIcon('people-fill'),descriptionButton,previewBody);
     const moreMenu=html('details','exercise-card-menu'),menuSummary=html('summary'),menuItems=html('div','card-menu-items');menuSummary.setAttribute('aria-label','Ďalšie možnosti cvičenia');menuSummary.append(uiIcon('three-dots'));moreMenu.append(menuSummary,menuItems);
     const closeMenuOutside=event=>{if(!moreMenu.contains(event.target))moreMenu.open=false;};
+    if(focused){const training=options.planState?.();if(training){const chooseBlock=html('details','card-exercise-picker');chooseBlock.append(html('summary','','Vybrať cvičenie'));for(const [index,item]of training.blocks.entries()){const button=html('button','',`${index+1}. ${item.title}`);button.type='button';if(item.id===block.id)button.setAttribute('aria-current','true');button.addEventListener('click',()=>options.onBlock(index));chooseBlock.append(button);}menuItems.append(chooseBlock);}}
     if(focused){parent.parentElement.querySelector('.activity-heading').append(moreMenu);document.addEventListener('click',closeMenuOutside);for(const[label,action]of[['Nákres',()=>selectTopic('steps',{instructions:false})],['Popis a postup',()=>selectTopic('steps',{instructions:true})],['Pokyny trénera',()=>selectTopic('coach')],['Nastavenia tréningu',()=>selectTopic('space',{settings:true})],['Predošlý cvik',()=>document.getElementById('previous-block').click()],['Moje · osobný plán',()=>options.onPrivate()]]){const button=html('button','',label);button.type='button';if(label==='Predošlý cvik')button.disabled=block.start===0;button.addEventListener('click',()=>{moreMenu.open=false;action();});menuItems.append(button);}moreMenu.addEventListener('keydown',event=>{if(event.key==='Escape'){moreMenu.open=false;menuSummary.focus();}});}
     const topicNav=html('nav','exercise-topic-nav');topicNav.setAttribute('aria-label','Podrobnosti cvičenia');
-    if(focused)for(const[key,title]of[['steps','Postup'],['space','Plocha'],['time','Čas'],['coach','Tréner'],['kit','Pomôcky']]){const button=html('button','',title);button.type='button';button.dataset.topic=key;button.setAttribute('aria-controls','exercise-panel-'+key);button.addEventListener('click',()=>selectTopic(key));if(['space','time','kit'].includes(key))button.prepend(uiIcon({space:'bounding-box',time:'stopwatch',kit:'cone-striped'}[key]));topicNav.append(button);}
+    if(focused)for(const[key,title]of[['steps','Postup'],['space','Nastaviť'],['time','Čas'],['coach','Tréner'],['kit','Pomôcky']]){const button=html('button','',title);button.type='button';button.dataset.topic=key;button.setAttribute('aria-controls','exercise-panel-'+key);button.addEventListener('click',()=>selectTopic(key,key==='steps'?{instructions:true}:{}));if(['space','time','kit'].includes(key))button.prepend(uiIcon({space:'bounding-box',time:'stopwatch',kit:'cone-striped'}[key]));topicNav.append(button);}
     tweaks.append(html('summary','',areas.length?'Nastaviť skupinu':'Schéma a nastavenia'));
     const selectors=html('div','football-selectors');
     const choose=(label,values,selected,callback)=>{const wrap=html('label','football-select-label',label),select=html('select');select.setAttribute('aria-label',label);values.forEach(([value,text])=>{const option=html('option','',text);option.value=value;select.append(option);});select.value=selected;select.addEventListener('change',()=>callback(Number(select.value)));wrap.append(select);selectors.append(wrap);};
@@ -248,6 +249,7 @@ const FootballScenes = {
       map=svgNode('svg',{viewBox:`-3 -4 ${layout.width+6} ${layout.height+7}`,role:'img','aria-label':`Rozloženie pracovnej plochy: ${block.title}`,class:'football-layout-map'});
       layoutGuide.append(map,html('p','',stage.instructions));
     }
+    const phaseBar=html('div','exercise-phase-bar'),phaseLabel=html('output','exercise-phase-label'),phaseNext=html('button','secondary-button','Ďalšia fáza →');phaseNext.type='button';phaseLabel.setAttribute('aria-live','polite');phaseBar.append(phaseLabel,phaseNext);
     const caption=html('p','football-caption'),skill=html('div','football-skill');
     const status=html('p','football-status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
     const progress=html('output','football-progress');progress.setAttribute('aria-live','off');progress.setAttribute('aria-label','Priebeh celej ukážky');
@@ -276,7 +278,7 @@ const FootballScenes = {
     if(options.levelConfig?.()&&areas.length)toolsParent.append(levelTools);
     if(options.onCountChange&&options.levelConfig?.()&&areas.length)toolsParent.append(countTools);
     if(options.onPitchChange&&options.levelConfig?.()&&areas.length)toolsParent.append(pitchTools);
-    if(focused)root.append(groupBar,figure,preview,glance,quickFacts,briefRoot,itemPager,topicNav);else root.append(skill,figure,controls);
+    if(focused)root.append(groupBar,figure,phaseBar,preview,glance,quickFacts,briefRoot,itemPager,topicNav);else root.append(skill,figure,controls);
     let guide;
     if(options.onGuide){
       guide=html('button','football-guide-entry');guide.type='button';guide.setAttribute('aria-haspopup','dialog');
@@ -298,14 +300,14 @@ const FootballScenes = {
       const oldPager=itemPager.firstElementChild;if(oldPager)briefRoot.querySelector('[data-panel="'+oldPager.dataset.panel+'"]')?.append(oldPager);itemPager.replaceChildren();const activePager=briefRoot.querySelector('[data-panel="'+topic+'"] .exercise-pager');if(activePager)itemPager.append(activePager);itemPager.hidden=topic==='steps'&&!instructionMode||!activePager;
       briefRoot.hidden=topic==='steps'&&!instructionMode;
       for(const panel of briefRoot.children)panel.hidden=panel.dataset.panel!==topic;
-      const showHero=topic==='steps'&&!instructionMode;groupBar.hidden=!showHero;glance.hidden=!showHero;quickFacts.hidden=!showHero;
+      const showHero=topic==='steps'&&!instructionMode;groupBar.hidden=!showHero;glance.hidden=!showHero;quickFacts.hidden=!showHero;phaseBar.hidden=!showHero;
       for(const section of briefRoot.querySelectorAll('[data-time-part]'))section.hidden=section.dataset.timePart!==timePart;
       for(const button of briefRoot.querySelectorAll('.exercise-time-nav button'))button.setAttribute('aria-pressed',String(button.getAttribute('aria-controls')==='exercise-time-'+timePart));
       for(const button of topicNav.children)button.setAttribute('aria-pressed',String(button.dataset.topic===topic));
     }
     function renderBrief(){
       if(!focused)return;
-      const data=options.brief(pitchIndex);if(!data)return;itemPager.replaceChildren();briefRoot.replaceChildren();visualLabel.textContent=data.selection.replace(/^Ukážka /,'').replace(/ z \d+ detí/,' detí');previewBody.textContent=data.steps[0];
+      const data=options.brief(pitchIndex);if(!data)return;itemPager.replaceChildren();briefRoot.replaceChildren();visualLabel.textContent=data.selection.replace(/^Ukážka /,'').replace(/ z \d+ detí/,' detí');previewBody.textContent=scene?.phases?.findLast(phase=>phase.start<=clock.time())?.cue||data.shortInstruction;
       const selectedArea=areas[pitchIndex],config=options.levelConfig(),localCount=selectedArea?.count||options.total;
       groupBar.replaceChildren();const groupButton=html('button','card-group-button',selectedArea?.label||'U11');groupButton.type='button';groupButton.setAttribute('aria-label','Vybrať skupinu a náročnosť');groupButton.addEventListener('click',()=>selectTopic('space',{settings:true}));groupBar.append(groupButton,html('span','',`${localCount} ${localCount>=2&&localCount<=4?'deti':'detí'}${selectedArea?.label?.length>1?' · '+TrainingPlanner.levels[config.levels[pitchIndex]]:''}`));
       glance.replaceChildren();for(const[label,value,hint,part,icon]of[['Práca',data.glance.work,data.glance.workHint,'work','stopwatch'],['Oddych',data.glance.rest,data.glance.restHint,'rest','cup-hot-fill']]){const button=html('button','card-dose');button.type='button';button.setAttribute('aria-label',label+': '+value+'. Celá dávka');const body=html('span');body.append(html('span','card-dose-label',label),html('strong','',value));if(hint)body.append(html('small','',hint));button.append(uiIcon(icon),body);button.addEventListener('click',()=>selectTopic('time',{part}));glance.append(button);}
@@ -407,7 +409,7 @@ const FootballScenes = {
       dialog.addEventListener('close',()=>{dialog.remove();if(layoutDialog===dialog)layoutDialog=null;const target=returnFocus?.isConnected?returnFocus:briefRoot.querySelector('[data-exercise-map]')||areaTools.querySelector('button');target?.focus();},{once:true});dialog.showModal();
     }
     function build() {
-      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});if(focused&&options.planState?.())scene=FootballSequences.build(options.planState(),block,pitchIndex,scene);clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
       renderLevelTools();
       renderCountTools();
       renderPitchTools();
@@ -447,6 +449,18 @@ const FootballScenes = {
       }
       for(const node of scene.nodes){
         const g=svgNode('g',{'data-actor':node.id,'data-team':node.team||'',transform:`translate(${node.x} ${node.y})`});
+        paintActor(g,node);
+        svg.append(g);actors.set(node.id,g);
+      }
+      caption.textContent=scene.caption;scrub.max=String(scene.duration);controls.hidden=scene.duration===0&&!focused;play.hidden=scene.duration===0;fineControls.hidden=scene.duration===0;settings.hidden=scene.duration===0;scrub.hidden=scene.duration===0;note.hidden=scene.duration===0;progress.hidden=scene.duration===0;
+      if(focused)note.textContent='Celé cvičenie je ukázané v skrátenom čase. Uvedené dávky platia v tréningu; tréningový časovač je samostatný.';
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)note.textContent='Prehrávanie spustíš iba tlačidlom. Pri obmedzenom pohybe môžeš použiť Ďalší krok alebo posuvník.';
+      renderBrief();
+      delete phaseBar.dataset.phase;
+      render();
+    }
+    function paintActor(g,node){
+        g.replaceChildren();g.setAttribute('data-team',node.team||'');
         const r=node.kind==='ball'?4:scene.localCount>12?7:focused?11:10;
         if(focused&&node.kind==='ball')g.append(svgNode('image',{href:'./assets/card-ball.webp',x:-4,y:-4,width:8,height:8}));
         else if(focused&&node.kind==='player'&&node.team==='A')g.append(svgNode('image',{class:'card-player-sprite',href:'./assets/card-player-blue.webp',x:-r*1.16,y:-r*1.16,width:r*2.32,height:r*2.32}));
@@ -454,16 +468,20 @@ const FootballScenes = {
         else g.append(svgNode('circle',{cx:0,cy:0,r,fill:node.kind==='ball'?'white':colors[node.team],stroke:node.kind==='ball'?'#173b31':'white','stroke-width':1}));
         if(node.kind==='ball'&&!focused)g.append(svgNode('circle',{cx:0,cy:0,r:1.5,fill:'#173b31'}));
         else if(node.kind!=='ball')g.append(svgNode('text',{x:0,y:.5,'text-anchor':'middle','dominant-baseline':'middle',fill:['N','T'].includes(node.team)?'#173b31':'white','font-size':r===7?7:9,'font-weight':650},node.label));
-        svg.append(g);actors.set(node.id,g);
-      }
-      caption.textContent=scene.caption;scrub.max=String(scene.duration);controls.hidden=scene.duration===0&&!focused;play.hidden=scene.duration===0;fineControls.hidden=scene.duration===0;settings.hidden=scene.duration===0;scrub.hidden=scene.duration===0;note.hidden=scene.duration===0;progress.hidden=scene.duration===0;
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)note.textContent='Prehrávanie spustíš iba tlačidlom. Pri obmedzenom pohybe môžeš použiť Ďalší krok alebo posuvník.';
-      renderBrief();
-      render();
     }
     function render() {
       if(!clock)return;
       const time=clock.time();
+      const phases=scene.phases||[],phaseIndex=Math.max(0,phases.findLastIndex(phase=>phase.start<=time)),phase=phases[phaseIndex];
+      if(phase){
+        const dose=phase.actualSeconds%60===0?phase.actualSeconds/60+' min':phase.actualSeconds+' s';
+        phaseLabel.textContent=`${phaseIndex+1}/${phases.length} · ${phase.name}${phase.actualSeconds?' · '+dose+' v tréningu':''}`;
+        phaseBar.dataset.kind=phase.kind;phaseNext.disabled=phaseIndex===phases.length-1;
+        if(phaseBar.dataset.phase!==String(phaseIndex)){
+          phaseBar.dataset.phase=String(phaseIndex);previewBody.textContent=phase.cue;
+          for(const node of scene.nodes){const role=phase.roles[node.id];if(!role)continue;const g=actors.get(node.id);g.setAttribute('visibility',role.visible?'visible':'hidden');paintActor(g,{...node,...role});}
+        }
+      }
       for(const[id,frames]of Object.entries(scene.tracks)){const p=FootballScenes.sample(frames,time);actors.get(id)?.setAttribute('transform',`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);}
       let index=0;scene.steps.forEach((s,i)=>{if(time>=s.time-.001)index=i;});
       const complete=scene.duration>0&&time>=scene.duration;
@@ -485,6 +503,7 @@ const FootballScenes = {
     });
     play.addEventListener('click',()=>{if(clock.origin!==null)pause();else{clock.play();render();frame=requestAnimationFrame(tick);}});
     next.addEventListener('click',()=>{pause();const nextStep=scene.steps.find(s=>s.time>clock.time()+.02);clock.seek(nextStep?nextStep.time:scene.duration);render();});
+    phaseNext.addEventListener('click',()=>{pause();const phase=scene.phases?.find(phase=>phase.start>clock.time()+.02);clock.seek(phase?.ready??phase?.start??scene.duration);render();});
     reset.addEventListener('click',()=>{pause();clock.seek(0);render();});
     scrub.addEventListener('input',()=>{const value=scrub.value;pause();clock.seek(value);render();});
     speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));render();});
