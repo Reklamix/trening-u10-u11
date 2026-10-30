@@ -49,6 +49,39 @@ final result: passed
 - Initial P2 findings fixed and re-captured; final full and focused comparisons inspected.
 - No actionable P0/P1/P2 issue remains; ready for authorized GitHub Pages publication.
 
+## UI/UX refinement — 30. 10. 2026
+
+This pass was explicitly requested for the whole application. It keeps the selected green card design, original assets, training data, motion model, doses, equipment, encrypted plans and public URL. The earlier image-fidelity report above records the original implementation; the following results describe this later authorized interaction and layout refinement.
+
+Current-run baseline evidence: `ux-before-overview.png`, `ux-before-preparation.png`, `ux-before-library.png`, `ux-before-private.png` in the existing visualization directory. Captures were inspected at 390×844. The first exercise capture was a loading frame and was not used as visual evidence. The main findings were competing overview elements, a clipped long date selector, unnecessary session controls above library search, and long exercise content without direct section navigation.
+
+The local skill search did not identify a specific progressive-disclosure entry after one narrower retry. Layout recommendations are therefore a manual fallback grounded in these captures; relevant retrieved label, focus and heading guidance was applied without treating unrelated search results as design evidence.
+
+Implemented:
+- Shared surfaces, typography, control sizing and navigation in `ui-refinements.css`; existing Inter, Bootstrap icons and equipment artwork retained. Light appearance remains intentional.
+- Overview: coaching cue with facts, two early action buttons, readable direct equipment checklist, separate settings/organization/timeline column on desktop. Equipment counts remain complete. A first mobile revision placed actions too low; it was corrected so the start action ends at approximately 444 px on a 375×812 screen.
+- The new overview wrappers initially broke the fact-tile shortcut's direct-child selector. The selector was corrected and half-pitch/three-coach save plus quarter-pitch/two-coach restoration were verified.
+- Exercise: five persistent controls for diagram, full procedure, timer, settings and equipment. Doses and all procedure steps remain visible. The original one-step procedure remains available from the menu. Back restores section and scroll position; phase controls return to the diagram and retain playback behavior.
+- Timer control opens the existing timer panel directly. A running training timer stayed running while animation phases changed; it was then paused and reset to 10:00. No timer starts automatically.
+- Library: clear mode buttons, search first, explicit labels, tighter previews and no irrelevant session selector above the library. Passing filter produced nine exercises; an unmatched search produced the existing empty state and clearing it restored nine.
+- Preparation, equipment, archive, share and locked personal-plan surfaces use the same cards and controls. Dialogs prevent background scrolling. No password was entered and private content was not decrypted during visual QA.
+- Fullscreen inspection found phase buttons inheriting full dialog width (724 px content in a 372 px dialog). Scoped control sizing removed that overflow. Fullscreen now opens the diagram directly; closing restores the previous panel. Procedure, timer, settings and equipment controls return to the main card before opening their content.
+
+Verification:
+- JavaScript syntax and `tests/validate.mjs`: 65,895 checks passed after implementation; final run recorded in project state.
+- 375×812 portrait: primary actions visible, full procedure jump and back-to-diagram work, local navigation and completion remain available. Phase previous/next kept animation playback; the separate training timer remained independent.
+- 320×568: no horizontal overflow; conditions could be opened, changed, saved and restored. All five equipment images loaded. Native numeric inputs retain bounds and use a numeric input mode.
+- 844×390 landscape: procedure jump scrolled the page to 632 px, diagram returned to the top, Back restored 632 px. Completion button bottom was 380 px, within the viewport.
+- Landscape timer focus was also checked: the start/pause control was automatically brought above the fixed navigation (button bottom about 184 px, navigation top 254 px), without starting the clock.
+- 1440×900 desktop: two overview columns approximately 569/367 px, no horizontal overflow. Archived Tuesday still selected 19 players and retained its existing training and share URL. Its single start action fills the journey row.
+- Direct checklist: overview 1/5 matched the detailed checklist's checked ball item; returned to 0/5 after QA. Preparation step two retained the actual four-area map and all cone instructions. The locked personal-plan form retained its original password and optional backup flow. Application console errors/warnings: zero in the exercised flows.
+- Visible keyboard focus, explicit input labels, accessible icon names and target sizes were inspected. This is not an accessibility-compliance certification.
+- Final fullscreen check at 390×844: dialog content width 372/372 px, phase arrows 44 px, next/previous returned to phase one. Procedure closed the dialog and focused the full procedure; close restored settings; timer closed the dialog and opened the real timer at 10:00 without starting it. Console errors/warnings: zero. Final syntax checks for both changed scripts, 65,895 regression checks and diff whitespace check passed before commit.
+
+Public visual evidence after deployment is saved in the same evidence folder as `ux-overview-live.png`, `ux-exercise-live.png` and `ux-library-live.png`; deployment commit and live verification are recorded in the canonical project notes.
+
+Not exercised: physical phones, mobile software keyboard, OS-level larger-text and reduced-motion settings, private-plan decryption and the native share sheet. The host's DOM browser supports viewport testing; the user's shared desktop settings were not changed. CSS retains a light color scheme, readable wrapping, reduced-motion transitions and keyboard alternatives. No dark theme was introduced or claimed as tested.
+
 ## Whole-application unification — 29 October 2026
 
 final result: passed

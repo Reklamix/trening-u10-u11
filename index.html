@@ -10,13 +10,14 @@
   <link rel="stylesheet" href="./styles.css?v=24">
   <link rel="stylesheet" href="./exercise-card.css?v=4">
   <link rel="stylesheet" href="./app-shell.css?v=3">
-  <script src="./football.js?v=26" defer></script>
+  <link rel="stylesheet" href="./ui-refinements.css?v=1">
+  <script src="./football.js?v=27" defer></script>
   <script src="./training-planner.js?v=5" defer></script>
   <script src="./football-sequence.js?v=3" defer></script>
   <script src="./exercise-brief.js?v=6" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
   <script src="./pitch-setup.js?v=4" defer></script>
-  <script src="./app.js?v=28" defer></script>
+  <script src="./app.js?v=29" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -55,10 +56,13 @@
         <div id="finished" class="finished" hidden><h2>Tréning je dokončený</h2><p>Časti máš označené. Doprajte si vodu a pokojný záver.</p><button id="review-training" class="secondary-button" type="button">Pozrieť prehľad</button></div>
       </section>
       <section id="overview-view" class="view" hidden aria-labelledby="training-title">
-        <p class="eyebrow">Trénerova karta · Prehľad</p><h1 id="training-title"></h1>
+        <div class="overview-grid"><div class="overview-main"><header class="overview-hero">
+        <p class="eyebrow">Trénerova karta · Prehľad</p><h1 id="training-title"></h1><p id="training-cue" class="active-cue"></p>
         <div id="summary-facts" class="summary-facts" aria-label="Dnešné podmienky"></div>
-        <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky · označ pripravené</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
+        </header>
         <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">1 · Pripraviť ihrisko →</button><button id="summary-start" class="button" type="button">2 · Začať cvičenia →</button></div>
+        <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky · označ pripravené</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
+        </div><aside class="overview-tools" aria-label="Podmienky a organizácia tréningu">
         <details id="conditions-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/gear.svg" alt="">Nastaviť podmienky<span id="conditions-summary"></span></summary>
         <form id="plan-form" class="plan-card" hidden>
           <nav class="plan-tabs" aria-label="Čo nastaviť">
@@ -72,7 +76,7 @@
               <button type="button" data-plan-control="plan-pitch" data-plan-value="quarter">1/4 ihriska</button><button type="button" data-plan-control="plan-pitch" data-plan-value="half">1/2 ihriska</button><button type="button" data-plan-control="plan-pitch" data-plan-value="full">Celé ihrisko</button>
             </div>
             <details class="plan-dimensions"><summary id="plan-dimensions-label">Vlastné rozmery</summary><div class="plan-form-grid">
-              <label>Dĺžka (m)<input id="plan-width" type="number" min="35" max="120" step="1" required></label><label>Šírka (m)<input id="plan-height" type="number" min="25" max="90" step="1" required></label>
+              <label>Dĺžka (m)<input id="plan-width" type="number" inputmode="numeric" min="35" max="120" step="1" required></label><label>Šírka (m)<input id="plan-height" type="number" inputmode="numeric" min="25" max="90" step="1" required></label>
             </div><p class="small-note">Predvoľby sú orientačné. Over skutočný priestor.</p></details>
           </section>
           <section id="plan-panel-coaches" data-plan-panel="coaches" aria-label="Nastaviť trénerov" hidden>
@@ -87,15 +91,18 @@
           </section>
           <button class="button" type="submit">Hotovo · uložiť</button><p id="plan-saved" class="small-note" role="status"></p>
         </form></details>
-        <details id="organization-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/people-fill.svg" alt="">Zameranie a organizácia</summary><div class="disclosure-body"><p id="training-focus" class="muted"></p><div id="training-topics" class="topic-chips"></div><p id="training-cue" class="active-cue"></p><div id="plan-recommendation"></div><button id="show-coaching" type="button" class="text-button">Spoločné pokyny trénerov →</button></div></details>
+        <details id="organization-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/people-fill.svg" alt="">Zameranie a organizácia</summary><div class="disclosure-body"><p id="training-focus" class="muted"></p><div id="training-topics" class="topic-chips"></div><div id="plan-recommendation"></div><button id="show-coaching" type="button" class="text-button">Spoločné pokyny trénerov →</button></div></details>
         <details id="timeline-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/stopwatch.svg" alt=""><span id="summary-timeline-title">Časový plán</span></summary><div class="disclosure-body">
         <div id="grouping" class="grouping"></div><p id="completion-count" class="small-note"></p><div id="overview-blocks" class="overview-blocks"></div>
         <button id="reset-progress" class="text-button" type="button">Zrušiť označenie dokončených častí</button>
         </div></details>
+        </aside></div>
       </section>
       <section id="catalog-view" class="view" hidden aria-labelledby="catalog-title">
         <p class="eyebrow">Uložené podľa tém a dátumov</p><h1 id="catalog-title">Knižnica tréningov</h1><p class="muted">Vráť sa k celému tréningu alebo nájdi konkrétne cvičenie.</p>
-        <div class="catalog-filters"><label>Zobraziť<select id="catalog-mode"><option value="trainings">Celé tréningy</option><option value="drills">Jednotlivé cvičenia</option></select></label><label>Čo trénujeme<select id="catalog-topic"><option value="">Všetky témy</option></select></label><label class="catalog-search">Hľadať<input id="catalog-query" type="search" placeholder="Názov, téma alebo dátum…"></label></div>
+        <label for="catalog-mode" class="sr-only">Zobraziť</label><select id="catalog-mode" hidden><option value="trainings">Celé tréningy</option><option value="drills">Jednotlivé cvičenia</option></select>
+        <div class="catalog-mode-tabs" role="group" aria-label="Zobraziť v knižnici"><button type="button" data-catalog-mode="trainings" aria-pressed="true">Celé tréningy</button><button type="button" data-catalog-mode="drills" aria-pressed="false">Cvičenia</button></div>
+        <div class="catalog-filters"><div class="catalog-search"><label for="catalog-query">Hľadať</label><input id="catalog-query" type="search" placeholder="Názov, téma alebo dátum…"></div><div class="catalog-topic-filter"><label for="catalog-topic">Čo trénujeme</label><select id="catalog-topic"><option value="">Všetky témy</option></select></div></div>
         <p id="catalog-count" class="small-note" role="status"></p><div id="catalog-list" class="catalog-list"></div>
       </section>
       <section id="equipment-view" class="view" hidden aria-labelledby="equipment-title">
