@@ -126,3 +126,18 @@ html:has(.exercise-focus) {scrollbar-gutter:auto}
 #exercise-clock-value {font-size:26px;line-height:1;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-1px;color:#214d35;flex:none}
 .exercise-clock #exercise-clock-toggle {width:112px;min-height:44px;flex:none;padding:7px 9px;margin:0;border-radius:9px;font-size:13px;line-height:1.2}
 @media(min-width:900px) {.exercise-clock-copy {flex:none;gap:24px}#exercise-clock-phase {flex:none;max-width:400px}.exercise-clock {justify-content:flex-start}.exercise-clock #exercise-clock-toggle {margin-left:auto}}
+
+/* Real interval follows the diagram; animation remains a separately playable preview. */
+.exercise-clock-label {flex:1;min-width:0}
+#exercise-clock-next {display:block;font-size:10px;line-height:1.4;color:#526a57;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exercise-clock #exercise-clock-phase {font-size:12px;min-height:2.6em}
+.exercise-focus .exercise-flow > .exercise-clock {margin:0 0 8px;min-height:76px;flex:none}
+.exercise-focus .exercise-flow:not([data-topic=steps]) > .exercise-clock,
+.exercise-focus .exercise-flow[data-instructions=true] > .exercise-clock {display:none}
+@media(min-width:900px) and (min-height:651px) {
+ .exercise-focus .exercise-flow > .exercise-clock {grid-column:1;grid-row:3;margin:0}
+ .exercise-focus .exercise-flow > .exercise-summary {grid-row:2 / span 2}
+ .exercise-clock-copy {flex:1;gap:10px}.exercise-clock-label {flex:1}#exercise-clock-phase {max-width:none}
+}
+
+@media(max-width:360px) {.exercise-clock #exercise-clock-toggle {width:92px;font-size:12px}#exercise-clock-value {font-size:24px}}

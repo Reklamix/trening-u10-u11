@@ -184,4 +184,6 @@ Schémy sú ilustračné; dávky a plné počty sú v texte a tabuľkách. Pôvo
 
 ## Časovač priamo pri cvičení
 
-`app.js?v=33` a `app-unified.css?v=3` zobrazujú kompaktný časovač priamo nad nákresom. Ukazuje zostávajúci čas aktuálneho meraného úseku, jeho názov a Spustiť/Pauza/Pokračovať/Ďalšia séria. Používa rovnaký IntervalClock aj zvuky ako podrobný panel Časovač; meranie sa nezdvojuje a výber animačnej fázy ho nepretáča. Podrobnosti, reset, dávkovanie a zvukové možnosti zostávajú v existujúcom paneli. Každú ďalšiu sériu naďalej spúšťa tréner.
+`app.js?v=34`, `football.js?v=32` a `app-unified.css?v=4` zobrazujú kompaktný časovač priamo pod animáciou. Ukazuje zostávajúci čas aktuálneho meraného úseku, jeho názov a Spustiť/Pauza/Pokračovať/Ďalšia séria. Používa rovnaký IntervalClock aj zvuky ako podrobný panel Časovač; meranie sa nezdvojuje a ručný výber animačnej fázy ho nepretáča. Pri prechode skutočného merania na novú fázu sa ukáže jej nákres; časovač označí Prácu/Oddych/Vodu a nasledujúci úsek. Podrobnosti, reset, dávkovanie a zvukové možnosti zostávajú v existujúcom paneli. Každú ďalšiu sériu naďalej spúšťa tréner.
+
+Po úplnom skončení cvičenia a dohraní záverečného signálu (1,2 s) sa označí dokončenie a otvorí ďalší cvik. Jeho časovač zostáva pripravený na ručný štart. Ďalšie série rovnakého cvičenia sa naďalej spúšťajú tlačidlom. Posledné cvičenie zobrazí dokončený tréning. Automatický prechod platí iba pri otvorenom cvičení a viditeľnej stránke; reset/odchod zruší čakajúci prechod.

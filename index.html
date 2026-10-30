@@ -12,15 +12,15 @@
   <link rel="stylesheet" href="./app-shell.css?v=3">
   <link rel="stylesheet" href="./ui-refinements.css?v=2">
   <link rel="stylesheet" href="./exercise-layout.css?v=1">
-  <link rel="stylesheet" href="./app-unified.css?v=3">
-  <script src="./football.js?v=31" defer></script>
+  <link rel="stylesheet" href="./app-unified.css?v=4">
+  <script src="./football.js?v=32" defer></script>
   <script src="./training-planner.js?v=5" defer></script>
   <script src="./football-sequence.js?v=3" defer></script>
   <script src="./exercise-brief.js?v=7" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
   <script src="./pitch-setup.js?v=7" defer></script>
   <script src="./interval-timer.js?v=1" defer></script>
-  <script src="./app.js?v=33" defer></script>
+  <script src="./app.js?v=34" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -42,8 +42,8 @@
         <nav class="exercise-toolbar" aria-label="Navigácia tréningu"><button id="exercise-back" class="secondary-button" type="button" aria-label="Späť o krok"><img class="card-ui-icon" src="./assets/bootstrap-icons/arrow-left.svg" alt=""><span>Späť</span></button><a href="#overview" data-view="overview" aria-label="Úvod tréningu"><span>Úvod</span></a><a href="#private" data-view="private">Moje</a></nav>
         <div class="exercise-session-header"><div class="card-session-date"><p id="card-date"></p><p id="card-time"></p></div><div class="card-session-side"><p id="card-total"></p><div class="card-session-stage"><span id="card-index"></span><nav id="block-rail" class="block-rail" aria-label="Vyber časť tréningu"></nav></div></div></div>
         <div class="activity-heading"><div><p id="block-meta" class="eyebrow"></p><h1 id="activity-title"></h1></div><button id="share-block" class="icon-button" type="button" aria-label="Zdieľať túto činnosť" title="Zdieľať túto činnosť"><img class="card-share-icon" src="./assets/bootstrap-icons/share.svg" alt=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m4 0 2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" transform="translate(2 0) scale(.85 1)"/></svg></button></div>
-        <section class="exercise-clock" aria-label="Časovač pri cvičení"><div class="exercise-clock-copy"><span id="exercise-clock-phase">Časovač</span><output id="exercise-clock-value" aria-label="Zostávajúci čas aktuálneho úseku" aria-live="off">00:05</output></div><button id="exercise-clock-toggle" class="button" type="button">Spustiť</button></section>
         <div id="active-diagram"></div>
+        <section class="exercise-clock" aria-label="Časovač pri cvičení"><div class="exercise-clock-copy"><div class="exercise-clock-label"><span id="exercise-clock-phase">Časovač</span><small id="exercise-clock-next"></small></div><output id="exercise-clock-value" aria-label="Zostávajúci čas aktuálneho úseku" aria-live="off">00:05</output></div><button id="exercise-clock-toggle" class="button" type="button">Spustiť</button></section>
         <div class="essentials"><p class="essentials-label">DÁVKA A ODDYCH</p><p id="active-dose"></p></div>
         <p id="active-cue" class="active-cue"></p>
         <div id="detail-buttons" class="detail-buttons" aria-label="Podrobnosti činnosti">

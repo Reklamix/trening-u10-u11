@@ -387,6 +387,9 @@ const PersonalPlans = [
   if(!configCache||typeof configCache!=='object'||Array.isArray(configCache))configCache={};
   let vaultEpoch = 0;
   let lastTimerState = '';
+  let timerVisualKey='';
+  let finishAdvance=null;
+  const finishedClockRuns=new WeakSet();
   function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
   function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { message('Prehliadač nepovolil uloženie. Údaje po zatvorení nemusia zostať.'); return false; } }
   function completed() { const value = state.done[state.selected.id]; return Array.isArray(value) ? value : []; }
@@ -409,7 +412,9 @@ const PersonalPlans = [
     $('timer-value').textContent = value;
     $('timer-preview').textContent = value;
     $('exercise-clock-value').textContent=value;
-    $('exercise-clock-phase').textContent=snapshot.part.name;
+    const phaseKinds={ready:'Príprava',work:'Práca',rest:'Oddych',water:'Voda',setup:'Rozloženie',end:'Hotovo'};
+    $('exercise-clock-phase').textContent=(phaseKinds[snapshot.part.kind]||'Úsek')+' · '+snapshot.part.name;
+    $('exercise-clock-next').textContent=clock.waiting?'Ďalšiu sériu spustíš tlačidlom':snapshot.next?'Potom: '+(phaseKinds[snapshot.next.kind]||snapshot.next.name)+' '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
     $('exercise-clock-phase').title=clock.scope+' · '+snapshot.part.name;
     $('exercise-clock-toggle').textContent=clock.waiting?'Ďalšia séria':clock.deadline!==null&&remaining>0?'Pauza':remaining===0?'Znova':clock.started?'Pokračovať':'Spustiť';
     $('exercise-clock-toggle').setAttribute('aria-label',clock.waiting?'Spustiť ďalšiu sériu':clock.deadline!==null&&remaining>0?'Pozastaviť časovač':remaining===0?'Spustiť cvičenie znova':clock.started?'Pokračovať v časovači':'Spustiť časovač');
@@ -424,6 +429,14 @@ const PersonalPlans = [
     if (status !== lastTimerState) { $('timer-state').textContent = status; lastTimerState = status; }
     $('timer-toggle').textContent = clock.waiting?'Spustiť ďalšiu sériu':clock.deadline !== null && remaining > 0 ? 'Pauza' : remaining === 0 ? 'Spustiť znova' : clock.started ? 'Pokračovať' : 'Spustiť';
     window.TimerAudio?.update(clock);window.TimerAudio?.keepAwake(clock.deadline!==null&&remaining>0);
+    const visualKey=clockKey()+'|'+clock.signature+'|'+snapshot.index;
+    if(clock.started&&clock.signature===clockSignature()&&visualKey!==timerVisualKey){timerVisualKey=visualKey;window.FootballBoard?.followInterval(snapshot.part);}
+    if(!snapshot.finished)finishedClockRuns.delete(clock);
+    if(finishAdvance&&(finishAdvance.clock!==clock||!snapshot.finished||state.view!=='field'||document.hidden)){clearTimeout(finishAdvance.timeout);finishAdvance=null;}
+    if(clock.started&&snapshot.finished&&state.view==='field'&&!document.hidden&&!finishedClockRuns.has(clock)&&!finishAdvance){
+      const key=clockKey();
+      finishAdvance={clock,timeout:setTimeout(()=>{finishAdvance=null;if(currentClock()!==clock||clockKey()!==key||state.view!=='field'||document.hidden||!clock.snapshot().finished)return;finishedClockRuns.add(clock);completeCurrentExercise();},1200)};
+    }
   }
   function attendanceCase() { return state.selected.attendanceCases?.find(x => x.total === state.attendance); }
   function updateSessionMeta() {
@@ -465,10 +478,15 @@ const PersonalPlans = [
     }));
   }
   function renderDiagram() {
+    const inlineClock=document.querySelector('.exercise-clock');
+    $('active-diagram').after(inlineClock);
     window.FootballBoard?.clear();
     $('active-diagram').replaceChildren();
+    timerVisualKey='';
     const block=activeBlock();
     addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
+    const visual=document.querySelector('#active-diagram .exercise-flow > .football-figure');
+    if(visual)visual.after(inlineClock);
     renderGroupCue();
   }
   function renderCardSession(){
@@ -1016,12 +1034,13 @@ const PersonalPlans = [
     state.detail = state.detail === button.dataset.detail ? null : button.dataset.detail; renderDetail();
   }));
   $('previous-block').addEventListener('click', () => navigate('field', Math.max(0, state.blockIndex - 1)));
-  $('complete-block').addEventListener('click', () => {
+  function completeCurrentExercise(){
     currentClock().pause();
     state.done[state.selected.id] = [...new Set([...completed(), activeBlock().id])];
     writeLocal(storageKeys.done, state.done);
     if (state.blockIndex < state.selected.blocks.length - 1) navigate('field', state.blockIndex + 1); else renderActive();
-  });
+  }
+  $('complete-block').addEventListener('click',completeCurrentExercise);
   $('review-training').addEventListener('click', () => navigate('overview'));
   $('reset-progress').addEventListener('click', () => { state.done[state.selected.id] = []; writeLocal(storageKeys.done, state.done); renderProgress(); renderActive(); });
   $('reset-equipment').addEventListener('click', () => { state.gear[state.selected.id] = []; writeLocal(storageKeys.gear, state.gear); syncEquipmentState(); });
