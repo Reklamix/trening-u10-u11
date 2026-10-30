@@ -127,3 +127,17 @@ Verification evidence:
 -Changed-script syntax, validate.mjs and sequences.mjs results and final public captures are recorded in canonical project notes. Live proof: phase-equipment-live.png, phase-preparation-live.png and phase-steps-live.png in the existing visualization folder.
 
 Not exercised: physical phones, OS text scaling/reduced-motion settings, native share sheet and vault decryption; those flows are unchanged. Browser work used hidden DOM APIs, without shared desktop input.
+
+## Focused exercise layout revision — 30 October 2026
+
+User rejected the appearance and explicitly identified exercise/phase layout as the problem. Scope is the exercise only. Equipment, overview, static preparation, library, models, stored data and vault remain unchanged. Current-run baseline exercise-layout-before.png was saved and inspected at390×844: the large overall dosing panel occupied the space needed for the current instruction.
+
+New scoped exercise-layout.css keeps the existing palette/assets but changes hierarchy to group+small total duration, diagram, compact phase choices and one active detail with phase arrows, work/rest/water and the actual cue. Full original dosing, description and ordered rules remain in a closed disclosure. Disclosure state is restored by Back and fullscreen close. Three warm-up phase choices fit across; larger lists scroll horizontally, with all phase navigation also available by existing arrows/keyboard. The current choice follows playback and seeks the same model time when tapped. Desktop places diagram and detail side by side. Fullscreen keeps the arrows and hides normal detail content.
+
+The first broad local UX search returned unrelated typography guidance and was rejected. The narrower Active State navigation result fit the selected-phase control and was applied. Other layout decisions are grounded in the captured screen and actual viewport checks.
+
+UI evidence at375×812: initial cue bottom616px versus footer top676px; all six exercises retain their cue above the footer (other blocks616/638/626/648/595px). At390, diagram/three choices/current instruction share the first view. A first revision overflowed by6px; spacing was tightened without shrinking touch targets.320×568 retained the full-width completion button at bottom558px and no horizontal overflow.1440×900: diagram387px wide beside359px detail, both start at198px; diagram360px high.844×390: Postup places summary12px from top and completion bottom380px.
+
+Interactions checked: phase next/previous with playback state; selecting phase3 shows its actual passing diagram and work/rest/water; full dosing expands with all original steps; selecting rest then Back restores the open disclosure; running training timer stayed Beží while animation next remained playing, then paused/reset10:00. Fullscreen content width357/357px, arrows remain44px high; fullscreen Postup closes it and focuses main summary. Seven-choice zones scroll to last choice and retain90s work/30s rest; end and previous recover correctly. Inline A1 skill change rebuilt the new detail. Application console errors/warnings zero.
+
+Final syntax/regression/diff and public version verification are in canonical notes. Live screenshot exercise-layout-live.png is in the existing visualization evidence folder. No physical-device, OS text-scaling/reduced-motion, native sharing or vault decryption test; those systems are unchanged. Hidden DOM-only browser testing used no shared desktop input.
