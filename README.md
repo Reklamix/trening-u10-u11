@@ -4,6 +4,16 @@ Mobilný tréningový plánovač: najprv zhrnutie zamerania, podmienok a pomôco
 
 Web: https://reklamix.github.io/trening-u10-u11/
 
+## Aktuálny dizajn cvičenia — 31. 10. 2026
+
+Schválený hybrid používa `exercise-hybrid.css?v=1`, `app.js?v=35` a `football.js?v=33`. V adaptívnych cvičeniach je hore názov/podmienky a výber fázy so šípkami, potom štvorcový rám nákresu, veľký skutočný časovač, karty fáz a krátky pokyn. Na mobile sú stále poruke Postup, Pomôcky, Nastaviť a Hotovo → ďalej. Na počítači sú časovač a pokyn spolu vedľa nákresu. Menšie displeje môžu posúvať obsah; spodné ovládanie zostáva dostupné.
+
+Rám je 1 : 1; pracovné ihrisko v ňom zachováva skutočné proporcie, hráčov, kužele aj pôvodné dráhy. Používajú sa pôvodné trávnikové a hráčske assety, nie statická snímka animácie. Horný výber aj spodné karty ovládajú rovnakú fázu. Šípky stále postupujú po jednej skutočnej fáze vrátane práce/oddychu; výber v zozname ide na začiatok zvolenej skupiny fáz.
+
+Klepnutie na odpočet otvorí podrobný časovač, reset, dávkovanie a zvuk. Menu ⋯ obsahuje Späť o krok, Úvod tréningu, zdieľanie, výber cvičenia, časovač/zvuk, pokyny trénera a Moje. Postup otvorí pôvodný popis, krokovanie, všetky kroky a úplný rozpis s prácou/oddychom/opakovaniami. Nastaviť zachováva skupiny, náročnosť, počty, plochu, mapu a všetky možnosti prehrávania.
+
+Modely a tréningové dáta, šifrované plány, dávky, manuálne ďalšie série a automatický prechod po celom cvičení sa nemenia. Úvod, príprava, knižnica a archív používajú existujúce rozhranie. Adresa a parametre odkazov zostávajú pôvodné. Kontroly: `node tests/validate.mjs`, `node tests/sequences.mjs`, `node tests/interval-timer.mjs`, `node tests/phase-clock.mjs`.
+
 ## Jednotná Trénerova karta
 
 Adaptívny štvrtkový tréning podporuje **10–30 hráčov**, štyri skupiny po **2–8**. Pri10 sú skupiny3+3+2+2. Dvojica namiesto ronda prihráva bez obrancu (2×60s práce/60s oddychu +30s do série4:30); v koncových zónach hrá1v1 šesťkrát60/60s a v minihre štyri úseky2min hry/2min oddychu. Nákresy, animácie, pomôcky aj návody zobrazujú iba skutočných hráčov. Varianty3–8 a uložené staršie tréningy zostávajú zachované.
@@ -28,8 +38,8 @@ Aktuálny dizajn adaptívnych štvrtkových cvičení vychádza z používateľo
 - **Fázy cvičenia** sú pod nákresom a časmi. Klikateľné karty ukazujú prácu, oddych a vodu; aktuálna fáza je jemne zvýraznená a má príslušný pokyn. Celý postup a pravidlá sú v rozbalení; pôvodný bodový sprievodca zostáva v menu.
 - Karty **Práca/Oddych** ukazujú krátku dávku a otvoria úplný rozpis vrátane vody a zostávajúcich prestávok. Rondo zobrazuje skutočnú prácu/oddych v jednom kole, nie čas celej série. V Čas zostáva samostatné Striedanie a nezávislý tréningový časovač.
 - Riadok **Plocha/Deti/Pomôcky** číta lokálnu skupinu: fyzické rozmery, počet zo všetkých detí a presné lokálne kužele/lopty. Hodnoty sa aktualizujú po úprave podmienok.
-- Spodné tlačidlá **Nákres/Postup/Časovač/Nastaviť/Pomôcky** a plné **Hotovo** zostávajú dostupné na dosah palca. Každý detail má návrat na Nákres.
-- Menu **⋯ pri názve** obsahuje Nákres, Popis a postup, Pokyny trénera, Nastavenia tréningu, Predošlý cvik a Moje. Zmena skupiny/náročnosti/počtov/ihriska je naďalej priamo pri cvičení: skupinový odznak alebo menu → Nastavenia tréningu. Schéma a nastavenia obsahuje pôvodné pokročilé prehrávanie. Celý Prehľad s počtom trénerov je cez hornú šípku.
+- Spodné tlačidlá **Postup/Pomôcky/Nastaviť** a plné **Hotovo** zostávajú dostupné na dosah palca. V detaile sa prvé tlačidlo zmení na Nákres. Podrobný časovač otvorí klepnutie na odpočet alebo menu.
+- Menu **⋯ pri názve** obsahuje Nákres, Popis a postup, Pokyny trénera, Nastavenia tréningu, Predošlý cvik a Moje. Zmena skupiny/náročnosti/počtov/ihriska je naďalej priamo pri cvičení: skupinový odznak alebo menu → Nastavenia tréningu. Schéma a nastavenia obsahuje pôvodné pokročilé prehrávanie. Celý Prehľad s počtom trénerov je cez menu ⋯ → Úvod tréningu.
 
 Štandardný viewport390×844 zodpovedá vybranému obrázku;375×812 používa o trochu nižší nákres. Malé displeje/dlhé názvy posúvajú iba obsah, spodné ovládanie zostáva. Nízke okno≤520px umožní posúvať stránku. Zmena počtu, skupiny, náročnosti a priestoru synchronizuje nákres, animáciu, text, dávky, pomôcky, mapu aj prípravu; nenuluje nezávislý bežiaci časovač. Nový cvik má stojaci nákres a predvolené prehrávanie. Ostatné stránky, archív, PDF a šifrované plány nemenia svoj dizajn ani obsah.
 
@@ -184,6 +194,6 @@ Schémy sú ilustračné; dávky a plné počty sú v texte a tabuľkách. Pôvo
 
 ## Časovač priamo pri cvičení
 
-`app.js?v=34`, `football.js?v=32` a `app-unified.css?v=4` zobrazujú kompaktný časovač priamo pod animáciou. Ukazuje zostávajúci čas aktuálneho meraného úseku, jeho názov a Spustiť/Pauza/Pokračovať/Ďalšia séria. Používa rovnaký IntervalClock aj zvuky ako podrobný panel Časovač; meranie sa nezdvojuje a ručný výber animačnej fázy ho nepretáča. Pri prechode skutočného merania na novú fázu sa ukáže jej nákres; časovač označí Prácu/Oddych/Vodu a nasledujúci úsek. Podrobnosti, reset, dávkovanie a zvukové možnosti zostávajú v existujúcom paneli. Každú ďalšiu sériu naďalej spúšťa tréner.
+`app.js?v=35`, `football.js?v=33`, `app-unified.css?v=4` a `exercise-hybrid.css?v=1` zobrazujú kompaktný časovač priamo pod animáciou. Ukazuje zostávajúci čas aktuálneho meraného úseku, jeho názov a Spustiť/Pauza/Pokračovať/Ďalšia séria. Používa rovnaký IntervalClock aj zvuky ako podrobný panel Časovač; meranie sa nezdvojuje a ručný výber animačnej fázy ho nepretáča. Pri prechode skutočného merania na novú fázu sa ukáže jej nákres; časovač označí Prácu/Oddych/Vodu a nasledujúci úsek. Podrobnosti, reset, dávkovanie a zvukové možnosti zostávajú v existujúcom paneli. Každú ďalšiu sériu naďalej spúšťa tréner.
 
 Po úplnom skončení cvičenia a dohraní záverečného signálu (1,2 s) sa označí dokončenie a otvorí ďalší cvik. Jeho časovač zostáva pripravený na ručný štart. Ďalšie série rovnakého cvičenia sa naďalej spúšťajú tlačidlom. Posledné cvičenie zobrazí dokončený tréning. Automatický prechod platí iba pri otvorenom cvičení a viditeľnej stránke; reset/odchod zruší čakajúci prechod.

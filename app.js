@@ -486,7 +486,7 @@ const PersonalPlans = [
     const block=activeBlock();
     addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
     const visual=document.querySelector('#active-diagram .exercise-flow > .football-figure');
-    if(visual)visual.after(inlineClock);
+    if(visual){const details=document.querySelector('#active-diagram .hybrid-details');if(details)details.prepend(inlineClock);else visual.after(inlineClock);}
     renderGroupCue();
   }
   function renderCardSession(){
@@ -496,6 +496,7 @@ const PersonalPlans = [
     $('card-time').textContent=timeRange(state.selected,activeBlock().start,activeBlock().end);
     const people=el('img','card-ui-icon');people.src='./assets/bootstrap-icons/people-fill.svg';people.alt='';$('card-total').replaceChildren(el('span','','U11'),people,el('span','',String(state.selected.planConfig.players)));
     $('card-index').textContent=`${state.blockIndex+1}/${state.selected.blocks.length}`;
+    $('hybrid-meta').textContent=`U11 · ${state.selected.planConfig.players} detí · ${activeBlock().end-activeBlock().start} min`;
   }
   function renderGroupCue(){renderCardSession();const index=window.FootballBoard?.selection()?.index||0,variant=TrainingPlanner.forGroup(state.selected,activeBlock(),index);$('active-cue').textContent='„'+variant.cues[0]+'“';}
   function renderActive() {
@@ -1054,6 +1055,7 @@ const PersonalPlans = [
   }
   $('timer-toggle').addEventListener('click',toggleExerciseClock);
   $('exercise-clock-toggle').addEventListener('click',toggleExerciseClock);
+  $('exercise-clock-details').addEventListener('click',()=>{if(state.selected.planConfig)window.FootballBoard?.showTimer();else $('timer-panel').open=true;});
   $('timer-reset').addEventListener('click',()=>{currentClock().reset();window.TimerAudio.cancel();updateTimer();});
   $('timer-sound').addEventListener('change',async()=>{window.TimerAudio.setEnabled($('timer-sound').checked);const ready=$('timer-sound').checked?await window.TimerAudio.unlock():false;$('timer-audio-status').textContent=$('timer-sound').checked?(ready?'Zvuk je aktívny.':'Zvuk aktivuješ tlačidlom Spustiť.'):'Zvuk je vypnutý.';updateTimer();});
   $('timer-test').addEventListener('click',async()=>{$('timer-sound').checked=true;window.TimerAudio.setEnabled(true);$('timer-audio-status').textContent=await window.TimerAudio.test()?'Testovací tón prehratý. Zvuk je aktívny.':'Zvuk nie je dostupný v tomto prehliadači.';});

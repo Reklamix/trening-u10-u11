@@ -1,0 +1,98 @@
+/* Selected hybrid design, 31 October: scoped to the adaptive exercise screen. */
+.hybrid-meta {display:none}
+.exercise-focus:has(.hybrid-board) {max-width:1060px;padding:12px 16px calc(136px + env(safe-area-inset-bottom));height:100dvh}
+.exercise-focus:has(.hybrid-board) #field-view {max-width:960px}
+.exercise-focus:has(.hybrid-board) .exercise-toolbar,
+.exercise-focus:has(.hybrid-board) .exercise-session-header,
+.exercise-focus:has(.hybrid-board) #share-block {display:none}
+.exercise-focus:has(.hybrid-board) .activity-heading {min-height:58px;margin:0 0 8px;padding-right:48px;align-items:flex-start}
+.exercise-focus:has(.hybrid-board) .activity-heading h1 {font-size:27px;line-height:1.14;letter-spacing:-.65px;font-weight:800;margin:0 0 5px}
+.exercise-focus:has(.hybrid-board) .hybrid-meta {display:block;font-size:14px;line-height:1.4;color:#5d756d;margin:0}
+.exercise-focus:has(.hybrid-board) .exercise-card-menu>summary {width:44px;min-height:44px;border-radius:10px;background:#fff}
+.exercise-focus .hybrid-board {scrollbar-gutter:auto;scrollbar-width:none;overflow-anchor:none}
+.exercise-focus .hybrid-board::-webkit-scrollbar {display:none}
+.hybrid-board>.exercise-phase-bar {display:flex;flex:none;align-items:center;gap:7px;margin:0 0 8px;padding:0;min-height:44px;border:0;background:none}
+.hybrid-board>.exercise-phase-bar>button {width:44px;min-width:44px;height:44px;min-height:44px;padding:10px;border:0;border-radius:9px;background:#e8f0e0;box-shadow:none}
+.hybrid-board>.exercise-phase-bar .card-ui-icon {width:24px;height:24px}
+.hybrid-board .phase-button-label {display:none}
+.hybrid-phase-center {flex:1;min-width:0}
+.hybrid-phase-center>.exercise-phase-label {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.hybrid-phase-select {width:100%;min-width:0;min-height:44px;margin:0;padding:8px 24px 8px 10px;border:0;border-radius:9px;font:inherit;font-size:16px;font-weight:700;line-height:1.3;text-align:center;text-overflow:ellipsis;color:#143e35;background-color:#edf3e8;cursor:pointer}
+.exercise-focus .hybrid-board>.football-figure {position:relative;width:100%;height:auto;aspect-ratio:1;min-height:0;max-height:none;flex:0 0 auto;margin:0 0 8px;border-radius:13px}
+.exercise-focus .hybrid-board>.football-figure>svg {position:absolute;inset:0;display:block;width:100%;height:100%;max-height:none;padding:32px 5px 45px;box-sizing:border-box}
+.exercise-focus .hybrid-board .card-group-bar {position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:7px;max-width:calc(100% - 20px);min-height:32px;margin:0;padding:0 9px 0 0;border:1px solid #e4f0db99;border-radius:10px;background:#163f31b8;color:#fff;font-size:12px}
+.exercise-focus .hybrid-board .card-group-button {min-width:36px;min-height:32px;margin:0;padding:5px 9px;border:0;border-radius:9px;background:#e5f1d9;color:#174635;font-size:14px;font-weight:750}
+.hybrid-board .card-group-bar .exercise-duration-badge {display:none}
+.exercise-focus .hybrid-board>.football-figure>.football-controls {left:50%;right:auto;bottom:10px;transform:translateX(-50%);white-space:nowrap}
+.exercise-focus .hybrid-board>.football-figure .football-controls .button {min-height:44px;margin:0;padding:9px 15px;border-radius:11px;font-size:14px;box-shadow:none}
+.exercise-focus .hybrid-board .exercise-clock {display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,.9fr);align-items:center;gap:12px;width:100%;min-height:84px;margin:0 0 8px;padding:4px 3px;border:0;border-radius:0;background:transparent}
+.exercise-focus .hybrid-board #exercise-clock-details {display:grid;grid-template-columns:minmax(0,1fr);gap:1px;min-width:0;min-height:0;width:100%;margin:0;padding:0;border:0;border-radius:4px;background:transparent;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.exercise-focus .hybrid-board .exercise-clock-label {display:contents}
+.exercise-focus .hybrid-board #exercise-clock-phase {order:1;display:block;min-height:16px;margin:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:11px;line-height:1.4;text-transform:uppercase;font-weight:650;color:#60716a}
+.exercise-focus .hybrid-board #exercise-clock-value {order:2;font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-1.5px;color:#123c34}
+.exercise-focus .hybrid-board #exercise-clock-next {order:3;min-height:15px;margin:0;font-size:11px;line-height:1.35;color:#627b70}
+.exercise-focus .hybrid-board #exercise-clock-toggle {width:100%;min-height:56px;margin:0;padding:9px 10px;border-radius:10px;font-size:17px;line-height:1.2;font-weight:700;background:#12614e}
+.exercise-focus .hybrid-board .exercise-summary {grid-row:auto;margin:0;padding:0}
+.hybrid-board .phase-choice-nav {gap:7px;padding:0;margin:0 0 8px}
+.hybrid-board .phase-choice {min-height:48px;border-radius:10px;padding:6px 5px;box-shadow:none}
+.hybrid-board .phase-choice-number {width:23px;height:23px;border-radius:50%}
+.hybrid-board .phase-choice-copy strong {font-size:11.5px}
+.hybrid-board .phase-choice-copy small {font-size:11px}
+.hybrid-board .phase-detail {padding:0;margin:0;border:0;border-radius:0;background:none;min-height:0!important}
+.hybrid-board .phase-current-doses,.hybrid-board .phase-current-status {display:none}
+.hybrid-cue {display:flex;align-items:center;gap:10px;min-height:54px;padding:8px 10px;border:1px solid #e0e7dd;border-radius:11px;background:#ffffffd9}
+.hybrid-cue>.hybrid-cue-icon {width:34px;height:32px;flex:none;object-fit:contain;padding-right:10px;border-right:1px solid #dbe4d6}
+.hybrid-board .phase-current-cue {display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0;font-size:13px;line-height:1.45;color:#536d62}
+.hybrid-board .exercise-full-plan {margin-top:12px}
+.exercise-focus .hybrid-board .exercise-topic-nav {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:calc(100% - 32px);max-width:960px;padding:0;border:0;border-radius:0;box-shadow:none;background:transparent;bottom:calc(76px + env(safe-area-inset-bottom))}
+.exercise-focus .hybrid-board .exercise-topic-nav button {display:flex;flex-direction:row;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:48px;padding:8px 4px;border:1px solid #dce5d7;border-radius:10px;background:#fff;color:#184b3e;font-size:13px;font-weight:600;box-shadow:none}
+.exercise-focus .hybrid-board .exercise-topic-nav button[data-topic=diagram],.exercise-focus .hybrid-board .exercise-topic-nav button[data-topic=time] {display:none}
+.exercise-focus .hybrid-board .exercise-topic-nav button[data-topic=steps] {display:flex;order:1}
+.exercise-focus .hybrid-board .exercise-topic-nav button[data-topic=kit] {order:2}
+.exercise-focus .hybrid-board .exercise-topic-nav button[data-topic=space] {order:3}
+.hybrid-board .exercise-topic-nav .card-ui-icon {width:22px;height:22px;flex:none}
+.exercise-focus:has(.hybrid-board) .step-actions {width:calc(100% - 32px);max-width:960px;bottom:calc(12px + env(safe-area-inset-bottom))}
+.exercise-focus:has(.hybrid-board) #complete-block {min-height:52px;border-radius:11px;font-size:18px}
+.hybrid-board[data-instructions=true]>.exercise-phase-bar,.hybrid-board:not([data-topic=steps])>.exercise-phase-bar {display:none}
+.exercise-focus .hybrid-board:not([data-topic=steps]) .exercise-clock,.exercise-focus .hybrid-board[data-instructions=true] .exercise-clock {display:none}
+@media(min-width:900px) and (min-height:651px) {
+ .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false] {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);gap:14px;align-content:start}
+ .exercise-focus .hybrid-board>.exercise-phase-bar {grid-column:1;grid-row:1;margin:0}
+ .exercise-focus .hybrid-board>.football-figure {grid-column:1;grid-row:2;margin:0}
+ .exercise-focus .hybrid-board .exercise-clock {align-self:stretch;margin:0}
+ .exercise-focus .hybrid-board .exercise-summary {margin:0}
+ .exercise-focus .hybrid-board .phase-choice-copy strong {font-size:13px}
+ .exercise-focus .hybrid-board .phase-current-cue {font-size:15px}
+}
+@media(max-width:360px) {
+ .exercise-focus:has(.hybrid-board) {padding-left:12px;padding-right:12px}
+ .exercise-focus:has(.hybrid-board) .activity-heading h1 {font-size:21px}
+ .exercise-focus .hybrid-board .exercise-topic-nav,.exercise-focus:has(.hybrid-board) .step-actions {width:calc(100% - 24px)}
+ .hybrid-phase-select {font-size:16px;padding-inline:5px}
+ .exercise-focus .hybrid-board #exercise-clock-value {font-size:36px}
+ .exercise-focus .hybrid-board #exercise-clock-toggle {font-size:14px}
+ .hybrid-board .phase-choice-copy strong {font-size:10.5px}
+ .hybrid-board .phase-choice-number {width:19px;height:21px}
+ .exercise-focus .hybrid-board .exercise-topic-nav button {font-size:12px;gap:5px}
+}
+@media(max-height:520px) {
+ .exercise-focus:has(.hybrid-board) {height:auto;min-height:100dvh;overflow:visible}
+ .exercise-focus:has(.hybrid-board)>#training,.exercise-focus:has(.hybrid-board) #field-view {height:auto}
+ .exercise-focus .hybrid-board>.football-figure {max-width:390px;align-self:center}
+ .exercise-focus .hybrid-board {overflow:visible}
+}
+
+#exercise-clock-details {font:inherit;color:inherit;border:0;background:transparent;padding:0;margin:0;text-align:left;min-height:0}
+.hybrid-board .exercise-topic-nav img {color:#174e3e}
+.football-focus .hybrid-board>.football-figure {position:relative;width:100%;height:auto;aspect-ratio:1;max-height:none;margin-bottom:10px;overflow:hidden}
+.football-focus .hybrid-board>.football-figure>svg {width:100%;height:100%;padding:32px 5px 45px;box-sizing:border-box}
+.football-focus .hybrid-board .card-group-bar {display:none}
+.football-focus .hybrid-board>.exercise-phase-bar {display:flex;gap:7px}
+.football-focus .hybrid-board .phase-choice-nav,.football-focus .hybrid-board .hybrid-cue {display:none}
+
+.hybrid-board[data-instructions=true] .exercise-full-plan .card-glance {display:block}
+
+.hybrid-details {display:contents}
+@media(min-width:900px) and (min-height:651px) {
+ .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.hybrid-details {display:flex;flex-direction:column;gap:14px;grid-column:2;grid-row:1 / span 2;align-self:start}
+}

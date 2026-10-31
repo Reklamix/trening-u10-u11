@@ -194,3 +194,36 @@ Final syntax/regression and publication evidence are in canonical notes. Public 
 - New deterministic phase-clock test uses a shared fake Date in the interval and UI scopes: work→rest, manual waiting does not consume time, five-second ready, shared full/inline values, exact interval→scene mapping, one final navigation, manual next clock and last exercise completion. First test used different VM clocks; corrected the test adapter, with production model unchanged.
 - UI375×812: Start after preview3 returns to actual phase1/work; pause01:45, selectedphase1, timer directly below diagram. Next exercise shows one clock and00:05/Start. 320×568: diagram170high, clock281×76/top292, button44high, CTA558; no overflow. 1440×900: figure379.55×360/bottom558, clock samewidth/top572; detail alongside. Console0.
 - Syntax2/validate65898/interval3591/phase-clock/diff PASS. Physical mobile audio not run; browser DOM/viewport and deterministic signal checks only. Live screenshot: phase-clock-live.png in session visualization folder.
+
+## Approved hybrid implementation — 31 October 2026
+
+**Source visual truth:** `../output/design/redesign-31-10-hybrid-proposal.png` (853×1844), explicitly approved with all existing animations/settings/timer and the same public URL. Supplied top/bottom crops retained alongside it. Scope: adaptive exercise screen only; other completed screens preserved.
+
+**Implementation evidence:** session visualization folder, `hybrid-local-final.png` (390×844 raw browser screenshot), `hybrid-comparison-final.png` (source and implementation in one input), `hybrid-header-compare.png`, `hybrid-controls-compare.png`, `hybrid-desktop-final.png`. Source downsampled proportionally to390×843, padded one pixel for390×844 comparison; no source or raw screenshot altered. Full and control-region comparisons were opened together. State:24 children, warm-up, phase2 preview; real clock ready00:05. The source uses illustrative work01:45/rest00:30. Production keeps the approved real schedule and manual start rather than fabricating those values.
+
+**Comparison history / fixes**
+- P2 pass1: title and marker labels too small. Title23→27px, metadata14px, focused player labels11px / marker radius12 (dense10). Existing physical positions/tracks unchanged. Updated raw captures and full-view comparison inspected after fixes.
+- P2 desktop: excessive empty gap between timer and cue. Grouped clock+summary into a responsive side container; final clock78–163, summary177–294.5 beside a492.7×492.7 diagram. No fixed-height gap. Mobile side container uses display:contents to preserve source order.
+- P2 relocation: full dosing block inherited hidden state after moving under Postup. Explicitly keep it available inside closed full-plan details; UI verified active8min,2×30s rest,+1min water,3×60s, and full10min total.
+- Final comparisons have no outstanding P0/P1/P2.
+
+**Required fidelity surfaces**
+- Typography: existing self-hosted Inter, strong title/timer hierarchy, native phase select16px, readable short cue, consistent three utility buttons. Real long titles wrap; no text overlaps.
+- Spacing/layout: true358×358 square at390;343×343 at375;296×296 at320; square348×348 fullscreen. Timer directly below on mobile; phases/cue/three utilities/CTA in source order. Selected warm-up cue bottom686.7 < dock688 at375. Long-title/small-height views scroll content while preserving the dock.
+- Colors/tokens: retained ivory, forest-green CTA, sage phase state, blue players/orange cones. Existing grass WebP retained as required; no generated screenshot flattened over functional content.
+- Image quality: original grass/cone/disc/ball sprites reused. Football geometry remains the live existing SVG model so actual21:14 proportions and motion paths are preserved, unlike the illustrative screenshot positions. Standard Bootstrap list-ul icon added from officialv1.13.2 source (MIT); kit uses cone-striped. Decorative cue uses the existing football sprite instead of the mock boot: acceptable P3 asset choice. No device chrome or placeholder artwork.
+- Copy/content: real category/attendance/duration/phase/doses replace illustrative values. All details remain reachable. A discreet⋯ menu preserves Back/Home/share/coach/private/clock functions omitted by the crop.
+
+**Browser interactions / regressions**
+- Phase select and lower cards synchronized; phase select activation diagram y131,width358,scroll0 before/after. Previous phase and menu Back return one actual step.
+- Inline Start5s→work01:52/Pause; full and inline clocks share values. Audio Test activated. Animation actors move while real timer paused. Preview pause/previous phase work independently.
+- Postup step2/full rules, utility return, kit24+4balls/8cones; levelA1base→standard; speed0.5/loopOFF→fullscreen→restore1/loopON; all advanced count/pitch/map controls remain available.
+- All six blocks checked at375: one clock each, square343px,3/2/3/7/5/2 phase choices, no horizontal overflow, CTA800<812. Final completion shows finished training. Menu Home opens unchanged overview/checklist.
+- 30children: displayed zoneA16, actual16players, metadata30; grouped8+8+7+7. 320×568: button/dock reachable, CTA556<568. 1440×900: square492.7px, grouped right controls;844×390: square390px, page scroll retained, CTA378<390.
+- Archived Tuesday19 retains original whole-block timer and layout; no adaptive styling leaked. Console warnings/errors0.
+
+**Verification:** syntax app.js/football.js, validate65899, sequences55224, interval3591, phase-clock and git diff-check PASS. Model/dose/JSON/private ciphertext files unchanged. No physical mobile, OS text-size/silent-mode/lock-screen or private decryption tests; existing deterministic audio/timing checks passed.
+
+**Follow-up polish:** optional decorative boot icon. No blocker.
+
+**final result: passed**
