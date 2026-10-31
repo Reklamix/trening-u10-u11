@@ -1,0 +1,91 @@
+/* Overview polish only. Exercise, preparation and archived content keep their styles. */
+body:has(#main[data-view=overview]) .site-header {background:#f5f7f0;border-bottom:0}
+body:has(#main[data-view=overview]) .header-button {min-height:44px;border:1px solid #dce5d7;border-radius:11px;background:#fff;box-shadow:none}
+#main[data-view=overview] {padding-top:12px}
+#main[data-view=overview] .session-picker {gap:12px;align-items:end;margin-bottom:14px}
+#main[data-view=overview] .session-picker label {font-size:11px;font-weight:650;letter-spacing:.25px;color:#62776b;margin-bottom:5px}
+#main[data-view=overview] .session-picker select {min-height:48px;padding:10px 28px 10px 12px;border:1px solid #d9e3d2;border-radius:12px;background-color:#fff;color:#214f40;font-size:16px;font-weight:650;box-shadow:none}
+#main[data-view=overview] .attendance-picker {flex:0 0 88px}
+#main[data-view=overview] .overview-hero {margin:0 0 12px;padding:17px 16px 12px;border:0;border-radius:18px;background:#123f35;color:#fff;box-shadow:none}
+#main[data-view=overview] .overview-hero>.eyebrow {display:block;margin:0 0 8px;color:#bfd5bd;font-size:10px;line-height:1.3;font-weight:650;letter-spacing:1px;text-transform:uppercase}
+#main[data-view=overview] .overview-hero h1 {font-size:26px;font-weight:800;line-height:1.13;letter-spacing:-.6px;margin:0 0 8px;color:#fff;text-wrap:balance}
+#main[data-view=overview] .overview-hero .active-cue {margin:0 0 14px;color:#e0ebd9;font-size:13px;line-height:1.5;font-weight:400}
+#main[data-view=overview] .overview-hero .summary-facts {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;min-height:60px;margin:0;padding:8px 0 0;border:0;border-top:1px solid #ffffff30;border-radius:0;background:transparent}
+#main[data-view=overview] .summary-facts>button {display:flex;align-items:center;justify-content:center;min-width:0;min-height:52px;padding:5px 3px;border:0;border-radius:9px;background:transparent;color:#fff;box-shadow:none}
+#main[data-view=overview] .summary-facts>button+button {border-left:1px solid #ffffff25}
+#main[data-view=overview] .summary-facts>button img {display:none}
+#main[data-view=overview] .summary-facts>button small {font-size:10px;line-height:1.4;color:#bfd3c1;font-weight:400}
+#main[data-view=overview] .summary-facts>button strong {font-size:16px;line-height:1.45;color:#fff;font-weight:750;white-space:normal}
+#main[data-view=overview] .summary-facts>button:hover,#main[data-view=overview] .summary-facts>button[aria-expanded=true] {background:#ffffff12}
+#main[data-view=overview] .summary-facts>button:focus-visible {outline:2px solid #e2edcd;outline-offset:2px}
+#main[data-view=overview] .summary-journey {display:grid;grid-template-columns:1fr 1.08fr;gap:8px;margin:0 0 20px}
+#main[data-view=overview] .summary-journey button {min-height:52px;padding:9px 7px;border-radius:12px;box-shadow:none;font-size:12px;line-height:1.4;font-weight:700}
+#main[data-view=overview] #summary-setup {border:1px solid #ceddc5;background:#eaf1e1;color:#255541}
+#main[data-view=overview] #summary-start {border:1px solid #14614e;background:#14614e;color:#fff}
+#main[data-view=overview] #summary-setup:hover {background:#e0ebd4}
+#main[data-view=overview] #summary-start:hover {background:#0e503f}
+#main[data-view=overview] .summary-kit {margin-bottom:18px}
+#main[data-view=overview] .summary-kit .section-heading {align-items:center;gap:8px;margin-bottom:11px}
+#main[data-view=overview] .summary-kit .section-heading h2 {margin:0;font-size:16px;font-weight:750;letter-spacing:-.25px;color:#224d3c;line-height:1.3}
+#main[data-view=overview] #summary-equipment-progress {display:inline-block;margin:5px 0 0;padding:3px 7px;border-radius:6px;background:#e8efdf;color:#4b6b53;font-size:10px;line-height:1.4;font-weight:650}
+#main[data-view=overview] #show-equipment {min-height:44px;margin:0;padding:6px 0 6px 6px;flex:none;font-size:11px;font-weight:650;color:#3e6550}
+#main[data-view=overview] .summary-gear-grid {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:1fr;gap:8px}
+#main[data-view=overview] .summary-gear {grid-column:span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:108px;margin:0;padding:9px 6px;border:1px solid #dce5d7;border-radius:14px;background:#fff;box-shadow:none;gap:6px;position:relative;transition:background-color .12s,border-color .12s}
+#main[data-view=overview] .summary-gear-grid:has(>button:nth-child(5):last-child)>button:nth-child(4) {grid-column:2 / span 2}
+#main[data-view=overview] .summary-gear-grid:has(>button:nth-child(5):last-child)>button:nth-child(5) {grid-column:4 / span 2}
+#main[data-view=overview] .summary-gear .shell-kit-image {width:32px;height:32px;flex:none;object-fit:contain}
+#main[data-view=overview] .summary-gear>span {min-width:0;width:100%}
+#main[data-view=overview] .summary-gear strong {display:block;color:#31523f;font-size:11.5px;line-height:1.3;font-weight:650;overflow-wrap:normal;word-break:normal}
+#main[data-view=overview] .summary-gear small {display:block;margin-top:2px;color:#173f32;font-size:14px;line-height:1.35;font-weight:750;white-space:normal}
+#main[data-view=overview] .summary-gear .summary-gear-status {margin-top:4px;padding-top:0;color:#627259;font-size:10px;line-height:1.3;font-weight:400}
+#main[data-view=overview] .summary-gear:hover {border-color:#a3bb91;background:#f8faf5}
+#main[data-view=overview] .summary-gear[aria-pressed=true] {border-color:#527d42;background:#e7f0dd;box-shadow:inset 0 0 0 1px #527d42}
+#main[data-view=overview] .summary-gear[aria-pressed=true] .summary-gear-status {color:#285b31;font-weight:750}
+#main[data-view=overview] .summary-gear:focus-visible {outline:2px solid #24654b;outline-offset:3px}
+.overview-tools-title {display:none}
+#main[data-view=overview] .overview-tools>.shell-disclosure {margin-bottom:8px;border:1px solid #dce5d7;border-radius:13px;background:#fff;box-shadow:none}
+#main[data-view=overview] .overview-tools>.shell-disclosure>summary {min-height:52px;padding:12px;font-size:13px;font-weight:650;color:#2d5644}
+#main[data-view=overview] .overview-tools>.shell-disclosure>summary img {width:22px;height:22px;flex:none}
+#main[data-view=overview] .overview-tools>.shell-disclosure[open] {border-color:#a9bf9b}
+@media(min-width:860px) {
+ #main[data-view=overview] {padding-top:20px}
+ #main[data-view=overview] .overview-grid {grid-template-columns:minmax(0,1.5fr) minmax(285px,1fr);gap:24px;align-items:start}
+ #main[data-view=overview] .overview-hero {padding:24px 24px 17px;border-radius:20px}
+ #main[data-view=overview] .overview-hero h1 {font-size:32px;line-height:1.13;max-width:500px}
+ #main[data-view=overview] .overview-hero>.eyebrow {font-size:11px}
+ #main[data-view=overview] .overview-hero .active-cue {font-size:15px}
+ #main[data-view=overview] .summary-facts>button small {font-size:11px}
+ #main[data-view=overview] .summary-facts>button strong {font-size:20px}
+ #main[data-view=overview] .summary-journey button {font-size:15px;min-height:56px}
+ #main[data-view=overview] .summary-gear-grid {grid-template-columns:repeat(5,minmax(0,1fr))}
+ #main[data-view=overview] .summary-gear,#main[data-view=overview] .summary-gear-grid:has(>button:nth-child(5):last-child)>button:nth-child(n) {grid-column:auto}
+ #main[data-view=overview] .summary-gear {min-height:122px;padding:12px 6px}
+ #main[data-view=overview] .summary-kit .section-heading h2 {font-size:18px}
+ #main[data-view=overview] .overview-tools-title {display:block;margin:0 0 12px;font-size:17px;line-height:1.4;color:#31523f;font-weight:750}
+ #main[data-view=overview] .overview-tools>.shell-disclosure>summary {min-height:58px;font-size:14px;padding:14px}
+}
+@media(max-width:360px) {
+ #main[data-view=overview] .session-picker {gap:8px}
+ #main[data-view=overview] .attendance-picker {flex-basis:76px}
+ #main[data-view=overview] .session-picker select {font-size:16px;padding-left:9px}
+ #main[data-view=overview] .overview-hero {padding:15px 12px 10px;border-radius:15px}
+ #main[data-view=overview] .overview-hero h1 {font-size:23px}
+ #main[data-view=overview] .overview-hero .active-cue {font-size:12px}
+ #main[data-view=overview] .summary-facts>button strong {font-size:14px}
+ #main[data-view=overview] .summary-journey button {font-size:11px;min-height:50px;padding-inline:4px}
+ #main[data-view=overview] .summary-kit .section-heading h2 {font-size:14px}
+ #main[data-view=overview] #show-equipment {font-size:10px}
+ #main[data-view=overview] .summary-gear-grid {gap:6px}
+ #main[data-view=overview] .summary-gear {padding:8px 4px;min-height:104px}
+ #main[data-view=overview] .summary-gear .shell-kit-image {width:28px;height:28px}
+ #main[data-view=overview] .summary-gear strong {font-size:10.5px}
+ #main[data-view=overview] .summary-gear small {font-size:12px}
+}
+@media(prefers-reduced-motion:reduce) {
+ #main[data-view=overview] .summary-gear {transition:none}
+}
+
+@media(min-width:600px) and (max-width:859px) {
+ #main[data-view=overview] .summary-gear-grid {grid-template-columns:repeat(5,minmax(0,1fr))}
+ #main[data-view=overview] .summary-gear,#main[data-view=overview] .summary-gear-grid:has(>button:nth-child(5):last-child)>button:nth-child(n) {grid-column:auto}
+}

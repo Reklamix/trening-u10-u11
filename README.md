@@ -4,6 +4,10 @@ Mobilný tréningový plánovač: najprv zhrnutie zamerania, podmienok a pomôco
 
 Web: https://reklamix.github.io/trening-u10-u11/
 
+## Grafické doladenie úvodu — 31. 10. 2026
+
+Samostatná vrstva `overview-enhanced.css?v=1` zvýrazňuje názov tréningu a tri podmienky v zelenom paneli. Nasledujú dve veľké tlačidlá a rovnaké políčka pomôcok s pôvodným ukladaným checklistom. Na mobile sú pomôcky v troch stĺpcoch s poslednými dvoma na strede, od600px v jednom rade; na počítači sú podmienky a plán vpravo. Ostatné obrazovky, funkcie a odkaz zostávajú zachované.
+
 ## Aktuálny dizajn cvičenia — 31. 10. 2026
 
 Schválený hybrid používa `exercise-hybrid.css?v=1`, `app.js?v=35` a `football.js?v=33`. V adaptívnych cvičeniach je hore názov/podmienky a výber fázy so šípkami, potom štvorcový rám nákresu, veľký skutočný časovač, karty fáz a krátky pokyn. Na mobile sú stále poruke Postup, Pomôcky, Nastaviť a Hotovo → ďalej. Na počítači sú časovač a pokyn spolu vedľa nákresu. Menšie displeje môžu posúvať obsah; spodné ovládanie zostáva dostupné.
@@ -12,7 +16,7 @@ Rám je 1 : 1; pracovné ihrisko v ňom zachováva skutočné proporcie, hráčo
 
 Klepnutie na odpočet otvorí podrobný časovač, reset, dávkovanie a zvuk. Menu ⋯ obsahuje Späť o krok, Úvod tréningu, zdieľanie, výber cvičenia, časovač/zvuk, pokyny trénera a Moje. Postup otvorí pôvodný popis, krokovanie, všetky kroky a úplný rozpis s prácou/oddychom/opakovaniami. Nastaviť zachováva skupiny, náročnosť, počty, plochu, mapu a všetky možnosti prehrávania.
 
-Modely a tréningové dáta, šifrované plány, dávky, manuálne ďalšie série a automatický prechod po celom cvičení sa nemenia. Úvod, príprava, knižnica a archív používajú existujúce rozhranie. Adresa a parametre odkazov zostávajú pôvodné. Kontroly: `node tests/validate.mjs`, `node tests/sequences.mjs`, `node tests/interval-timer.mjs`, `node tests/phase-clock.mjs`.
+Modely a tréningové dáta, šifrované plány, dávky, manuálne ďalšie série a automatický prechod po celom cvičení sa nemenia. Úvod má samostatné grafické doladenie uvedené vyššie; príprava, knižnica a archív používajú existujúce rozhranie. Adresa a parametre odkazov zostávajú pôvodné. Kontroly: `node tests/validate.mjs`, `node tests/sequences.mjs`, `node tests/interval-timer.mjs`, `node tests/phase-clock.mjs`.
 
 ## Jednotná Trénerova karta
 

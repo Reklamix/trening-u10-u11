@@ -227,3 +227,12 @@ Final syntax/regression and publication evidence are in canonical notes. Public 
 **Follow-up polish:** optional decorative boot icon. No blocker.
 
 **final result: passed**
+
+
+## Overview graphic polish — 31. 10. 2026
+
+Scope: only overview visuals. Forest-green title/facts card, two distinct journey actions, equal equipment checklist fields and a desktop conditions column. Existing ivory/Inter/green style and actual icons/assets retained. No scripts, training data, doses, private ciphertext or exercise styles changed. New stylesheet is scoped to the overview.
+
+Browser QA in hidden IAB, without system input: 320×568,390×844,834×1112,1440×900 have no horizontal overflow. Five equipment fields have equal heights at each width. Checklist toggling persists after reload and was restored to0/5; fields remain the same height when checked. Space fact opens pitch conditions; saving and closing works. Preparation opens the original six-step diagram; Start opens the existing square358px exercise visual, clock and phase controls. Browser Back returns to overview. No console warnings/errors. Tablet uses five cards in one row; mobile uses3+2 centered.
+
+Evidence: overview-before-graphic-31-10.png and overview-graphic-local.png in the project visualization folder. Validation: node tests/validate.mjs and git diff --check. Physical mobile/audio/full75min run not repeated for this CSS-only change.
