@@ -4,7 +4,7 @@
     "from": "2026-11-02",
     "to": "2026-11-15"
   },
-  "assumptions": "Pracovný návrh: pondelok, utorok a štvrtok; 20 detí, bez brankárov, ¼ ihriska 35 × 25 m a 2 tréneri. Dni a časy treba potvrdiť.",
+  "assumptions": "Potvrdené termíny U11: pondelok, utorok a štvrtok vždy o 18:00. Predpoklad podmienok: 20 detí, bez brankárov, ¼ ihriska 35 × 25 m a 2 tréneri; pred tréningom uprav podľa reality.",
   "sessions": [
     {
       "date": "2026-11-02",
@@ -12,7 +12,7 @@
       "focus": "Pripraviť si loptu a poslať ju po zemi na spoluhráča.",
       "cue": "Priprav si loptu, potom prihraj.",
       "topic": "Kontrola lopty",
-      "startTime": "",
+      "startTime": "18:00",
       "status": "draft",
       "templateId": "u11-pass-move-v1"
     },
@@ -22,7 +22,7 @@
       "focus": "Pred prijatím skontrolovať priestor a nájsť voľného spoluhráča.",
       "cue": "Pozri sa skôr, než príde lopta.",
       "topic": "Rozhľad",
-      "startTime": "",
+      "startTime": "18:00",
       "status": "draft",
       "templateId": "u11-pass-move-v1"
     },
@@ -42,7 +42,7 @@
       "focus": "Prvým dotykom si pripraviť priestor na ďalšiu akciu.",
       "cue": "Prvý dotyk tam, kde je voľno.",
       "topic": "Prvý dotyk",
-      "startTime": "",
+      "startTime": "18:00",
       "status": "draft",
       "templateId": "u11-pass-move-v1"
     },
@@ -52,7 +52,7 @@
       "focus": "Vybrať prihrávku voľnému hráčovi alebo vedenie do otvoreného priestoru.",
       "cue": "Voľný spoluhráč alebo voľná cesta?",
       "topic": "Rozhodovanie",
-      "startTime": "",
+      "startTime": "18:00",
       "status": "draft",
       "templateId": "u11-pass-move-v1"
     },
@@ -66,5 +66,6 @@
       "status": "draft",
       "templateId": "u11-pass-move-v1"
     }
-  ]
+  ],
+  "scheduleConfirmed": true
 }

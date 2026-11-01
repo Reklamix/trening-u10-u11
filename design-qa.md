@@ -267,3 +267,10 @@ QA: root opens nearestNov2; explicit old29Oct URL restores24children/base-base-s
 Checks: syntax of4changed scripts; calendar(date/range/timezone/DST/leap/duplicates/archive isolation,6drafts/54future count+pitch adaptations), validate65904, sequences55224, interval3591, phase-clock and warmup126 all PASS; git diff-check PASS. No physical phone, native share, private decryption, OS audio/lock-screen or full75min run. Planning data remains on GitHub; condition edits remain local and are shared through existing training links. No recurring automation or AI generation enabled.
 
 Evidence: planning-two-weeks-local.png in the project visualization folder.
+
+
+## Confirmed weekly start times — 1. 11. 2026
+
+User confirmed U11 Monday/Tuesday/Thursday18:00. All six upcoming sessions now have18:00; `scheduleConfirmed` distinguishes confirmed dates/times from draft training content. Calendar metadata removes the obsolete time-confirmation prompt, overview retains a content-draft notice, explainer and README reflect the confirmation. No doses, activities, animation/timer logic, previous dates or private plans changed. app37/calendar2.
+
+Verification: syntax app/calendar, tests/calendar (six18:00 sessions, schedule status,54adaptations and unconfirmed/no-time fallback), validate65904 and git diff-check PASS. Local DOM all6metadata18:00/75min; Nov2preparation18:00–18:10; overview term confirmed/content draft. Wider trajectory/audio/physical-device checks not repeated for this metadata/label change.

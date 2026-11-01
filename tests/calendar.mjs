@@ -30,6 +30,8 @@ assert.equal(new Set(drafts.map(t=>t.date)).size,6);
 let adaptations=0;
 for(const training of drafts){
  assert.equal(training.planning.status,'draft');
+ assert.equal(training.planning.scheduleConfirmed,true);
+ assert.equal(training.startTime,'18:00');
  assert.equal(training.duration,75);
  assert.ok(planner.supports(training));
  assert.equal(training.blocks.reduce((sum,b)=>sum+b.end-b.start,0),75);
@@ -52,4 +54,7 @@ for(const training of drafts){
 }
 assert.ok(!planner.supports({...drafts[0],id:'2099-01-01',templateId:'unknown'}));
 assert.equal(planner.supports(data.trainings.find(t=>t.date==='2026-10-27')),false);
+const unconfirmed=calendar.expand(data,{...agenda,scheduleConfirmed:false,sessions:[{...agenda.sessions[0],startTime:''}]}).trainings.at(-1);
+assert.equal(unconfirmed.planning.scheduleConfirmed,false);
+assert.equal(setup.forExercises(planner.adapt(unconfirmed,unconfirmed.defaultConfig)).steps[0].when,'0 min–10 min');
 console.log(`PASS: calendar date/range/isolation checks;6 complete drafts;${adaptations} future count/pitch adaptations; original archive unchanged.`);

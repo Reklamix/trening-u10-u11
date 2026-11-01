@@ -91,7 +91,7 @@ const PersonalPlans = [
     $('planning-list').replaceChildren(...items.map(training=>{
       const card=el('article','planning-card'),heading=el('div','planning-card-heading');
       heading.append(el('p','planning-date',dateLabel(training.date)),el('span','planning-badge','Pracovný návrh'));
-      const title=el('h2','',training.title),meta=el('p','planning-meta',`${training.startTime?training.startTime+' · čas potvrdiť':'Čas doplniť'} · ${training.duration} min · U11`);
+      const title=el('h2','',training.title),meta=el('p','planning-meta',`${training.startTime?training.startTime+(training.planning.scheduleConfirmed?'':' · čas potvrdiť'):'Čas doplniť'} · ${training.duration} min · U11`);
       const focus=el('p','planning-focus',training.focus),topic=el('span','planning-topic',training.planning.topic);
       const link=el('a','button','Otvoriť celý tréning →');link.href=linkFor(training.id,null,'overview');
       link.addEventListener('click',event=>{event.preventDefault();history.pushState({trainingBack:true},'',link.href);onRoute();});
@@ -844,7 +844,7 @@ const PersonalPlans = [
     if (blockChanged || initial) renderActive();
     const view = ['overview', 'equipment', 'coaching', 'catalog', 'private', 'planning'].includes(current.section) ? current.section : current.block?'field':'overview';
     $('training-plan-status').hidden=!training.planning;
-    $('training-plan-status').textContent=training.planning?'Pracovný návrh · termín a čas potvrdiť.':'';
+    $('training-plan-status').textContent=training.planning?(training.planning.scheduleConfirmed?'Pracovný návrh obsahu · termín potvrdený.':'Pracovný návrh · termín a čas potvrdiť.'):'';
     setView(view);
     if (!current.id || current.id !== training.id) {
       history.replaceState(history.state, '', linkFor(training.id, training.blocks[index].id, view === 'field' ? null : view));

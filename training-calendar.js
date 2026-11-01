@@ -36,10 +36,10 @@ const TrainingCalendar = {
       const t=JSON.parse(JSON.stringify(source));
       t.id=t.date=plan.date;t.title=plan.title;t.focus=plan.focus;t.cue=plan.cue;t.templateId=plan.templateId;
       delete t.startTime; if(plan.startTime)t.startTime=plan.startTime;
-      t.planning={status:'draft',topic:plan.topic,assumptions:agenda.assumptions,period:{...agenda.period}};
+      t.planning={status:'draft',topic:plan.topic,scheduleConfirmed:agenda.scheduleConfirmed===true,assumptions:agenda.assumptions,period:{...agenda.period}};
       t.defaultConfig={players:20,coaches:2,pitch:'quarter',width:35,height:25,levels:['base','base','standard','standard'],groupSizes:[5,5,5,5]};
       t.players='Návrh: 20 detí · počet možno upraviť 10–30';
-      t.notes.push({title:'Zameranie tohto dňa',text:plan.focus+' '+plan.cue+' Zachovávame známy 75-minútový formát a dávky; mení sa hlavný trénerský podnet. Termín a podmienky sú pracovný návrh.'});
+      t.notes.push({title:'Zameranie tohto dňa',text:plan.focus+' '+plan.cue+' Zachovávame známy 75-minútový formát a dávky; mení sa hlavný trénerský podnet. Obsah a podmienky zostávajú pracovný návrh.'});
       for(const block of t.blocks)block.cues.unshift(plan.cue);
       return t;
     });

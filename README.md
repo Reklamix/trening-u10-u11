@@ -8,13 +8,13 @@ Web: https://reklamix.github.io/trening-u10-u11/
 
 Na úvode je odkaz **Plán tréningov**. Výhľad1/2týždne ukáže dátumy, zameranie, stav návrhu a odkaz na celý tréning. Dátum Od, predošlé/ďalšie obdobie, Dnes a Pripravené obdobie umožňujú nájsť aj uložené plánovacie obdobie. Ďalšie obdobie bez dát má výslovný prázdny stav; aplikácia nevymýšľa nové tréningy automaticky.
 
-`upcoming.json` obsahuje šesť **pracovných návrhov** na2.,3.,5.,9.,10.a12.novembra2026. Pravidelné dni a časy používateľ ešte nepotvrdil. Štvrtkové18:00 je návrh; pondelkové a utorkové časy nie sú vyplnené. Predpoklad20detí/bezB/quarter35×25/2tréneri/base-base-standard-standard je pri každom dni upraviteľný existujúcimi ovládačmi. Ukladanie podmienok/checklistu/dokončenia je oddelené podľa dátumu; Zdieľať odošle variant podmienok rovnakým spôsobom ako doteraz.
+`upcoming.json` obsahuje šesť **pracovných návrhov** na2.,3.,5.,9.,10.a12.novembra2026. Používateľ1.11.potvrdil U11 v pondelok, utorok a štvrtok vždy18:00. `scheduleConfirmed` oddeľuje potvrdené termíny od pracovného návrhu obsahu. Predpoklad20detí/bezB/quarter35×25/2tréneri/base-base-standard-standard je pri každom dni upraviteľný existujúcimi ovládačmi. Ukladanie podmienok/checklistu/dokončenia je oddelené podľa dátumu; Zdieľať odošle variant podmienok rovnakým spôsobom ako doteraz.
 
 `training-calendar.js` z manifestu vytvorí nezávislé kópie schváleného75-minútového štvrtkového formátu (`templateId: u11-pass-move-v1`). Mení sa dátum, téma a hlavný trénerský podnet; dávky, geometria, rotácie, animácie a šesť cvičení zostávajú. Nejde o šesť nových súborov cvikov. Zámerne sa opakujú známe činnosti s iným dôrazom. Nové typy cvičení potrebujú samostatne pripravený a overený model. Pôvodné3tréningy v `trainings.json`, PDF a šifrované osobné plány sú nedotknuté.
 
 Plánovač a príprava prijmú okrem pôvodného29.10. iba explicitne označenú šablónu. Pri chýbajúcom čase príprava ukazuje minúty od začiatku, pri známom čase pôvodné hodiny. Bez parametra dátumu sa otvorí najbližší uložený tréning; staré zdieľané odkazy na konkrétne dni sa nemenia. Výpadok/invalidita manifestu zachová pôvodné tréningy a v pláne ukáže chybu načítania.
 
-Ďalšie obdobia sa pripravujú naraz doplnením manifestu a publikovaním naGitHubPages. Formulár v prehliadači nepíše doGitHubu. Týždenná automatizácia ani AIgenerovanie nie sú zapnuté. Kontroly: `node tests/calendar.mjs` (dátumy, izolácia archívu,6dní,54budúcich adaptácií) a existujúce validačné/sekvenčné/časovačové sady. Aktuálne app36/planner6/setup8/calendar1.
+Ďalšie obdobia sa pripravujú naraz doplnením manifestu a publikovaním naGitHubPages. Formulár v prehliadači nepíše doGitHubu. Týždenná automatizácia ani AIgenerovanie nie sú zapnuté. Kontroly: `node tests/calendar.mjs` (dátumy, izolácia archívu,6dní,54budúcich adaptácií) a existujúce validačné/sekvenčné/časovačové sady. Aktuálne app37/planner6/setup8/calendar2.
 
 ## Grafické doladenie úvodu — 31. 10. 2026
 
