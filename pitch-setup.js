@@ -91,6 +91,7 @@ const PitchSetupPlan = {
     return { layout, steps:instructions };
   },
   forExercises(training){
+    if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training))return SessionPrograms.preparation(training);
     const {layout,steps}=this.build(training),[warm,pass,expand,zones,games]=steps;
     const unchanged=(step,action)=>({...step,moves:[],added:[],kept:step.map.cones,action,coach:training.organizationNotes.join(' '),extra:'Rozloženie z predchádzajúceho cvičenia zostáva. Méty nepridávaj ani nepresúvaj.'});
     const views=[warm,pass,unchanged(pass,'Nechaj štyri plochy z prihrávok. Na rondo netreba presunúť žiadne kužele.'),{...zones,moves:expand.moves,kept:expand.kept,action:expand.action+' '+zones.action,coach:expand.coach.replace('Tento krok aj nasledujúci urobte','Úpravu rohov aj pridanie zónových mét urobte')},games,{...unchanged(games,'Zastav hru. Deti prejdú k trénerovi na pokojný záver. Pomôcky zbierajte až na pokyn, mimo prebiehajúcej hry.'),coach:'Celé mužstvo prejde k trénerovi. Pred zberom pomôcok zastavte všetky hry.'}];
@@ -157,6 +158,7 @@ const PitchSetupMotion = {
         if(step.map.key==='football-zones'&&!step.map.cornersOnly)for(const x of[area.x,area.x+area.w-2])map.append(svg('rect',{x,y:area.y,width:2,height:area.h,fill:'#d8eea4'}));
         map.append(text(area.x+area.w/2,area.y+area.h/2-.4*scale,area.label,1.8),text(area.x+area.w/2,area.y+area.h/2+1.5*scale,`${area.length} × ${area.width} m`,1.3));
       }
+      for(const line of step.map.lines||[])map.append(svg('line',{x1:line.from.x,y1:line.from.y,x2:line.to.x,y2:line.to.y,stroke:'#638268','stroke-width':.2,'stroke-dasharray':'.6 .4'}));
       for(const move of step.moves){
         const {from,to}=move,angle=Math.atan2(to.y-from.y,to.x-from.x);
         const route=svg('g',{'data-setup-route':to.area});

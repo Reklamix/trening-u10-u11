@@ -9,21 +9,23 @@
     {
       "date": "2026-11-02",
       "title": "Prvý dotyk a presná prihrávka",
-      "focus": "Pripraviť si loptu a poslať ju po zemi na spoluhráča.",
+      "focus": "Prvý dotyk, presná prihrávka a nová ponuka. Záťaž cez aktívne držanie lopty a malé hry s prestávkami.",
       "cue": "Priprav si loptu, potom prihraj.",
       "topic": "Kontrola lopty",
       "startTime": "18:00",
-      "status": "draft",
+      "status": "ready",
+      "programId": "u11-touch-2026-11-02",
       "templateId": "u11-pass-move-v1"
     },
     {
       "date": "2026-11-03",
-      "title": "Pozri sa pred prijatím",
-      "focus": "Pred prijatím skontrolovať priestor a nájsť voľného spoluhráča.",
-      "cue": "Pozri sa skôr, než príde lopta.",
-      "topic": "Rozhľad",
+      "title": "Voľná cesta alebo spoluhráč: 1 na 1 → 2 na 1",
+      "focus": "Krátke intenzívne súboje a rozhodnutie, kedy viesť do voľna a kedy prihrať.",
+      "cue": "Pozri, rozhodni sa a zrýchli do voľna.",
+      "topic": "Rozhodovanie a súboje",
       "startTime": "18:00",
-      "status": "draft",
+      "status": "ready",
+      "programId": "u11-decisions-2026-11-03",
       "templateId": "u11-pass-move-v1"
     },
     {

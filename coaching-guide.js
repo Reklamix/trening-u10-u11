@@ -10,7 +10,7 @@ const CoachingGuideModel = {
     'football-mini-games': ['Organizácia a časovanie', 'Priprav bránky', 'Pravidlá minihry', 'Výmena neutrálneho', 'Skórovanie', 'Obnovenie a prestávka'],
     'football-finish': ['Upokojenie', 'Otázka deťom', 'Konkrétna pochvala']
   },
-  supports(block) { return this.titles[block.diagram]?.length === block.steps.length; },
+  supports(block) { return (block.stepTitles||this.titles[block.diagram])?.length === block.steps.length; },
   tables(block, attendance, size) {
     return (block.tables || []).filter(table => !table.groupSize || table.groupSize === size).map(table => ({
       ...table,
@@ -76,7 +76,7 @@ const CoachingGuideModel = {
         else if (stage) facts.append(card('Skupiny', groups.join(' + ')));
         else facts.append(card('Organizácia', 'Celé mužstvo'));
         if (stage) facts.append(card('Jedna plocha', `${stage.areas[0].length} × ${stage.areas[0].width} m`));
-        if (block.coneSetup) facts.append(card('Kužele spolu', String(block.coneSetup.perArea * block.coneSetup.areas)));
+        if (block.coneSetup) facts.append(card('Kužele spolu', String(block.coneSetup.total ?? block.coneSetup.perArea * block.coneSetup.areas)));
         body.append(facts);
         if (block.coneSetup) {
           body.append(card('Rozlož kužele', block.coneSetup.placement));

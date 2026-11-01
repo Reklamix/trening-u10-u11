@@ -31,6 +31,7 @@ const ExerciseBrief = {
   },
   slogans:{'football-warmup':'Malé dotyky, hlava hore.','football-pass':'Prihraj a ukáž sa znova.','football-rondo':'Ukáž sa vedľa obrancu.','football-zones':'Prihraj do pohybu.','football-mini-games':'Prihraj, ponúkni sa, zakonči.','football-finish':'Čo sa ti dnes podarilo?'},
   build(training,block,index=0){
+    if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training))return SessionPrograms.brief(training,block,index,this.build(SessionPrograms.plain(training),block,index));
     if(!training?.planConfig||!this.slogans[block.diagram])return null;
     const config=training.planConfig,key=block.diagram,warm=key==='football-warmup',finish=key==='football-finish',labels=['A1','A2','B1','B2'];
     const areas=FootballScenes.groups(key,config.players,training.quarterPitch),area=areas[index]||areas[0],n=area?.count||config.players,groupIndex=area?.index||0;

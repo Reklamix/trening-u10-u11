@@ -2,9 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 const read=n=>readFileSync(new URL('../'+n,import.meta.url),'utf8');
-const calendar=runInNewContext(read('training-calendar.js')+';TrainingCalendar;');
-const planner=runInNewContext(read('training-planner.js')+';TrainingPlanner;');
-const setup=runInNewContext(read('football.js').split('// FOOTBALL_BROWSER')[0]+read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0]+';PitchSetupPlan;',{performance:{now:()=>0}});
+const {calendar,planner,setup}=runInNewContext(read('training-calendar.js')+read('football.js').split('// FOOTBALL_BROWSER')[0]+read('training-planner.js')+read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0]+read('training-programs.js')+';({calendar:TrainingCalendar,planner:TrainingPlanner,setup:PitchSetupPlan});',{performance:{now:()=>0}});
 const data=JSON.parse(read('trainings.json')),agenda=JSON.parse(read('upcoming.json'));
 const original=JSON.stringify(data),expanded=calendar.expand(data,agenda);
 assert.equal(JSON.stringify(data),original,'Expansion must not mutate existing archived training data');
@@ -29,15 +27,15 @@ assert.equal(new Set(drafts.map(t=>t.title)).size,6);
 assert.equal(new Set(drafts.map(t=>t.date)).size,6);
 let adaptations=0;
 for(const training of drafts){
- assert.equal(training.planning.status,'draft');
+ assert.equal(training.planning.status,training.programId?'ready':'draft');
  assert.equal(training.planning.scheduleConfirmed,true);
  assert.equal(training.startTime,'18:00');
  assert.equal(training.duration,75);
  assert.ok(planner.supports(training));
  assert.equal(training.blocks.reduce((sum,b)=>sum+b.end-b.start,0),75);
- assert.ok(training.blocks.every(b=>b.cues.includes(training.cue)));
+ assert.ok(training.blocks.every(b=>training.programId?b.cues.length>0:b.cues.includes(training.cue)));
  assert.equal(training.blocks.length,6);
- assert.equal(JSON.stringify(training.blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),JSON.stringify(data.trainings.find(t=>t.date==='2026-10-29').blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),'Approved doses and activity sequence retained');
+ if(!training.programId)assert.equal(JSON.stringify(training.blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),JSON.stringify(data.trainings.find(t=>t.date==='2026-10-29').blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),'Unchanged later drafts retain approved template doses');
  for(const players of [10,20,30])for(const pitch of ['quarter','half','full']){
   const t=planner.adapt(training,{...training.defaultConfig,players,pitch,width:planner.pitches[pitch].width,height:planner.pitches[pitch].height,groupSizes:planner.groups(players)});
   assert.equal(t.planConfig.groupSizes.reduce((a,b)=>a+b,0),players);
@@ -57,4 +55,4 @@ assert.equal(planner.supports(data.trainings.find(t=>t.date==='2026-10-27')),fal
 const unconfirmed=calendar.expand(data,{...agenda,scheduleConfirmed:false,sessions:[{...agenda.sessions[0],startTime:''}]}).trainings.at(-1);
 assert.equal(unconfirmed.planning.scheduleConfirmed,false);
 assert.equal(setup.forExercises(planner.adapt(unconfirmed,unconfirmed.defaultConfig)).steps[0].when,'0 min–10 min');
-console.log(`PASS: calendar date/range/isolation checks;6 complete drafts;${adaptations} future count/pitch adaptations; original archive unchanged.`);
+console.log(`PASS: calendar date/range/isolation checks;2 ready + 4 drafts;${adaptations} future count/pitch adaptations; original archive unchanged.`);

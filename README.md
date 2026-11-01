@@ -214,6 +214,16 @@ Voliteľné `attendanceCases` obsahuje objekty `total` a `groups`; súčet skup�
 
 Schémy sú ilustračné; dávky a plné počty sú v texte a tabuľkách. Pôvodné súkromné PDF a čitateľný osobný plán dieťaťa nie sú súčasťou tohto repozitára; osobný plán je iba v šifrovanej obálke.
 
+## Pripravené tréningy 2. a 3. novembra 2026
+
+`training-programs.js` obsahuje dva schválené 75-minútové programy, oba od 18:00. `upcoming.json` im priraďuje `programId` a stav `ready`; zvyšné štyri novembrové dni zostávajú pracovné návrhy. Archívny `trainings.json` zostáva bez zmeny. Pondelok: rozohriatie / dvojice a trojice / držanie lopty s jedným obrancom / zóny / minihra / záver (10+12+14+16+20+3). Utorok: rozohriatie / krátke 1 na 1 / 2 na 1 / zóny / minihra / záver (10+12+16+16+18+3).
+
+Riadená záťaž vzniká aktívnou hrou a krátkymi zrýchleniami. Utorková akcia trvá najviac 10 s, návrat/výmena/oddych 15–20 s. Pri piatich v skupine sú 4 série po 5 kolách; v 1 na 1 každý 8 útokov a 8 obrán, v 2 na 1 každý 8 útočných účastí a 4 obrany. Iné počty 2–8 v skupine majú prepočítané kompletné cykly a prestávky. Pri 2 deťoch sa 2 na 1 zmení na 1 na 1; od 6 sa 2 na 1 hrá v dvoch súčasných dráhach. Štyri skupiny a dva warmup priestory zachovávajú rozostupy na 35 × 25 m. Väčšia dostupná plocha nemení potrebu krátkych, prehľadných pracovísk.
+
+Časovač automaticky pokračuje cez krátke kolá a oddych v sérii; ďalšiu sériu spúšťa tréner. Menšie skupiny 2–3 majú v každom päťminútovom hernom úseku 6 × (30 s hra + 20 s oddych). Pri 7–8 deťoch sú neutrálne roly rovnomerné v celosekundových úsekoch, zvyšné 4–6 s slúžia na vydýchanie a výmenu. Pomôcky, príprava, nákres, animácia a tabuľky používajú tie isté počty a roly. Pri 20 deťoch je maximum 32 pracovných mét v pondelok a 40 v utorok, k tomu 8 rezervných; bránkové méty sa nezapočítavajú druhýkrát. Po zmene skupín sa maximum prepočíta.
+
+Dávky sú vlastný organizačný návrh pre tieto podmienky, nie výstup fyzického testovania ani automatické predpisovanie záťaže každému dieťaťu. Tréner sleduje pripravenosť a kvalitu; pri únave uberie odpor/čas hry alebo pridá oddych. Verejná aplikácia neobsahuje osobné víkendové aktivity dieťaťa a nemení aplikáciu Rozvoj hráča. Overenie: `node tests/programs.mjs` (nové dávky, férové roly, nákresy, príprava, pomôcky, časovače), `node tests/calendar.mjs` a existujúce regresné testy.
+
 ## Časovač priamo pri cvičení
 
 `app.js?v=35`, `football.js?v=33`, `app-unified.css?v=4` a `exercise-hybrid.css?v=1` zobrazujú kompaktný časovač priamo pod animáciou. Ukazuje zostávajúci čas aktuálneho meraného úseku, jeho názov a Spustiť/Pauza/Pokračovať/Ďalšia séria. Používa rovnaký IntervalClock aj zvuky ako podrobný panel Časovač; meranie sa nezdvojuje a ručný výber animačnej fázy ho nepretáča. Pri prechode skutočného merania na novú fázu sa ukáže jej nákres; časovač označí Prácu/Oddych/Vodu a nasledujúci úsek. Podrobnosti, reset, dávkovanie a zvukové možnosti zostávajú v existujúcom paneli. Každú ďalšiu sériu naďalej spúšťa tréner.

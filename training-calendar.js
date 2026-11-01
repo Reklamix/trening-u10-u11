@@ -29,19 +29,22 @@ const TrainingCalendar = {
     if(!source?.quarterPitch) throw Error('Missing approved training template');
     const ids=new Set(data.trainings.map(t=>t.id));
     const sessions=agenda.sessions.map(plan=>{
-      if(!this.validDate(plan.date) || ids.has(plan.date) || plan.date<agenda.period.from || plan.date>agenda.period.to || plan.templateId!==this.templateId || plan.status!=='draft') throw Error('Invalid planned session');
+      if(!this.validDate(plan.date) || ids.has(plan.date) || plan.date<agenda.period.from || plan.date>agenda.period.to || plan.templateId!==this.templateId || !['draft','ready'].includes(plan.status)) throw Error('Invalid planned session');
+      if(plan.programId&&!(typeof SessionPrograms!=='undefined'&&SessionPrograms.ids.includes(plan.programId)))throw Error('Invalid session program');
+      if(plan.status==='ready'&&!plan.programId)throw Error('Ready session requires an approved program');
       if(!['title','focus','cue','topic'].every(key=>typeof plan[key]==='string' && plan[key].trim())) throw Error('Missing session description');
       if(plan.startTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(plan.startTime)) throw Error('Invalid planned time');
       ids.add(plan.date);
       const t=JSON.parse(JSON.stringify(source));
       t.id=t.date=plan.date;t.title=plan.title;t.focus=plan.focus;t.cue=plan.cue;t.templateId=plan.templateId;
       delete t.startTime; if(plan.startTime)t.startTime=plan.startTime;
-      t.planning={status:'draft',topic:plan.topic,scheduleConfirmed:agenda.scheduleConfirmed===true,assumptions:agenda.assumptions,period:{...agenda.period}};
+      t.planning={status:plan.status,topic:plan.topic,scheduleConfirmed:agenda.scheduleConfirmed===true,assumptions:agenda.assumptions,period:{...agenda.period}};
+      if(plan.programId)t.programId=plan.programId;
       t.defaultConfig={players:20,coaches:2,pitch:'quarter',width:35,height:25,levels:['base','base','standard','standard'],groupSizes:[5,5,5,5]};
       t.players='Návrh: 20 detí · počet možno upraviť 10–30';
       t.notes.push({title:'Zameranie tohto dňa',text:plan.focus+' '+plan.cue+' Zachovávame známy 75-minútový formát a dávky; mení sa hlavný trénerský podnet. Obsah a podmienky zostávajú pracovný návrh.'});
       for(const block of t.blocks)block.cues.unshift(plan.cue);
-      return t;
+      return t.programId?SessionPrograms.adapt(t,t.defaultConfig):t;
     });
     return {...data,trainings:[...data.trainings,...sessions]};
   }

@@ -31,6 +31,7 @@ const TrainingPlanner = {
     return notes;
   },
   forGroup(training,block,index=0){
+    if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training))return SessionPrograms.variant(training,block,index);
     if(!training?.planConfig)return block;
     const config=training.planConfig,key=block.diagram;
     if(key==='football-warmup'){
@@ -92,6 +93,7 @@ const TrainingPlanner = {
     return b;
   },
   adapt(source,input){
+    if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(source))return SessionPrograms.adapt(source,input);
     if(!this.supports(source))return source;
     const config=this.normalize(input),t=JSON.parse(JSON.stringify(source)),groups=config.groupSizes,labels=['A1','A2','B1','B2'];
     t.planConfig=config;t.organizationNotes=this.organization(config,groups);t.coaches=config.coaches+' '+(config.coaches===1?'tréner':'tréneri');t.players=config.players+' detí · bez brankárov';
@@ -179,7 +181,7 @@ const TrainingPlanner = {
 const TrainingLibrary = {
   topics:{passing:'Prihrávky',touch:'Prvý dotyk',movement:'Pohyb bez lopty',dribbling:'Vedenie lopty a kľučky',duels:'Súboje 1 na 1',decisions:'Rozhodovanie a prečíslenie',buildout:'Rozohrávka',coordination:'Koordinácia a rýchlosť',games:'Malé hry',finish:'Záver a reflexia'},
   tags:{'football-warmup':['dribbling','passing','movement'],'football-pass':['passing','touch','movement'],'football-rondo':['passing','touch','decisions'],'football-zones':['passing','movement','decisions'],'football-mini-games':['games','passing','movement'],'football-finish':['finish'],warmup:['dribbling','passing'],'duel-no-keeper':['duels','dribbling'],'two-one-no-keeper':['decisions','passing'],'two-two-no-keeper':['games','decisions'],'two-matches-no-keeper':['games'],finish:['finish'],coordination:['coordination','dribbling'],'sprint-jump':['coordination'],target:['buildout','passing','movement'],buildout:['buildout','passing','decisions'],match:['games','buildout']},
-  items(trainings){return trainings.flatMap(training=>training.blocks.map(block=>({training,block,topics:this.tags[block.diagram]||[]})));},
+  items(trainings){return trainings.flatMap(training=>training.blocks.map(block=>({training,block,topics:block.topics||this.tags[block.diagram]||[]})));},
   text(value){return value.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLocaleLowerCase('sk');},
   filter(trainings,{topic='',query='',mode='trainings'}={}){
     const match=item=>(!topic||item.topics.includes(topic))&&(!query||this.text(`${item.training.title} ${item.block.title} ${item.training.date} ${item.training.date.split('-').reverse().join('.')} ${item.topics.map(key=>this.topics[key]).join(' ')}`).includes(this.text(query)));

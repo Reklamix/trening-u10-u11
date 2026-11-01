@@ -36,6 +36,7 @@ const FootballScenes = {
     return {x:frames.at(-1)[1],y:frames.at(-1)[2]};
   },
   build(key,{total=19,size=5,pitchIndex=0,area}={}) {
+    if(area?.programKind&&typeof SessionPrograms!=='undefined')return SessionPrograms.scene(key,{total,size,pitchIndex,area});
     if(!this.keys.includes(key))throw Error('Unknown football scene');
     const pitch=(x,y,w,length,width,extra={})=>{length=area?.length??length;width=area?.width??width;return{x,y,w,h:w*width/length,length,width,...extra};};
     const scene={key,nodes:[],tracks:{},arrows:[],steps:[],duration:6,pitch:pitch(72,40,216,12,12),caption:'Jedna ukážková akcia; hráči si v hre vyberajú riešenie.',total,size,pitchIndex};
@@ -461,6 +462,7 @@ const FootballPhaseNavigation={
       for(const area of areas){
         map.append(svgNode('rect',{'data-map-area':area.label,x:area.x,y:area.y,width:area.w,height:area.h,fill:area.index===pitchIndex?'#d8eea4':'#f6f8f1',stroke:'#216a4b','stroke-width':area.index===pitchIndex?.5:.25}));
         const local=FootballScenes.build(block.diagram,{total:options.total,size:area.count,pitchIndex:area.index,area});
+        for(const line of local.lines||[]){const from=FootballScenes.mapPoint(area,local.pitch,line.from),to=FootballScenes.mapPoint(area,local.pitch,line.to);map.append(svgNode('line',{x1:from.x,y1:from.y,x2:to.x,y2:to.y,stroke:'#638268','stroke-width':.2,'stroke-dasharray':'.6 .4'}));}
         for(const player of local.nodes.filter(n=>n.kind==='player')){const p=FootballScenes.mapPoint(area,local.pitch,player);map.append(svgNode('circle',{'data-map-player':area.label,cx:p.x,cy:p.y,r:.42,fill:colors[player.team],stroke:'white','stroke-width':.12}));}
         for(const cone of local.cones){const p=FootballScenes.mapPoint(area,local.pitch,cone);map.append(svgNode('path',{'data-map-cone':area.label,d:`M${p.x} ${p.y-.65}l-.55 1h1.1Z`,fill:'#f47700',stroke:'#713708','stroke-width':.12}));}
         const scale=Math.max(1,layout.width/35),labelSize=1.65*scale,dimensionSize=1.35*scale;
@@ -475,8 +477,10 @@ const FootballPhaseNavigation={
       const close=html('button','secondary-button','Späť na cvičenie');close.type='button';close.addEventListener('click',()=>dialog.close());
       const content=html('div','layout-body');content.append(map.cloneNode(true),html('p','layout-legend','Oranžové trojuholníky = kužele. Body = hráči, zelená plocha = zobrazená skupina. Postavenie hráčov je orientačné.'));
       const choices=html('div','layout-choices');
-      for(const area of areas){const button=html('button','secondary-button',areaLabel(area));button.type='button';button.setAttribute('aria-pressed',String(area.index===pitchIndex));button.addEventListener('click',()=>{selectArea(area.index);content.querySelector('svg').replaceWith(map.cloneNode(true));choices.querySelectorAll('button').forEach((b,index)=>b.setAttribute('aria-pressed',String(index===pitchIndex)));});choices.append(button);}
-      content.append(choices,html('p','',stage.instructions),html('p','',`Kužele: ${block.coneSetup.perArea} na jednu plochu · ${block.coneSetup.perArea*block.coneSetup.areas} spolu.`),html('p','',block.coneSetup.placement));
+      const coneCount=html('p'),conePlacement=html('p');
+      const updateLayoutDetails=()=>{const setup=block.coneSetup,training=options.planState?.();coneCount.textContent=`Kužele: ${setup.counts?.[pitchIndex]??setup.perArea} na vybranú plochu · ${setup.total??setup.perArea*setup.areas} spolu.`;conePlacement.textContent=typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training)?SessionPrograms.placement(block.programKind,training,pitchIndex):setup.placement;};
+      for(const area of areas){const button=html('button','secondary-button',areaLabel(area));button.type='button';button.setAttribute('aria-pressed',String(area.index===pitchIndex));button.addEventListener('click',()=>{selectArea(area.index);content.querySelector('svg').replaceWith(map.cloneNode(true));choices.querySelectorAll('button').forEach((b,index)=>b.setAttribute('aria-pressed',String(index===pitchIndex)));updateLayoutDetails();});choices.append(button);}
+      updateLayoutDetails();content.append(choices,html('p','',stage.instructions),coneCount,conePlacement);
       const footer=html('footer','layout-footer');footer.append(close);dialog.append(head,content,footer);document.body.append(dialog);layoutDialog=dialog;
       dialog.addEventListener('close',()=>{dialog.remove();if(layoutDialog===dialog)layoutDialog=null;const target=returnFocus?.isConnected?returnFocus:briefRoot.querySelector('[data-exercise-map]')||areaTools.querySelector('button');target?.focus();},{once:true});dialog.showModal();
     }
@@ -489,14 +493,17 @@ const FootballPhaseNavigation={
       svg.setAttribute('aria-label',block.title+(areas.length?' · '+areaLabel(areas[pitchIndex]):''));renderMap();
       clock.setRate(Number(speed.value));clock.setLoop(repeat.checked);
       if(block.coneSetup){
-        const setup=block.coneSetup,total=setup.perArea*setup.areas;
-        coneGuide.replaceChildren(html('summary','',total?`Kužele: ${setup.perArea} v nákrese · ${total} spolu`:'Kužele: 0 · bez rozkladania'),html('p','',setup.placement));
+        const setup=block.coneSetup,total=setup.total??setup.perArea*setup.areas;
+        const local=setup.counts?.[pitchIndex]??setup.perArea,training=options.planState?.();
+        const placement=typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training)?SessionPrograms.placement(block.programKind,training,pitchIndex):setup.placement;
+        coneGuide.replaceChildren(html('summary','',total?`Kužele: ${local} v nákrese · ${total} spolu`:'Kužele: 0 · bez rozkladania'),html('p','',placement));
         if(setup.extra)coneGuide.append(html('p','small-note',setup.extra));
       }
       const p=scene.pitch;root.classList.toggle('card-has-pitch',Boolean(p));
       if(focused)svg.setAttribute('viewBox',p?`${p.x-44} ${p.y-24} ${p.w+88} ${p.h+96}`:'0 0 360 270');
       if(p){
         svg.append(svgNode('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:focused?'none':'#e5eddd',stroke:focused?'white':'#638268','stroke-width':1.2}));
+        for(const line of scene.lines||[])svg.append(svgNode('line',{x1:line.from.x,y1:line.from.y,x2:line.to.x,y2:line.to.y,stroke:focused?'#ffffffa0':'#638268','stroke-width':1,'stroke-dasharray':'5 4'}));
         if(p.zones){const depth=p.w*2/p.length;for(const x of[p.x,p.x+p.w-depth])svg.append(svgNode('rect',{x,y:p.y,width:depth,height:p.h,fill:focused?'#ffffff22':'#cfdcbd',stroke:focused?'#f5fff080':'#638268'}));}
         for(const cone of scene.cones){
           const g=svgNode('g',{'data-cone':cone.kind,transform:`translate(${cone.x} ${cone.y})`});

@@ -28,7 +28,7 @@ const FootballSequences = {
           if(!id)continue;
           const node=scene.nodes.find(node=>node.id===source),p=transform(node);
           targets.set(id,{node,source,p});
-          const person=ids.indexOf(id),suffix=node.team==='N'?'N':key==='football-rondo'&&node.team==='B'?'D':'';
+          const person=ids.indexOf(id),suffix=node.label?.endsWith('R')?'R':node.team==='N'?'N':key==='football-rondo'&&node.team==='B'?'D':'';
           phase.roles[id]={team:node.team,label:person<0?node.label:String(person+1)+suffix,visible:true};
         }
         for(const id of ballIds)if(!targets.has(id))phase.roles[id]={...phase.roles[id],visible:false};
@@ -66,7 +66,9 @@ const FootballSequences = {
       const available=ids.filter((_,i)=>!neutrals.includes(i)),team=Math.floor(available.length/2),slots={A:available.slice(0,team),B:available.slice(team),N:neutrals.map(i=>ids[i])},used={A:0,B:0,N:0};
       return sourcePlayers(scene).map(node=>slots[node.team][used[node.team]++]);
     };
-    if(key==='football-warmup'){
+    if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training)&&SessionPrograms.plan(training,block,index,base,{action,hold,orderFor,gameOrder,gameScene})){
+      // The approved program supplied all work, role changes, rest and transitions.
+    }else if(key==='football-warmup'){
       const mobilize={...base,tracks:{},arrows:[],nodes:base.nodes.map(node=>({...node}))};
       for(const node of players)mobilize.tracks[node.id]=base.tracks[node.id].filter(([t])=>t<=6);
       mobilize.nodes=mobilize.nodes.filter(node=>node.kind!=='ball');mobilize.duration=6;
