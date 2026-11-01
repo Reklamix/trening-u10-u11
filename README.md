@@ -26,6 +26,10 @@ Vybraný návrh 1 používa celá aplikácia: úvod, pomôcky, knižnica, organi
 
 Na úvode sú rovno podmienky a vizuálne pomôcky s počtami. Dve veľké tlačidlá otvoria prípravu ihriska alebo prvé cvičenie. Nastavenia, zameranie s organizáciou a časový plán sa rozbaľujú samostatne. Kliknutie na pomôcku ju priamo na úvode označí/odznačí ako pripravenú; počet pripravených položiek a samostatný checklist sa priebežne zosynchronizujú bez zmeny stránky. Stav sa ukladá pre daný deň v prehliadači. Tlačidlo Podrobnosti otvorí celý checklist s rozložením. Celkový čas, priestor a tréneri sú tlačidlá otvárajúce príslušný panel; priestor a tréneri zaostria konkrétne nastavenie. Presné rozpisy počtov a pokyny k rozloženiu zostávajú v checkliste. Bránky z kužeľov sa nepripočítavajú k métam druhýkrát.
 
+## Pomôcky na mobile — 1. 11. 2026
+
+Stránka Pomôcky používa `equipment-enhanced.css?v=1`: zelený panel s počtom pripravených položiek a rovnaké políčka s obrázkom, názvom, počtom a natívnym zaškrtávacím poľom. Celá horná časť karty je odkliknuteľná. Na mobile sú dva stĺpce, pri piatich položkách posledná na strede; na počítači tri stĺpce a posledné dve na strede. Označenie nemení veľkosť políčka, používa zelený stav aj viditeľnú fajku. Pôvodné uloženie podľa dňa, synchronizácia s úvodom, zrušenie označení a rozbaliteľné úplné počty/pokyny zostávajú.
+
 ## Príprava a podmienky jedným palcom
 
 Grafické zjednotenie1.11.2026 používa samostatnú vrstvu `preparation-enhanced.css?v=1`: zelená hlavička, šesť rovnakých tlačidiel s vyznačeným výberom, dominantný nákres, karta krátkeho pokynu a pevné spodné Späť/Hotovo. Na bežnom mobile375×812 sa všetkých šesť krokov zmestí bez posúvania; menšie displeje posúvajú iba telo dialógu. Podrobnosti, pôvodné SVG nákresy, presuny kužeľov, nastavenia a výpočty zostávajú bez zmeny.

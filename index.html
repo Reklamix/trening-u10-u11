@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./exercise-hybrid.css?v=1">
   <link rel="stylesheet" href="./overview-enhanced.css?v=1">
   <link rel="stylesheet" href="./preparation-enhanced.css?v=1">
+  <link rel="stylesheet" href="./equipment-enhanced.css?v=1">
   <script src="./football.js?v=33" defer></script>
   <script src="./training-planner.js?v=5" defer></script>
   <script src="./football-sequence.js?v=3" defer></script>
@@ -114,7 +115,7 @@
       </section>
       <section id="equipment-view" class="view" hidden aria-labelledby="equipment-title">
         <nav class="section-toolbar" aria-label="Navigácia pomôcok"><a href="#overview" data-view="overview">← Úvod</a><button id="equipment-prepare" type="button" class="text-button">Pripraviť ihrisko →</button></nav>
-        <p class="eyebrow">Pred odchodom</p><h1 id="equipment-title">Čo zobrať</h1><p id="equipment-progress" class="muted"></p><div id="equipment-list" class="equipment-list"></div><button id="reset-equipment" class="text-button" type="button">Zrušiť označenie pomôcok</button><p class="small-note">Označenie si pamätá iba tento prehliadač.</p>
+        <header class="equipment-hero"><p class="eyebrow">Pred odchodom</p><h1 id="equipment-title">Čo zobrať</h1><p id="equipment-progress" class="muted" role="status"></p></header><div id="equipment-list" class="equipment-list"></div><button id="reset-equipment" class="text-button" type="button">Zrušiť označenie pomôcok</button><p class="small-note">Označenie si pamätá iba tento prehliadač.</p>
       </section>
       <section id="coaching-view" class="view" hidden aria-labelledby="coaching-title">
         <p class="eyebrow">Spoločný postup</p><h1 id="coaching-title">Organizácia</h1><div id="coaching-notes"></div><details class="sources"><summary>Podklady tréningu</summary><div id="sources-list"></div></details><a class="guide-link" href="https://github.com/Reklamix/trening-u10-u11/blob/main/README.md" target="_blank" rel="noopener noreferrer">Ako pridať ďalší tréning ↗</a>
