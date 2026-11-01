@@ -28,6 +28,8 @@ Na úvode sú rovno podmienky a vizuálne pomôcky s počtami. Dve veľké tlač
 
 ## Príprava a podmienky jedným palcom
 
+Grafické zjednotenie1.11.2026 používa samostatnú vrstvu `preparation-enhanced.css?v=1`: zelená hlavička, šesť rovnakých tlačidiel s vyznačeným výberom, dominantný nákres, karta krátkeho pokynu a pevné spodné Späť/Hotovo. Na bežnom mobile375×812 sa všetkých šesť krokov zmestí bez posúvania; menšie displeje posúvajú iba telo dialógu. Podrobnosti, pôvodné SVG nákresy, presuny kužeľov, nastavenia a výpočty zostávajú bez zmeny.
+
 Príprava ukazuje statický nákres bez videa. Šesť tlačidiel **Rozohriatie / Prihrávky / Rondo / Koncové zóny / Minihry / Záver** priamo vyberá cvičenie. Pod mapou je krátky pokyn a veľké **Hotovo → ďalej**; podrobnosti, počty a pokyny trénerov sa rozbalia. Rondo preberá rozloženie prihrávok bez presunu. Koncové zóny spájajú rozšírenie plôch a pridanie mét do jedného nákresu. Z cvičenia sa príprava otvorí rovno na danom cvičení. Pôvodná geometria, počty a školiteľské pokyny zostávajú.
 
 Podmienky sú rozdelené na tlačidlá **Ihrisko / Tréneri / Skupiny**. Predvoľby priestoru a počtu trénerov sú tlačidlá, vlastné rozmery sa rozbalia. Pri skupinách sa upravuje jedna A1/A2/B1/B2 naraz: Menej/Viac alebo číslo, plus tlačidlá náročnosti. Návrh sa ukladá až cez **Hotovo · uložiť**, potom sa panel zavrie. Chybný súčet sa neuloží; neplatné číslo otvorí príslušnú skupinu/panel. Pôvodné hodnoty, URL, uloženie podľa dňa aj skratka Polovica na základy ostávajú zachované.

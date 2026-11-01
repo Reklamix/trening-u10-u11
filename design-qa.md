@@ -236,3 +236,12 @@ Scope: only overview visuals. Forest-green title/facts card, two distinct journe
 Browser QA in hidden IAB, without system input: 320×568,390×844,834×1112,1440×900 have no horizontal overflow. Five equipment fields have equal heights at each width. Checklist toggling persists after reload and was restored to0/5; fields remain the same height when checked. Space fact opens pitch conditions; saving and closing works. Preparation opens the original six-step diagram; Start opens the existing square358px exercise visual, clock and phase controls. Browser Back returns to overview. No console warnings/errors. Tablet uses five cards in one row; mobile uses3+2 centered.
 
 Evidence: overview-before-graphic-31-10.png and overview-graphic-local.png in the project visualization folder. Validation: node tests/validate.mjs and git diff --check. Physical mobile/audio/full75min run not repeated for this CSS-only change.
+
+
+## Preparation graphic alignment — 1. 11. 2026
+
+Scope: preparation dialog CSS only, plus its stylesheet link. Existing forest/ivory/sage/Inter style from the approved overview reused. Six equal48px exercise tabs, strong selected state, green header, white diagram/instruction/details cards and fixed large footer actions. Scoped under `.pitch-setup`; no JavaScript, geometry, data, models, settings or clock changes. Mobile touch spacing8px follows the targeted UI/UX Pro Max mobile touch-spacing result.
+
+QA: all six SVG outerHTML values match the previous live version exactly for24children/quarter35×25. All six steps at375×812 have no body scroll, identical mapY282.78 and CTA bottom791;390×844 also fits. Back6→5 and expanded full details verified; final completion closes and returns focus to Prepare.320×568 has intentional body scroll129px in step4, no horizontal overflow; footer buttons76/179×50px remain visible at bottom551 and labels do not wrap.1440×900 fits with six tabs in a row, no scroll/overflow, CTA bottom879. Changing30children/full70×50 updates preparation map to two30×20 zones and groups8+8+7+7. Unchanged exercise square343×343 and idle clock00:05 at375; local console0warnings/errors.
+
+Evidence: preparation-before-01-11.png and preparation-graphic-local.png in the project visualization folder. Existing validation and diff checks run before commit. Physical mobile, audio and real75min run not repeated for this CSS-only change.

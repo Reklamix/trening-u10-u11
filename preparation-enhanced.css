@@ -1,0 +1,72 @@
+/* Preparation presentation only; diagram geometry, steps and settings stay intact. */
+.pitch-setup {
+ width:min(820px,calc(100% - 16px));height:min(900px,calc(100dvh - 16px));
+ border:1px solid #dce5d7;border-radius:20px;background:#f5f7f0;color:#214d3b;
+ box-shadow:0 20px 80px #123f3526;
+}
+.pitch-setup::backdrop {background:#123f358c}
+.pitch-setup .setup-header {padding:16px;gap:12px;background:#123f35;border:0}
+.pitch-setup .setup-header h2 {font-size:23px;line-height:1.2;font-weight:800;letter-spacing:-.5px;color:#fff}
+.pitch-setup .setup-close {min-width:84px;min-height:44px;padding:9px 12px;border:1px solid #ffffff60;border-radius:11px;background:#ffffff0d;color:#fff;font-size:13px;font-weight:650}
+.pitch-setup .setup-close:hover {background:#ffffff20}
+.pitch-setup .setup-close:focus-visible {outline:2px solid #e2edcd;outline-offset:3px}
+.pitch-setup .setup-exercise-tabs {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 16px;background:#f5f7f0;border:0;border-bottom:1px solid #dce5d7;flex:none}
+.pitch-setup .setup-exercise-tabs button {min-width:0;min-height:48px;margin:0;padding:8px 5px;border:1px solid #dce5d7;border-radius:11px;background:#fff;color:#3c5d49;font-size:12px;line-height:1.3;font-weight:650;box-shadow:none}
+.pitch-setup .setup-exercise-tabs button:hover {background:#edf3e6;border-color:#a3bb91}
+.pitch-setup .setup-exercise-tabs button[aria-pressed=true] {background:#e4efda;border-color:#779b60;color:#173f32;box-shadow:inset 0 0 0 1px #779b60;font-weight:750}
+.pitch-setup .setup-exercise-tabs button:focus-visible {outline:2px solid #24654b;outline-offset:2px}
+.pitch-setup .setup-body {display:flex;flex-direction:column;gap:6px;padding:12px 16px;line-height:1.5;background:#f5f7f0;scrollbar-gutter:stable;scrollbar-width:thin;overflow-anchor:none}
+.pitch-setup .setup-progress {margin:0;color:#62776b;font-size:12px;line-height:1.4;font-weight:650;flex:none}
+.pitch-setup .setup-step-title {margin:0 0 2px;color:#214d3b;font-size:24px;line-height:1.2;letter-spacing:-.45px;font-weight:800;flex:none}
+.pitch-setup .setup-map {display:block;flex:none;width:100%;height:clamp(180px,30dvh,310px);max-height:none;margin:0;padding:10px 4px;border:1px solid #dce5d7;border-radius:16px;background:#fff;box-sizing:border-box}
+.pitch-setup .setup-action {display:grid;grid-template-columns:26px minmax(0,1fr);align-items:start;gap:10px;flex:none;margin:2px 0 0;padding:14px;border:1px solid #dce5d7;border-radius:14px;background:#fff;color:#31523f;font-size:15px;line-height:1.5;font-weight:500}
+.pitch-setup .setup-action::before {content:'';display:block;width:26px;height:28px;background:url('./assets/bootstrap-icons/cone-striped.svg') center/24px 24px no-repeat}
+.pitch-setup .setup-details {flex:none;margin:0;padding:0 12px;border:1px solid #dce5d7;border-radius:12px;background:#fff}
+.pitch-setup .setup-details>summary {min-height:48px;padding:13px 0;color:#31523f;font-size:13px;line-height:1.5;font-weight:650;cursor:pointer}
+.pitch-setup .setup-details[open]>summary {margin-bottom:8px;border-bottom:1px solid #e4ebdf}
+.pitch-setup .setup-details p {color:#42624f;font-size:14px;line-height:1.5}
+.pitch-setup .setup-facts {gap:8px}
+.pitch-setup .setup-facts>div {padding:8px 3px;border:1px solid #dce5d7;border-radius:10px;background:#f5f7f0}
+.pitch-setup .setup-facts span {font-size:11px;color:#62776b}
+.pitch-setup .setup-facts strong {font-size:21px;color:#214d3b}
+.pitch-setup .setup-footer {gap:8px;padding:12px 16px max(12px,env(safe-area-inset-bottom));border-top:1px solid #dce5d7;background:#f5f7f0}
+.pitch-setup .setup-footer button {min-height:56px;padding:10px 8px;border-radius:12px;font-size:14px;font-weight:650;white-space:nowrap;box-shadow:none}
+.pitch-setup .setup-footer .secondary-button {flex:0 0 88px;border:1px solid #dce5d7;background:#fff;color:#31523f}
+.pitch-setup .setup-footer .secondary-button:disabled {opacity:.45}
+.pitch-setup .setup-footer .button {flex:1;border:1px solid #14614e;background:#14614e;color:#fff;font-size:16px;font-weight:750}
+.pitch-setup .setup-footer .button:hover {background:#0e503f}
+.pitch-setup .setup-footer .secondary-button:not(:disabled):hover {background:#eaf1e1}
+@media(min-width:700px) and (min-height:651px) {
+ .pitch-setup .setup-header {padding:20px 24px}
+ .pitch-setup .setup-header h2 {font-size:27px}
+ .pitch-setup .setup-exercise-tabs {grid-template-columns:repeat(6,minmax(0,1fr));padding:16px 24px}
+ .pitch-setup .setup-exercise-tabs button {min-height:52px;font-size:13px}
+ .pitch-setup .setup-body {padding:18px 24px;gap:10px}
+ .pitch-setup .setup-map {height:clamp(230px,40dvh,390px)}
+ .pitch-setup .setup-step-title {font-size:27px}
+ .pitch-setup .setup-footer {padding-inline:24px}
+}
+@media(max-width:360px) {
+ .pitch-setup .setup-header {padding:12px}
+ .pitch-setup .setup-header h2 {font-size:20px}
+ .pitch-setup .setup-close {min-width:76px;padding-inline:8px}
+ .pitch-setup .setup-exercise-tabs {padding:10px 12px}
+ .pitch-setup .setup-exercise-tabs button {font-size:11px;padding-inline:3px}
+ .pitch-setup .setup-body {padding:12px}
+ .pitch-setup .setup-step-title {font-size:22px}
+ .pitch-setup .setup-action {padding:12px;font-size:14px;gap:8px}
+ .pitch-setup .setup-footer {padding-inline:12px}
+ .pitch-setup .setup-footer .secondary-button {flex-basis:76px}
+ .pitch-setup .setup-footer .button {font-size:15px}
+}
+@media(max-height:650px) {
+ .pitch-setup .setup-header {padding-block:10px}
+ .pitch-setup .setup-exercise-tabs {padding-block:8px}
+ .pitch-setup .setup-body {padding-block:10px;gap:6px}
+ .pitch-setup .setup-progress {font-size:11px}
+ .pitch-setup .setup-step-title {font-size:20px}
+ .pitch-setup .setup-map {height:170px}
+ .pitch-setup .setup-action {padding:10px;font-size:14px}
+ .pitch-setup .setup-footer {padding-block:8px}
+ .pitch-setup .setup-footer button {min-height:50px}
+}
