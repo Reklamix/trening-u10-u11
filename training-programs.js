@@ -156,8 +156,14 @@ const SessionPrograms = {
         node('p'+idx,u,mid-dy);track('p'+idx,[[0,u,mid-dy],[2,.4,mid-dy],[4,.6,mid+dy],[6,.8,mid+dy],[8,.96,mid+dy]]);
         const defender=idx+active-1;node('p'+defender,.42,mid,'B');track('p'+defender,[[0,.42,mid],[2,area.skill==='base'?.42:.48,area.skill==='base'?mid:mid-dy*.5],[4,.62,active===3?mid-dy:mid],[6,.76,active===3?mid-dy:mid],[8,.83,mid]]);
         let route=[[0,u+.025,mid-dy+.02],[2,.425,mid-dy+.02],[4,.625,mid+dy+.02],[6,.825,mid+dy+.02],[8,.98,mid+dy]];
-        if(active===3){node('p'+(idx+1),u,mid+dy);track('p'+(idx+1),[[0,u,mid+dy],[2,.4,mid+dy],[4,.58,mid+dy],[6,.8,mid+dy],[8,.97,mid+dy]]);route=[[0,u+.025,mid-dy],[2,.425,mid-dy],[4,.6,mid+dy],[6,.825,mid+dy],[8,.99,mid+dy]];arrow('pass',[[.4,mid-dy],[.58,mid+dy]]);}
-        node('ball'+lane,u+.025,mid-dy,'A','ball');track('ball'+lane,route);arrow('dribble',[[u,mid-dy],[.4,mid-dy],[.6,mid+dy],[.98,mid+dy]]);
+        if(active===3){
+          node('p'+(idx+1),u,mid+dy);track('p'+(idx+1),[[0,u,mid+dy],[2,.4,mid+dy],[4,.58,mid+dy],[6,.8,mid+dy],[8,.97,mid+dy]]);
+          track('p'+idx,[[0,u,mid-dy],[2,.4,mid-dy],[4,.6,mid-dy],[6,.8,mid-dy],[8,.94,mid-dy]]);
+          track('p'+defender,[[0,.42,mid],[2,area.skill==='base'?.42:.46,mid],[4,.52,mid],[6,.65,mid],[8,.78,mid]]);
+          route=[[0,u+.025,mid-dy],[2,.425,mid-dy],[4,.6,mid+dy],[6,.825,mid+dy],[8,.99,mid+dy]];
+          arrow('pass',[[.4,mid-dy],[.58,mid+dy]]);arrow('dribble',[[u,mid-dy],[.4,mid-dy]]);arrow('dribble',[[.58,mid+dy],[.99,mid+dy]]);
+        }else arrow('dribble',[[u,mid-dy],[.4,mid-dy],[.6,mid+dy],[.98,mid+dy]]);
+        node('ball'+lane,u+.025,mid-dy,'A','ball');track('ball'+lane,route);
         if(kind==='two-one'){const gate=(lanes===2?1:2)/area.width/2;for(const center of[mid-dy,mid+dy]){cone(1,center-gate,'gate');cone(1,center+gate,'gate');}}
       }
       for(let i=lanes*active;i<n;i++){const v=(i-lanes*active+1)/(n-lanes*active+1);node('p'+i,service/2,v,'N','player',String(i+1)+'R');track('p'+i,[[0,service/2,v],[8,service/2,v]]);}

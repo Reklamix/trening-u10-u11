@@ -42,6 +42,13 @@ for(const source of programs){
      assert.ok(roles.every(r=>JSON.stringify(r)===JSON.stringify(roles[0])),'Balanced attack/defence/rest for every child');
      const d=G.duelDose(n);assert.equal(work.length,d.cycles*n);assert.equal(timer.parts.filter(p=>p.requiresStart).length,d.cycles-1,'Only next series requires manual start');
      if(n===5){assert.equal(roles[0].A,8);assert.equal(roles[0].B,b.programKind==='duel'?8:4);assert.equal(roles[0].N,b.programKind==='duel'?4:8);}
+     if(b.programKind==='two-one'&&n>=3){
+      const children=base.nodes.filter(node=>node.kind==='player');
+      for(let time=0;time<=base.duration;time+=.1)for(let a=0;a<children.length;a++)for(let z=a+1;z<children.length;z++){
+       const x=F.sample(base.tracks[children[a].id],time),y=F.sample(base.tracks[children[z].id],time);
+       assert.ok(Math.hypot(x.x-y.x,x.y-y.y)>14,`Two-on-one actors stay separate: n=${n}, ${level}, t=${time}, ${children[a].id}/${children[z].id}`);
+      }
+     }
      const table=b.tables.find(v=>v.groupSize===n);
      for(const [k,row]of table.rows.entries())for(const [column,team]of [[1,'A'],[2,'B'],[3,'N']]){
       const shown=row[column]==='—'?[]:row[column].split(', ').map(Number);
