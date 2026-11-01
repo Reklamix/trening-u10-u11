@@ -58,6 +58,7 @@ const PersonalPlans = [
   const $ = (id) => document.getElementById(id);
   const state = { trainings: [], selected: null, blockIndex: 0, view: 'field', detail: null, loading: false, attendance: 19, clocks: new Map(), done: {}, gear: {}, vault: null, vaultPassword: null };
   let toastTimeout;
+  let planningFrom=TrainingCalendar.today(),planningDays=14,planningError=false;
 
   function el(tag, className, content) {
     const node = document.createElement(tag);
@@ -79,6 +80,24 @@ const PersonalPlans = [
   }
   function timeRange(training, start=0, end=training.duration) {
     return training.startTime ? TrainingSchedule.clock(training.startTime,start)+'–'+TrainingSchedule.clock(training.startTime,end) : start+'–'+end+' min';
+  }
+
+  function renderCalendar() {
+    $('planning-from').value=planningFrom;
+    document.querySelectorAll('[data-planning-days]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.planningDays)===planningDays)));
+    const items=TrainingCalendar.range(state.trainings,planningFrom,planningDays);
+    const end=TrainingCalendar.shift(planningFrom,planningDays-1);
+    $('planning-count').textContent=planningError?'Plán sa nepodarilo načítať. Obnov stránku; uložené tréningy sú dostupné.':`${dateLabel(planningFrom)} – ${dateLabel(end)} · Pripravené tréningy: ${items.length}`;
+    $('planning-list').replaceChildren(...items.map(training=>{
+      const card=el('article','planning-card'),heading=el('div','planning-card-heading');
+      heading.append(el('p','planning-date',dateLabel(training.date)),el('span','planning-badge','Pracovný návrh'));
+      const title=el('h2','',training.title),meta=el('p','planning-meta',`${training.startTime?training.startTime+' · čas potvrdiť':'Čas doplniť'} · ${training.duration} min · U11`);
+      const focus=el('p','planning-focus',training.focus),topic=el('span','planning-topic',training.planning.topic);
+      const link=el('a','button','Otvoriť celý tréning →');link.href=linkFor(training.id,null,'overview');
+      link.addEventListener('click',event=>{event.preventDefault();history.pushState({trainingBack:true},'',link.href);onRoute();});
+      card.append(heading,title,meta,focus,topic,link);return card;
+    }));
+    if(!items.length)$('planning-list').append(el('p','planning-empty',planningError?'Po načítaní sa tu zobrazia pripravené dni.':'Na toto obdobie zatiaľ nie sú pripravené tréningy. Otvor Pripravené obdobie alebo vyber iný dátum.'));
   }
 
   function renderArchive() {
@@ -790,25 +809,26 @@ const PersonalPlans = [
     if (state.view === 'private' && view !== 'private') lockVault();
     state.view = view;
     $('main').dataset.view=view;
-    $('open-pitch-setup').hidden = ['private','overview','catalog'].includes(view) || !window.PitchSetup?.supports(state.selected);
+    $('open-pitch-setup').hidden = ['private','overview','catalog','planning'].includes(view) || !window.PitchSetup?.supports(state.selected);
     $('main').classList.toggle('private-mode', view === 'private');
     $('main').classList.toggle('exercise-focus',view==='field'&&Boolean(state.selected?.planConfig));
     const cardToolbar=document.querySelector('.exercise-toolbar'),cardHeading=document.querySelector('.activity-heading');
     if(view==='field'&&state.selected?.planConfig)cardToolbar.append($('share-block'));else cardHeading.append($('share-block'));
-    for (const name of ['field', 'overview', 'equipment', 'coaching', 'catalog', 'private']) $(name + '-view').hidden = name !== view;
+    for (const name of ['field', 'overview', 'equipment', 'coaching', 'catalog', 'private', 'planning']) $(name + '-view').hidden = name !== view;
     document.querySelectorAll('a[data-view]').forEach(a => {
       if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     if (view === 'private') renderVault();
     if (view === 'catalog') renderCatalog();
+    if (view === 'planning') renderCalendar();
   }
   function onRoute(initial = false) {
     if (!state.trainings.length) return;
     const current = route();
-    const source = state.trainings.find(x => x.id === current.id) || state.trainings[0];
+    const source = state.trainings.find(x => x.id === current.id) || TrainingCalendar.initial(state.trainings);
     let training=source;
     if(TrainingPlanner.supports(source)){
-      const config=TrainingPlanner.normalize({...configCache[source.id],...current.config});
+      const config=TrainingPlanner.normalize({...source.defaultConfig,...configCache[source.id],...current.config});
       if(JSON.stringify(configCache[source.id])!==JSON.stringify(config)){configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);}
       training=TrainingPlanner.adapt(source,config);state.attendance=config.players;
     }
@@ -822,7 +842,9 @@ const PersonalPlans = [
     else if (training.attendanceCases) { $('attendance').value = String(state.attendance); updateSessionMeta(); }
     state.blockIndex = index;
     if (blockChanged || initial) renderActive();
-    const view = ['overview', 'equipment', 'coaching', 'catalog', 'private'].includes(current.section) ? current.section : current.block?'field':'overview';
+    const view = ['overview', 'equipment', 'coaching', 'catalog', 'private', 'planning'].includes(current.section) ? current.section : current.block?'field':'overview';
+    $('training-plan-status').hidden=!training.planning;
+    $('training-plan-status').textContent=training.planning?'Pracovný návrh · termín a čas potvrdiť.':'';
     setView(view);
     if (!current.id || current.id !== training.id) {
       history.replaceState(history.state, '', linkFor(training.id, training.blocks[index].id, view === 'field' ? null : view));
@@ -965,7 +987,13 @@ const PersonalPlans = [
     try {
       const response = await fetch('./trainings.json', { cache: 'no-cache' });
       if (!response.ok) throw new Error('HTTP ' + response.status);
-      const data = validateData(await response.json());
+      let data = validateData(await response.json());
+      planningError=false;
+      try {
+        const agendaResponse=await fetch('./upcoming.json',{cache:'no-cache'});
+        if(!agendaResponse.ok)throw Error('Agenda unavailable');
+        data=validateData(TrainingCalendar.expand(data,await agendaResponse.json()));
+      } catch { planningError=true; }
       state.trainings = TrainingArchive.list(data.trainings);
       $('catalog-topic').replaceChildren(...[['','Všetky témy'],...Object.entries(TrainingLibrary.topics)].map(([value,label])=>{const option=el('option','',label);option.value=value;return option;}));
       state.selected = null;
@@ -1004,6 +1032,12 @@ const PersonalPlans = [
   $('plan-pitch').addEventListener('change',()=>{const preset=TrainingPlanner.pitches[$('plan-pitch').value];$('plan-width').value=preset.width;$('plan-height').value=preset.height;$('plan-dimensions-label').textContent=`Rozmery ${preset.width} × ${preset.height} m · upraviť`;});
   $('plan-half-basics').addEventListener('click',()=>{const preset=TrainingPlanner.halfBasics(state.attendance);document.querySelectorAll('[data-group-size]').forEach((input,i)=>{input.value=preset.groupSizes[i];input.removeAttribute('aria-invalid');});document.querySelectorAll('[data-group-level]').forEach((select,i)=>select.value=preset.levels[i]);$('plan-group-error').hidden=true;syncPlanDraft(true);message('Polovica na základy pripravená. Potvrď Hotovo · uložiť.');});
   $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav rozdelenie na ${state.attendance}.`;showPlanTab('groups');$('conditions-panel').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});$('conditions-panel').open=false;$('conditions-panel').querySelector('summary').focus({preventScroll:true});});
+  $('planning-from').addEventListener('change',event=>{if(TrainingCalendar.validDate(event.target.value)){planningFrom=event.target.value;renderCalendar();}});
+  $('planning-today').addEventListener('click',()=>{planningFrom=TrainingCalendar.today();renderCalendar();});
+  $('planning-prepared').addEventListener('click',()=>{const first=state.trainings.filter(t=>t.planning).sort((a,b)=>a.date.localeCompare(b.date))[0];if(first){planningFrom=first.planning.period.from;planningDays=14;renderCalendar();}});
+  document.querySelectorAll('[data-planning-days]').forEach(button=>button.addEventListener('click',()=>{planningDays=Number(button.dataset.planningDays);renderCalendar();}));
+  $('planning-prev').addEventListener('click',()=>{planningFrom=TrainingCalendar.shift(planningFrom,-planningDays);renderCalendar();});
+  $('planning-next').addEventListener('click',()=>{planningFrom=TrainingCalendar.shift(planningFrom,planningDays);renderCalendar();});
   $('summary-start').addEventListener('click',()=>navigate('field',0));
   $('summary-setup').addEventListener('click',()=>window.PitchSetup.open(state.selected));
   $('show-equipment').addEventListener('click',()=>navigate('equipment'));

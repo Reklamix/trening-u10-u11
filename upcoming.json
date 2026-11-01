@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "period": {
+    "from": "2026-11-02",
+    "to": "2026-11-15"
+  },
+  "assumptions": "Pracovný návrh: pondelok, utorok a štvrtok; 20 detí, bez brankárov, ¼ ihriska 35 × 25 m a 2 tréneri. Dni a časy treba potvrdiť.",
+  "sessions": [
+    {
+      "date": "2026-11-02",
+      "title": "Prvý dotyk a presná prihrávka",
+      "focus": "Pripraviť si loptu a poslať ju po zemi na spoluhráča.",
+      "cue": "Priprav si loptu, potom prihraj.",
+      "topic": "Kontrola lopty",
+      "startTime": "",
+      "status": "draft",
+      "templateId": "u11-pass-move-v1"
+    },
+    {
+      "date": "2026-11-03",
+      "title": "Pozri sa pred prijatím",
+      "focus": "Pred prijatím skontrolovať priestor a nájsť voľného spoluhráča.",
+      "cue": "Pozri sa skôr, než príde lopta.",
+      "topic": "Rozhľad",
+      "startTime": "",
+      "status": "draft",
+      "templateId": "u11-pass-move-v1"
+    },
+    {
+      "date": "2026-11-05",
+      "title": "Prihraj a vytvor nový uhol",
+      "focus": "Po prihrávke sa znovu ponúknuť v inom uhle.",
+      "cue": "Prihraj a ukáž sa znova.",
+      "topic": "Ponuka po prihrávke",
+      "startTime": "18:00",
+      "status": "draft",
+      "templateId": "u11-pass-move-v1"
+    },
+    {
+      "date": "2026-11-09",
+      "title": "Príjem do voľného priestoru",
+      "focus": "Prvým dotykom si pripraviť priestor na ďalšiu akciu.",
+      "cue": "Prvý dotyk tam, kde je voľno.",
+      "topic": "Prvý dotyk",
+      "startTime": "",
+      "status": "draft",
+      "templateId": "u11-pass-move-v1"
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Rozhodnutie: prihrať alebo viesť",
+      "focus": "Vybrať prihrávku voľnému hráčovi alebo vedenie do otvoreného priestoru.",
+      "cue": "Voľný spoluhráč alebo voľná cesta?",
+      "topic": "Rozhodovanie",
+      "startTime": "",
+      "status": "draft",
+      "templateId": "u11-pass-move-v1"
+    },
+    {
+      "date": "2026-11-12",
+      "title": "Spoj to v hre",
+      "focus": "V hre spojiť rozhľad, príjem lopty a novú ponuku.",
+      "cue": "Pozri, priprav, rozhodni sa.",
+      "topic": "Prenos do hry",
+      "startTime": "18:00",
+      "status": "draft",
+      "templateId": "u11-pass-move-v1"
+    }
+  ]
+}

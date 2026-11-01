@@ -2,7 +2,7 @@
 
 const PitchSetupPlan = {
   supports(training) {
-    return training?.id === '2026-10-29' && ['football-warmup','football-pass','football-zones','football-mini-games'].every(key => training.quarterPitch?.stages?.[key]?.areas?.length);
+    return (training?.id === '2026-10-29' || training?.templateId === 'u11-pass-move-v1') && ['football-warmup','football-pass','football-zones','football-mini-games'].every(key => training.quarterPitch?.stages?.[key]?.areas?.length);
   },
   build(training) {
     if (!this.supports(training)) throw Error('No setup plan for this training');
@@ -95,7 +95,7 @@ const PitchSetupPlan = {
     const unchanged=(step,action)=>({...step,moves:[],added:[],kept:step.map.cones,action,coach:training.organizationNotes.join(' '),extra:'Rozloženie z predchádzajúceho cvičenia zostáva. Méty nepridávaj ani nepresúvaj.'});
     const views=[warm,pass,unchanged(pass,'Nechaj štyri plochy z prihrávok. Na rondo netreba presunúť žiadne kužele.'),{...zones,moves:expand.moves,kept:expand.kept,action:expand.action+' '+zones.action,coach:expand.coach.replace('Tento krok aj nasledujúci urobte','Úpravu rohov aj pridanie zónových mét urobte')},games,{...unchanged(games,'Zastav hru. Deti prejdú k trénerovi na pokojný záver. Pomôcky zbierajte až na pokyn, mimo prebiehajúcej hry.'),coach:'Celé mužstvo prejde k trénerovi. Pred zberom pomôcok zastavte všetky hry.'}];
     const names=['Rozohriatie','Prihrávky','Rondo','Koncové zóny','Minihry','Záver'];
-    const start=training.startTime.split(':').map(Number),at=offset=>{const minutes=start[0]*60+start[1]+offset;return `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;};
+    const start=training.startTime?training.startTime.split(':').map(Number):null,at=offset=>{if(!start)return offset+' min';const minutes=start[0]*60+start[1]+offset;return `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;};
     return{layout,steps:views.map((step,index)=>({...step,blockId:training.blocks[index].id,title:names[index],when:`${at(training.blocks[index].start)}–${at(training.blocks[index].end)}`,shortAction:index===0?`Vyznač dve zóny ${warm.map.areas[0].length} × ${warm.map.areas[0].width} m. Rozlož 8 rohových kužeľov; priechod 3 m a obvod 2 m nechaj voľný.`:index===1?`Presuň ${pass.moves.length} pôvodných rohov podľa šípok a pridaj ${pass.added.length} mét. Štyri plochy ${pass.map.areas[0].length} × ${pass.map.areas[0].width} m.`:index===3?`Presuň ${expand.moves.length} rohov podľa šípok a pridaj ${zones.added.length} zónových mét: vždy 2 m od oboch koncov. Štyri plochy ${zones.map.areas[0].length} × ${zones.map.areas[0].width} m.`:index===4?`Rohy nechaj. Presuň ${games.moves.length} zónových mét na osem bránok širokých 2 m.`:step.action}))};
   }
 };

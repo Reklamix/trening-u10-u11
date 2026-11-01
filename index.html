@@ -17,14 +17,16 @@
   <link rel="stylesheet" href="./overview-enhanced.css?v=1">
   <link rel="stylesheet" href="./preparation-enhanced.css?v=1">
   <link rel="stylesheet" href="./equipment-enhanced.css?v=1">
+  <link rel="stylesheet" href="./training-calendar.css?v=1">
+  <script src="./training-calendar.js?v=1" defer></script>
   <script src="./football.js?v=33" defer></script>
-  <script src="./training-planner.js?v=5" defer></script>
+  <script src="./training-planner.js?v=6" defer></script>
   <script src="./football-sequence.js?v=3" defer></script>
   <script src="./exercise-brief.js?v=7" defer></script>
   <script src="./coaching-guide.js?v=4" defer></script>
-  <script src="./pitch-setup.js?v=7" defer></script>
+  <script src="./pitch-setup.js?v=8" defer></script>
   <script src="./interval-timer.js?v=1" defer></script>
-  <script src="./app.js?v=35" defer></script>
+  <script src="./app.js?v=36" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
@@ -68,8 +70,10 @@
         <p class="eyebrow">Trénerova karta · Prehľad</p><h1 id="training-title"></h1><p id="training-cue" class="active-cue"></p>
         <div id="summary-facts" class="summary-facts" aria-label="Dnešné podmienky"></div>
         </header>
+        <p id="training-plan-status" class="planning-notice" hidden></p>
         <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">1 · Pripraviť ihrisko →</button><button id="summary-start" class="button" type="button">2 · Začať cvičenia →</button></div>
         <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky · označ pripravené</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
+        <a class="planning-entry" href="#planning" data-view="planning"><span>Plán tréningov</span><small>Najbližšie 2 týždne →</small></a>
         </div><aside class="overview-tools" aria-label="Podmienky a organizácia tréningu"><h2 class="overview-tools-title">Podmienky a plán</h2>
         <details id="conditions-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/gear.svg" alt="">Nastaviť podmienky<span id="conditions-summary"></span></summary>
         <form id="plan-form" class="plan-card" hidden>
@@ -112,6 +116,15 @@
         <div class="catalog-mode-tabs" role="group" aria-label="Zobraziť v knižnici"><button type="button" data-catalog-mode="trainings" aria-pressed="true">Celé tréningy</button><button type="button" data-catalog-mode="drills" aria-pressed="false">Cvičenia</button></div>
         <div class="catalog-filters"><div class="catalog-search"><label for="catalog-query">Hľadať</label><input id="catalog-query" type="search" placeholder="Názov, téma alebo dátum…"></div><div class="catalog-topic-filter"><label for="catalog-topic">Čo trénujeme</label><select id="catalog-topic"><option value="">Všetky témy</option></select></div></div>
         <p id="catalog-count" class="small-note" role="status"></p><div id="catalog-list" class="catalog-list"></div>
+      </section>
+      <section id="planning-view" class="view" hidden aria-labelledby="planning-title">
+        <nav class="section-toolbar" aria-label="Navigácia plánu"><a href="#overview" data-view="overview">← Úvod</a><button id="planning-today" type="button">Dnes</button></nav>
+        <header class="planning-hero"><p class="eyebrow">U11 · výhľad dopredu</p><h1 id="planning-title">Plán tréningov</h1><p>Celé tréningy pripravené naraz. Pred tréningom doladíš podmienky.</p></header>
+        <div class="planning-controls"><label>Od dátumu<input id="planning-from" type="date"></label><div class="planning-span" role="group" aria-label="Dĺžka výhľadu"><button type="button" data-planning-days="7">1 týždeň</button><button type="button" data-planning-days="14" aria-pressed="true">2 týždne</button></div></div>
+        <button id="planning-prepared" class="text-button" type="button">Pripravené obdobie →</button>
+        <p id="planning-count" class="small-note" role="status"></p><div id="planning-list" class="planning-list"></div>
+        <div class="planning-period-nav"><button id="planning-prev" type="button">← Predošlé obdobie</button><button id="planning-next" type="button">Ďalšie obdobie →</button></div>
+        <details class="planning-explainer"><summary>Ako plán používame</summary><p>Termíny sú zatiaľ návrh podľa dní pondelok, utorok a štvrtok. Štvrtkové 18:00 je navrhnutý čas; ostatné časy treba doplniť.</p><p>Šesť tréningov nadväzuje na známy 75-minútový formát. Mení sa hlavný trénerský podnet; dávky a cvičenia sú zachované. Skupiny Základy a Upevnenie majú vlastnú náročnosť.</p><p>Počet detí 10–30, ihrisko, trénerov a skupiny upravíš v otvorenom tréningu. Tieto podmienky sa ukladajú v zariadení; aktuálny variant odošli cez Zdieľať. Uložené plány zostávajú na webe aj po uplynutí dátumu.</p><p>Ďalšie obdobie sa doplní naraz. Automatické generovanie ani týždenná úloha zatiaľ nie sú zapnuté.</p></details>
       </section>
       <section id="equipment-view" class="view" hidden aria-labelledby="equipment-title">
         <nav class="section-toolbar" aria-label="Navigácia pomôcok"><a href="#overview" data-view="overview">← Úvod</a><button id="equipment-prepare" type="button" class="text-button">Pripraviť ihrisko →</button></nav>

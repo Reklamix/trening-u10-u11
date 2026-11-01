@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
+const read=n=>readFileSync(new URL('../'+n,import.meta.url),'utf8');
+const calendar=runInNewContext(read('training-calendar.js')+';TrainingCalendar;');
+const planner=runInNewContext(read('training-planner.js')+';TrainingPlanner;');
+const setup=runInNewContext(read('football.js').split('// FOOTBALL_BROWSER')[0]+read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0]+';PitchSetupPlan;',{performance:{now:()=>0}});
+const data=JSON.parse(read('trainings.json')),agenda=JSON.parse(read('upcoming.json'));
+const original=JSON.stringify(data),expanded=calendar.expand(data,agenda);
+assert.equal(JSON.stringify(data),original,'Expansion must not mutate existing archived training data');
+assert.equal(expanded.trainings.length,9);
+assert.equal(calendar.range(expanded.trainings,'2026-11-02',14).length,6);
+assert.equal(calendar.range(expanded.trainings,'2026-11-02',7).length,3);
+assert.equal(calendar.range(expanded.trainings,'2026-11-16',14).length,0);
+assert.equal(calendar.initial(expanded.trainings,'2026-11-01').date,'2026-11-02');
+assert.equal(calendar.initial(expanded.trainings,'2026-11-03').date,'2026-11-03');
+assert.equal(calendar.initial(expanded.trainings,'2026-12-01').date,'2026-11-12');
+assert.equal(calendar.shift('2026-12-31',1),'2027-01-01');
+assert.equal(calendar.shift('2026-10-25',1),'2026-10-26');
+assert.equal(calendar.today(new Date('2026-10-31T23:30:00Z')),'2026-11-01');
+assert.equal(calendar.validDate('2026-02-30'),false);
+assert.equal(calendar.validDate('2028-02-29'),true);
+assert.throws(()=>calendar.expand(data,{...agenda,sessions:[agenda.sessions[0],agenda.sessions[0]]}));
+assert.throws(()=>calendar.expand(data,{...agenda,sessions:[{...agenda.sessions[0],date:'2026-02-30'}]}));
+assert.throws(()=>calendar.expand(data,{...agenda,sessions:[{...agenda.sessions[0],templateId:'unknown'}]}));
+assert.throws(()=>calendar.expand(data,{...agenda,sessions:[{...agenda.sessions[0],startTime:'25:00'}]}));
+const drafts=expanded.trainings.filter(t=>t.planning);
+assert.equal(new Set(drafts.map(t=>t.title)).size,6);
+assert.equal(new Set(drafts.map(t=>t.date)).size,6);
+let adaptations=0;
+for(const training of drafts){
+ assert.equal(training.planning.status,'draft');
+ assert.equal(training.duration,75);
+ assert.ok(planner.supports(training));
+ assert.equal(training.blocks.reduce((sum,b)=>sum+b.end-b.start,0),75);
+ assert.ok(training.blocks.every(b=>b.cues.includes(training.cue)));
+ assert.equal(training.blocks.length,6);
+ assert.equal(JSON.stringify(training.blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),JSON.stringify(data.trainings.find(t=>t.date==='2026-10-29').blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),'Approved doses and activity sequence retained');
+ for(const players of [10,20,30])for(const pitch of ['quarter','half','full']){
+  const t=planner.adapt(training,{...training.defaultConfig,players,pitch,width:planner.pitches[pitch].width,height:planner.pitches[pitch].height,groupSizes:planner.groups(players)});
+  assert.equal(t.planConfig.groupSizes.reduce((a,b)=>a+b,0),players);
+  assert.equal(t.id,training.id);
+  assert.ok(setup.supports(t));
+  const plan=setup.forExercises(t);
+  assert.equal(plan.steps.length,6);
+  if(!t.startTime)assert.equal(plan.steps[0].when,'0 min–10 min');
+  assert.equal(plan.layout.width,planner.pitches[pitch].width);
+  assert.ok(t.equipment[0].quantity.includes(String(players+4)));
+  assert.equal(t.blocks.at(-1).end,75);
+  adaptations++;
+ }
+}
+assert.ok(!planner.supports({...drafts[0],id:'2099-01-01',templateId:'unknown'}));
+assert.equal(planner.supports(data.trainings.find(t=>t.date==='2026-10-27')),false);
+console.log(`PASS: calendar date/range/isolation checks;6 complete drafts;${adaptations} future count/pitch adaptations; original archive unchanged.`);

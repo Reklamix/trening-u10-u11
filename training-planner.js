@@ -3,7 +3,7 @@
 const TrainingPlanner = {
   levels:{base:'Základy',standard:'Upevnenie',challenge:'Výzva'},
   pitches:{quarter:{label:'1/4 ihriska',width:35,height:25},half:{label:'1/2 ihriska',width:50,height:35},full:{label:'Celé ihrisko',width:70,height:50}},
-  supports(training){return training?.id==='2026-10-29'&&Boolean(training.quarterPitch);},
+  supports(training){return (training?.id==='2026-10-29'||training?.templateId==='u11-pass-move-v1')&&Boolean(training.quarterPitch);},
   normalize(input={}){
     const pitch=Object.hasOwn(this.pitches,input.pitch)?input.pitch:'quarter',preset=this.pitches[pitch];
     const integer=(value,fallback,min,max)=>Number.isFinite(Number(value))&&value!==''?Math.max(min,Math.min(max,Math.round(Number(value)))):fallback;
