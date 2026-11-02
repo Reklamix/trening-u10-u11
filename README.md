@@ -226,6 +226,8 @@ Dávky sú vlastný organizačný návrh pre tieto podmienky, nie výstup fyzick
 
 ## Tri pohľady a dostupný úvod
 
+V pohľadoch Kužele aj Celá plocha je priamo dostupný výber skupiny. Používa rovnakú zmenu skupiny ako pôvodné nastavenia, bez presunu fokusu do skrytého formulára; zvolený pohľad ostáva otvorený a celková mapa zvýrazní skupinu. Viditeľné šípky po stranách prepínačov poskytujú alternatívu k potiahnutiu. Tlačidlá Popis a postup / Postup otvoria panel s celým existujúcim popisom, krokmi, organizáciou, pomôckami, dávkami a pokynmi trénera pre aktuálnu skupinu. Panel má záložky Postup/Plocha/Časy/Tréner, stálu výšku, posúvateľný obsah, Escape a návrat fokusu; časovač pokračuje. Pôvodné nastavenia aj krokový režim v ponuke zostávajú dostupné.
+
 `exercise-views.js/css` pridáva pri cvičení prepínanie Animácia → Kužele → Celá plocha tlačidlami alebo vodorovným potiahnutím cez nákres. Kužele vychádzajú z aktuálnej schémy vybranej skupiny; statická celková mapa používa existujúce rozmiestnenie, všetky deti vrátane čakajúcich a nastavené rozmery. Zvislé posúvanie, zväčšenie a okrajové systémové gestá ostávajú dostupné. Klávesnica: šípky, Home/End. Statický pohľad pozastaví iba ukážku, tréningový časovač pokračuje. Spodná hlavná navigácia s Úvodom je dostupná aj pri cvičení a v otvorených dialógoch. Hotovo je nad ňou; Postup/Pomôcky/Nastaviť sú v posúvateľnom obsahu. Overenie: `node tests/exercise-views.mjs` a mobilná/desktopová DOM kontrola. Fyzické gesto na telefóne treba potvrdiť na zariadení.
 
 ## Časovač priamo pri cvičení

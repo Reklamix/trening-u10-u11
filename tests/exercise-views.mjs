@@ -18,6 +18,7 @@ for(const date of ['2026-10-29','2026-11-02','2026-11-03'])for(const players of 
    const scene=scenes.build(block.diagram,{total:players,size:area.count,pitchIndex:index,area}),before=JSON.stringify(scene);
    assert.equal(scene.nodes.filter(node=>node.kind==='player').length,area.count,'Whole-pitch snapshot must include every actual child, including waiting roles');
    const info=views.describe({scene,layout:t.quarterPitch,areas,index,total:players});
+   assert.equal(info.groups.length,areas.length);assert.equal(info.groups.filter(group=>group.selected).length,1);assert.equal(info.groups.find(group=>group.selected).index,index);assert.match(info.groups[index].label,new RegExp('^'+area.label+' · '+area.count+' '));
    assert.equal(info.totalPlayers,players);assert.equal(info.selectedPlayers,area.count);assert.equal(info.cones,scene.cones.length);assert.equal(info.pitchWidth,t.quarterPitch.width);assert.equal(info.pitchHeight,t.quarterPitch.height);assert.equal(JSON.stringify(scene),before);checked++;
   }
  }
