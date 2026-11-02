@@ -82,7 +82,8 @@ const TrainingLoad = {
       if(n<=6)rotation+=` Každý 3-minútový úsek: ${d.parts} × (${d.slot} s hra + ${d.rest} s oddych)${d.buffer?' + '+d.buffer+' s vydýchanie':''}.`;
       else if(d.buffer)rotation+=` Po poradí ${d.buffer} s vydýchanie do konca 3 min.`;
     }
-    return{...b,summary:task,skillTask:task,skillLabel:label,rotationText:rotation,steps:[task,b.dose,rotation],adjustments:[...b.adjustments],tables:b.programKind==='large-game'?[{caption:`${area.label}: ${this.form(n).label}`,headers:['Úsek','Roly'],rows:Array.from({length:4},(_,r)=>[String(r+1),rotation])}]:b.tables};
+    const steps=b.programKind==='strength'?[b.steps[0],b.steps[1]+' '+b.dose,b.steps[2]+' '+rotation]:b.programKind==='speed'?[task,b.dose+' '+b.steps[1],rotation+' '+b.steps[2]]:[task,b.dose,rotation];
+    return{...b,summary:task,skillTask:task,skillLabel:label,rotationText:rotation,steps,adjustments:[...b.adjustments],tables:b.programKind==='large-game'?[{caption:`${area.label}: ${this.form(n).label}`,headers:['Úsek','Roly'],rows:Array.from({length:4},(_,r)=>[String(r+1),rotation])}]:b.tables};
   },
   placement(t,b,index){
     const a=t.quarterPitch.stages[b.diagram].areas[index];
