@@ -42,6 +42,21 @@ for(const source of programs){
      assert.ok(roles.every(r=>JSON.stringify(r)===JSON.stringify(roles[0])),'Balanced attack/defence/rest for every child');
      const d=G.duelDose(n);assert.equal(work.length,d.cycles*n);assert.equal(timer.parts.filter(p=>p.requiresStart).length,d.cycles-1,'Only next series requires manual start');
      if(n===5){assert.equal(roles[0].A,8);assert.equal(roles[0].B,b.programKind==='duel'?8:4);assert.equal(roles[0].N,b.programKind==='duel'?4:8);}
+     if(b.programKind==='duel'){
+      const lanes=G.lanes('duel',n),gates=base.cones.filter(c=>c.kind==='gate'),shots=base.arrows.filter(a=>a.kind==='shot');
+      assert.equal(shots.length,lanes,'Every duel lane ends with a shot');assert.equal(gates.length,2*lanes,'One real cone goal per duel lane');
+      assert.ok(brief.description.includes('prízemnou strelou'));assert.equal(brief.visualKit.find(k=>k.kind==='gates').local,lanes);
+      for(let lane=0;lane<lanes;lane++){
+       const finish=F.sample(base.tracks['ball'+lane],8),attacker=F.sample(base.tracks['p'+(lane*2)],8),posts=gates.slice(lane*2,lane*2+2);
+       assert.ok(Math.abs(finish.x-posts[0].x)<.001&&finish.y>Math.min(...posts.map(p=>p.y))&&finish.y<Math.max(...posts.map(p=>p.y)),'Ball really reaches the goal between both posts');
+       assert.ok(finish.x-attacker.x>base.pitch.w*.1,'Shot ball separates from attacker; no dribbling through the goal');
+       const before=F.sample(base.tracks['ball'+lane],6.4),kicker=F.sample(base.tracks['p'+(lane*2)],6.4);assert.ok(Math.hypot(before.x-kicker.x,before.y-kicker.y)<12,'Ball stays at the foot until the shot');
+      }
+      const children=base.nodes.filter(node=>node.kind==='player');
+      for(let time=0;time<=base.duration;time+=.1)for(let a=0;a<children.length;a++)for(let z=a+1;z<children.length;z++){
+       const x=F.sample(base.tracks[children[a].id],time),y=F.sample(base.tracks[children[z].id],time);assert.ok(Math.hypot(x.x-y.x,x.y-y.y)>14,`Duel actors and waiting children remain separate: n=${n},${level},${pitch},t=${time},${children[a].id}/${children[z].id}`);
+      }
+     }
      if(b.programKind==='two-one'&&n>=3){
       const children=base.nodes.filter(node=>node.kind==='player');
       for(let time=0;time<=base.duration;time+=.1)for(let a=0;a<children.length;a++)for(let z=a+1;z<children.length;z++){

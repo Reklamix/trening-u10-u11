@@ -24,10 +24,10 @@ const SessionPrograms = {
     t.programId=source.programId;
     const kinds=['warm',tue?'duel':'pairs',tue?'two-one':'rondo','zones','game','finish'];
     const ends=tue?[10,22,38,54,72,75]:[10,22,36,52,72,75];
-    const names=['Rozohriatie s loptou',tue?'Krátke 1 na 1':'Prijmi a prihraj',tue?'2 na 1 na dve bránky':'Držanie lopty s obrancom','Hra do koncových zón','Minihra podľa počtu','Pokojný záver'];
+    const names=['Rozohriatie s loptou',tue?'1 na 1 so strelou':'Prijmi a prihraj',tue?'2 na 1 na dve bránky':'Držanie lopty s obrancom','Hra do koncových zón','Minihra podľa počtu','Pokojný záver'];
     const instructions=[
       'Pohybuj sa medzi spoluhráčmi, veď loptu do voľna a potom prihrávaj.',
-      tue?'Prejdi cez obrancu a kontrolovane preveď loptu cez koncovú čiaru.':'Prijmi loptu, priprav si ju a prihraj spoluhráčovi po zemi.',
+      tue?'Prekonaj obrancu a po otvorení cesty zakonči krátkou prízemnou strelou na kužeľovú bránku.':'Prijmi loptu, priprav si ju a prihraj spoluhráčovi po zemi.',
       tue?'Pritiahni obrancu a vyber voľnú bránku alebo spoluhráča.':'Ukáž sa vedľa obrancu a prihraj voľnému spoluhráčovi.',
       'Boduj vedením alebo príjmom prihrávky v súperovej zóne.',
       tue?'Vyber vedenie alebo prihrávku podľa situácie.':'Prijmi, prihraj a znovu sa ponúkni.',
@@ -51,6 +51,7 @@ const SessionPrograms = {
       if(i>0&&i<5)b.tables=Array.from({length:7},(_,j)=>this.table(kinds[i],j+2));
       b.adjustments=['Zníž tlak, ak mizne kvalita. Pri dobrej kvalite pridaj aktívnejšiu obranu alebo nový uhol.',
         'Záťaž tvorí hra a krátke zrýchlenia do voľna. Pri zjavnej únave skráť herný úsek a pridaj oddych; žiadne trestné behy.'];
+      if(kinds[i]==='duel')b.adjustments.push('Bez brankára, len krátke prízemné strely vo vlastnej dráhe. Za bránkou nechaj voľný priestor. Po strele, strate, aute alebo do 10 s je akcia hotová; obranca po zisku nezakončuje naspäť. Lopty zbieraj až po zastavení oboch dráh, návrat mimo streleckej dráhy.');
       b.topics=i===1&&tue?['duels','dribbling','coordination']:i===2&&tue?['decisions','passing','dribbling']:TrainingLibrary.tags[b.diagram];
       const stage=t.quarterPitch.stages[b.diagram];
       if(stage&&i>0&&i<5){
@@ -70,6 +71,7 @@ const SessionPrograms = {
     t.notes=t.notes.filter(n=>n.title!=='Odvaha v 1 na 1');
     t.notes.unshift({title:'Odvaha v 1 na 1',text:(tue?'Samostatné krátke súboje, potom rozhodovanie 2 na 1. ':'Súboje 1 na 1 v koncových zónach a záverečnej hre. ')+this.confidenceCue+' '+this.confidenceSupport});
     t.sources.push({label:'The FA: individuálne výzvy v malých hrách',url:'https://www.thefa.com/bootroom/resources/coaching/challenges-in-small-sided-games'});
+    if(tue)t.sources.push({label:'The FA: 1 na 1 so zakončením',url:'https://www.thefa.com/bootroom/resources/coaching/1v1-and-score'});
     // Dynamic kit totals come from exactly the same scene markers as the maps.
     for(const b of t.blocks){
       const areas=FootballScenes.groups(b.diagram,c.players,t.quarterPitch);
@@ -107,7 +109,7 @@ const SessionPrograms = {
     if(kind==='rondo'){const play=t.loadRevision?TrainingLoad.rondo(n).playSeconds:Math.min(45,Math.floor(300/n)-15),buffer=t.loadRevision?TrainingLoad.rondo(n).bufferSeconds:300-n*(play+15);task=n===2?'Dvojica bez obrancu. Prihrávaj, priprav prvý dotyk a znovu sa ponúkni.':`${n-1} na 1. ${base?'Obranca iba kráča a zachytáva prihrávku, pri nohe neodoberá. Ak sa nedarí, dočasne prihrávajte bez odoberania.':'Obranca aktívne zatvára líniu; ostatní sa ponúkajú. Voľné dotyky.'}`;rotation=`2 série po ${n} kolách: ${play} s práca + ${t.loadRevision?12:15} s oddych/výmena${buffer?`; po poradí ešte ${buffer} s oddych`:''}. ${n===2?'Bez obrancu.':'Obranca podľa čísel 1–'+n+', každý raz v sérii; nikdy nie za chybu.'}`;}
     if(['duel','two-one'].includes(kind)){
       const d=this.duelDose(n),roles=this.roles(kind,n),lanes=this.lanes(kind,n);
-      task=kind==='duel'?`${lanes} ${lanes===1?'dráha':'dráhy'}, v každej 1 na 1. Preveď loptu cez koncovú čiaru, bez strely. ${base?'Obranca začína o 2 s neskôr a s kontrolovaným odporom.':'Aktívny obranca; zmeň smer alebo rytmus a zrýchli do otvorenej cesty.'}`:n===2?'Pri dvoch hrajte 1 na 1 na dve bránky; tretieho hráča nepridávame.':`${lanes} ${lanes===1?'hra':'hry'} 2 na 1. Voľné vedenie aj prihrávka, bez povinnej kombinácie. ${base?'Obranca najprv iba zatvára cestu/zachytáva prihrávku.':'Pritiahni obrancu a rozhodni podľa jeho reakcie.'}`;
+      task=kind==='duel'?`${lanes} ${lanes===1?'dráha':'dráhy'}, v každej 1 na 1 a jedna kužeľová bránka bez brankára. Prekonaj obrancu, otvor si cestu a zakonči krátkou prízemnou strelou. Po strele, strate, aute alebo do 10 s akcia končí; obranca po zisku nezakončuje naspäť. ${base?'Obranca začína o 2 s neskôr a s kontrolovaným odporom.':'Aktívny obranca; zmeň smer alebo rytmus a zrýchli do otvorenej cesty.'}`:n===2?'Pri dvoch hrajte 1 na 1 na dve bránky; tretieho hráča nepridávame.':`${lanes} ${lanes===1?'hra':'hry'} 2 na 1. Voľné vedenie aj prihrávka, bez povinnej kombinácie. ${base?'Obranca najprv iba zatvára cestu/zachytáva prihrávku.':'Pritiahni obrancu a rozhodni podľa jeho reakcie.'}`;
       rotation=`${d.cycles} série × ${n} kôl × ${d.slot} s. Útok najviac 10 s, potom ${d.reset} s návrat/výmena/oddych. Roly ${roles.join(' → ')}; A útok, D obrana, R plánovaný oddych. Po kole sa každý posunie o jednu rolu; po ${n} kolách každý prejde celý kruh.${kind==='two-one'?` Medzi sériami ${t.loadRevision?String(Math.floor(120/(d.cycles-1)))+(120%(d.cycles-1)?'–'+Math.ceil(120/(d.cycles-1)):''):d.between} s oddych.`:''}${d.buffer?` Navyše ${d.buffer} s na oddych a opravu pred vodou.`:''} Oddychujúci v 2 m servisnom páse, nikdy v priechode.`;
     }
     if(['zones','game'].includes(kind)){
@@ -128,7 +130,7 @@ const SessionPrograms = {
     if(kind==='warm')return `4 rohové méty na zónu ${l} × ${w} m, 8 spolu. Vnútri voľný priestor na vedenie medzi deťmi.`;
     if(['duel','two-one'].includes(kind)){
       const lanes=this.lanes(kind,n),laneW=(w-(lanes-1))/lanes;
-      return `4 rohy plochy ${l} × ${w} m. Vo vzdialenosti 2 m od štartu označ servisný pás pre oddych a lopty. Za ním ${lanes} ${lanes===1?'dráha':'dráhy'} ${(l-2)} × ${laneW} m${lanes===2?', medzi nimi 1 m deliaci pás':''}. ${kind==='two-one'?`Na vzdialenom konci každej dráhy dve bránky ${lanes===2?1:2} m, vyznačené 4 métami.`:'Na konci iba čiara, bez strely.'} Všetko vo vnútri pracovnej plochy.`;
+      return `4 rohy plochy ${l} × ${w} m. Vo vzdialenosti 2 m od štartu označ servisný pás pre oddych a lopty. Za ním ${lanes} ${lanes===1?'dráha':'dráhy'} ${(l-2)} × ${laneW} m${lanes===2?', medzi nimi 1 m deliaci pás':''}. ${kind==='two-one'?`Na vzdialenom konci každej dráhy dve bránky ${lanes===2?1:2} m, vyznačené 4 métami.`:`Na vzdialenom konci uprostred každej dráhy jedna ${lanes===2?1:2} m bránka z 2 mét. Len prízemné strely; za bránkou nechaj voľný obvodový pás. Návrat mimo streleckej dráhy, lopty zbieraj až po zastavení oboch dráh.`} Všetko vo vnútri pracovnej plochy.`;
     }
     return `4 rohy každej plochy ${l} × ${w} m.${kind==='zones'?' Ďalšie 4 méty na hranice zón 2 m od oboch koncov.':kind==='game'?' Ďalšie 4 méty na dve 2 m bránky v strede koncových čiar.':''}`;
   },
@@ -142,7 +144,7 @@ const SessionPrograms = {
     const p=(u,v)=>({x:pitch.x+u*pitch.w,y:pitch.y+v*pitch.h});
     const node=(id,u,v,team='A',kind='player',label)=>{const q=p(u,v);s.nodes.push({id,...q,kind,team,label:label??(kind==='player'?String(s.nodes.filter(v=>v.kind==='player').length+1):'')});};
     const track=(id,frames)=>s.tracks[id]=frames.map(([time,u,v])=>[time,...Object.values(p(u,v))]);
-    const cone=(u,v,kind='corner')=>{const q=p(u,v);if(!s.cones.some(v=>Math.hypot(v.x-q.x,v.y-q.y)<.001))s.cones.push({...q,kind});};
+    const cone=(u,v,kind='corner',label)=>{const q=p(u,v);if(!s.cones.some(v=>Math.hypot(v.x-q.x,v.y-q.y)<.001))s.cones.push({...q,kind,...(label?{label}:{})});};
     const arrow=(kind,points)=>s.arrows.push({kind,number:s.arrows.length+1,label:false,points:points.map(([u,v])=>p(u,v))});
     [[0,0],[1,0],[0,1],[1,1]].forEach(([u,v])=>cone(u,v));
     if(kind==='pairs'){
@@ -179,6 +181,13 @@ const SessionPrograms = {
           track('p'+defender,[[0,.42,mid],[2,area.skill==='base'?.42:.46,mid],[4,.52,mid],[6,.65,mid],[8,.78,mid]]);
           route=[[0,u+.025,mid-dy],[2,.425,mid-dy],[4,.6,mid+dy],[6,.825,mid+dy],[8,.99,mid+dy]];
           arrow('pass',[[.4,mid-dy],[.58,mid+dy]]);arrow('dribble',[[u,mid-dy],[.4,mid-dy]]);arrow('dribble',[[.58,mid+dy],[.99,mid+dy]]);
+        }else if(kind==='duel'){
+          track('p'+idx,[[0,u,mid-dy],[2,.4,mid-dy],[3,.42,mid+dy],[4,.62,mid+dy],[6,.78,mid+dy],[6.4,.8,mid+dy],[8,.84,mid+dy]]);
+          const defenderStart=p(.5,mid);Object.assign(s.nodes.find(v=>v.id==='p'+defender),defenderStart);
+          track('p'+defender,[[0,.5,mid],[2,area.skill==='base'?.5:.47,area.skill==='base'?mid:mid-dy*.4],[3,.53,mid-dy*.5],[4,.57,mid-dy*.5],[6,.65,mid],[8,.7,mid]]);
+          route=[[0,u+.025,mid-dy+.02],[2,.425,mid-dy+.02],[3,.445,mid+dy+.02],[4,.645,mid+dy+.02],[6,.805,mid+dy+.02],[6.4,.825,mid+dy+.02],[7.2,1,mid],[8,1,mid]];
+          arrow('dribble',[[u,mid-dy],[.4,mid-dy],[.42,mid+dy],[.62,mid+dy],[.8,mid+dy]]);arrow('shot',[[.825,mid+dy+.02],[1,mid]]);
+          const goalWidth=lanes===2?1:2,gate=goalWidth/area.width/2,label=`Kužeľ bránky širokej ${goalWidth} m`;cone(1,mid-gate,'gate',label);cone(1,mid+gate,'gate',label);
         }else arrow('dribble',[[u,mid-dy],[.4,mid-dy],[.6,mid+dy],[.98,mid+dy]]);
         node('ball'+lane,u+.025,mid-dy,'A','ball');track('ball'+lane,route);
         if(kind==='two-one'){const gate=(lanes===2?1:2)/area.width/2;for(const center of[mid-dy,mid+dy]){cone(1,center-gate,'gate');cone(1,center+gate,'gate');}}
@@ -186,7 +195,7 @@ const SessionPrograms = {
       for(let i=lanes*active;i<n;i++){const v=(i-lanes*active+1)/(n-lanes*active+1);node('p'+i,service/2,v,'N','player',String(i+1)+'R');track('p'+i,[[0,service/2,v],[8,service/2,v]]);}
     }
     if(['duel','two-one'].includes(kind))s.nodes.sort((a,b)=>a.kind===b.kind&&a.kind==='player'?Number(a.id.slice(1))-Number(b.id.slice(1)):a.kind==='player'?-1:b.kind==='player'?1:0);
-    s.steps=[{time:0,text:kind==='duel'?'Útok do 10 s: preveď loptu cez koncovú čiaru.':kind==='two-one'?'Voľná cesta alebo prihrávka: vyber riešenie a dokonči cez bránku.':kind==='pairs'?'Prijmi a prihraj po zemi.':'Prihraj voľnému spoluhráčovi a ukáž sa.'}];
+    s.steps=[{time:0,text:kind==='duel'?'Útok do 10 s: prekonaj obrancu a zakonči prízemnou strelou.':kind==='two-one'?'Voľná cesta alebo prihrávka: vyber riešenie a dokonči cez bránku.':kind==='pairs'?'Prijmi a prihraj po zemi.':'Prihraj voľnému spoluhráčovi a ukáž sa.'}];
     return s;
   },
   plan(t,b,index,base,api){
@@ -242,12 +251,13 @@ const SessionPrograms = {
     const work=duel?'do 10 s':kind==='pairs'?(t.loadRevision?'150 s':'3 min'):kind==='rondo'?`${b.rotation.find(r=>r.size===n).playSeconds} s`:n<=3?`${period/10} s`:`${period/60} min`;
     const rest=duel?`${d.reset} s`:kind==='pairs'?'30 s':kind==='rondo'?(t.loadRevision?'12 s':'15 s'):n<=3?`${period/15} s`:'1 min';
     const repetitions=duel?{value:`${d.cycles} × ${n}`,hint:'série × kolá'}:kind==='rondo'?{value:`2 × ${n}`,hint:'série × kolá'}:{value:kind==='zones'?'2':'3',hint:'úseky'};
-    const kit=[`Lopty: ${ballsLocal} tu, ${ballsTotal} spolu + 4 rezervné.`,`Méty: ${conesLocal} tu, ${conesTotal} spolu.`,this.placement(kind,t,index),'Rozlišovačky, signál a vlastná voda pre každé dieťa.'];
+    const gatesLocal=kind==='duel'?this.lanes(kind,n):0,gatesTotal=kind==='duel'?t.planConfig.groupSizes.reduce((sum,size)=>sum+this.lanes(kind,size),0):0;
+    const kit=[`Lopty: ${ballsLocal} tu, ${ballsTotal} spolu + 4 rezervné.`,`Méty: ${conesLocal} tu, ${conesTotal} spolu.`,...(gatesLocal?[`Bránky z kužeľov: ${gatesLocal} tu, ${gatesTotal} spolu. Ich méty sú už započítané.`]:[]),this.placement(kind,t,index),'Rozlišovačky, signál a vlastná voda pre každé dieťa.'];
     return {...legacy,shortInstruction:b.summary,description:v.skillTask,steps:v.steps,space:`${area.length} × ${area.width} m pre túto skupinu; celkom ${t.planConfig.width} × ${t.planConfig.height} m.`,grouping:`${area.label}: ${n} detí · ${v.skillLabel}`,work,rest,rotation:v.rotationText,notes:b.adjustments,
       glance:{work,rest,workHint:duel?'jeden útok':'v úseku',restHint:duel?'návrat/výmena/oddych':'plus voda podľa rozpisu'},
       timing:{...legacy.timing,work,rest,repetitions,schedule:b.dose,note:v.rotationText,workHint:duel?'jeden útok':'v úseku',restHint:duel?'návrat a výmena':'medzi úsekmi'},
       kit,conePlacement:this.placement(kind,t,index),ballsLocal,ballsTotal,conesLocal,conesTotal,slogan:b.cues[0],
-      visualKit:[{kind:'ball',title:'Lopty',value:`${ballsTotal} + 4 rezervné`,detail:`${ballsLocal} v tejto skupine.`,local:ballsLocal,total:ballsTotal},{kind:'cone',title:'Méty a kužele',value:`${conesTotal} spolu`,detail:`${conesLocal} v tejto skupine.`,local:conesLocal,total:conesTotal},{kind:'bibs',title:'Rozlišovačky',value:`${t.planConfig.players} spolu`,detail:`${n} v tejto skupine; odlíš spoluhráčov, obranu a prípadných N. Oddychujúci R sú v servisnom páse.`,local:n,total:t.planConfig.players},...legacy.visualKit.filter(v=>!['ball','cone','gates','bibs'].includes(v.kind))]};
+      visualKit:[{kind:'ball',title:'Lopty',value:`${ballsTotal} + 4 rezervné`,detail:`${ballsLocal} v tejto skupine.`,local:ballsLocal,total:ballsTotal},{kind:'cone',title:'Méty a kužele',value:`${conesTotal} spolu`,detail:`${conesLocal} v tejto skupine.`,local:conesLocal,total:conesTotal},...(gatesLocal?[{kind:'gates',title:'Kužeľové bránky',value:`${gatesTotal} spolu`,detail:`${gatesLocal} tu; 2 méty na bránku už v počte mét.`,local:gatesLocal,total:gatesTotal}]:[]),{kind:'bibs',title:'Rozlišovačky',value:`${t.planConfig.players} spolu`,detail:`${n} v tejto skupine; odlíš spoluhráčov, obranu a prípadných N. Oddychujúci R sú v servisnom páse.`,local:n,total:t.planConfig.players},...legacy.visualKit.filter(v=>!['ball','cone','gates','bibs'].includes(v.kind))]};
   },
   preparation(t){
     let previous=[];const all=t.blocks.map(b=>this.cones(t,b)),capacity=Math.max(...all.map(v=>v.length));
