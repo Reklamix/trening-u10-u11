@@ -537,6 +537,8 @@ const PersonalPlans = [
     $('complete-block').textContent = last ? lastDone ? 'Posledná časť hotová ✓' : 'Dokončiť tréning ✓' : 'Hotovo → ďalej';
     $('complete-block').disabled = lastDone;
     const next = state.selected.blocks[state.blockIndex + 1];
+    $('preview-next-block').hidden=!next||!state.selected.planConfig||!window.PitchSetup?.supports(state.selected);
+    if(next)$('preview-next-block').setAttribute('aria-label','Náhľad nasledujúceho cvičenia: '+next.title);
     $('next-preview').textContent = next ? 'Nasleduje: ' + next.title + ' · ' + (next.end - next.start) + ' min' : 'Posledná časť tréningu.';
     $('finished').hidden = !lastDone;
     $('finished').querySelector('h2').textContent = allDone ? 'Tréning je dokončený' : 'Posledná časť je hotová';
@@ -1074,6 +1076,7 @@ const PersonalPlans = [
     state.detail = state.detail === button.dataset.detail ? null : button.dataset.detail; renderDetail();
   }));
   $('previous-block').addEventListener('click', () => navigate('field', Math.max(0, state.blockIndex - 1)));
+  $('preview-next-block').addEventListener('click',()=>window.PitchSetup?.openNext(state.selected,activeBlock().id));
   function completeCurrentExercise(){
     currentClock().pause();
     state.done[state.selected.id] = [...new Set([...completed(), activeBlock().id])];
