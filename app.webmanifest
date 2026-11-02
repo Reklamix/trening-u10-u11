@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Tréningy U10 / U11",
-  "short_name": "U11",
+  "name": "U11 Tréningy",
+  "short_name": "U11 Tréningy",
   "lang": "sk",
   "description": "Trénerova karta, cvičenia a nové tréningy poruke.",
   "start_url": "./#sekcia=overview",
@@ -11,13 +11,13 @@
   "theme_color": "#123d35",
   "icons": [
     {
-      "src": "./assets/app/icon-u11-192.png",
+      "src": "./assets/app/icon-training-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./assets/app/icon-u11-512.png",
+      "src": "./assets/app/icon-training-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

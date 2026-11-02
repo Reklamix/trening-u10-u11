@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {inflateSync} from 'node:zlib';
 const manifest=JSON.parse(fs.readFileSync('app.webmanifest','utf8'));
 assert.equal(manifest.scope,'./');assert.equal(manifest.id,'./');assert.equal(manifest.display,'standalone');assert.equal(manifest.start_url,'./#sekcia=overview');
-assert.equal(manifest.short_name,'U11');assert.ok(manifest.icons.every(icon=>icon.src.includes('icon-u11-')));
+assert.equal(manifest.short_name,'U11 Tréningy');assert.equal(manifest.name,'U11 Tréningy');assert.ok(manifest.icons.every(icon=>icon.src.includes('icon-training-')));
 for(const icon of manifest.icons){const data=fs.readFileSync(icon.src);assert.equal(data.subarray(1,4).toString(),'PNG');const[n]=icon.sizes.split('x').map(Number);assert.equal(data.readUInt32BE(16),n);assert.equal(data.readUInt32BE(20),n);}
 const source=fs.readFileSync('sw.js','utf8');assert.ok(!/caches\./.test(source));
 const listeners={},notifications=[],opened=[],scope='https://treningy.begoal.sk/';
@@ -14,6 +15,20 @@ for(const request of [{method:'GET',mode:'cors',url:scope+'personal-plan.enc.jso
 async function push(data){let promise;listeners.push({data:{json:()=>data},waitUntil:p=>promise=p});await promise;return notifications.at(-1);}
 async function click(url){let promise;listeners.notificationclick({notification:{data:{url},close(){}},waitUntil:p=>promise=p});await promise;return opened.at(-1);}
 const n=await push({date:'2026-11-03',title:'Súboje',url:'https://evil.invalid/'});assert.equal(n.data.url,scope+'#trening=2026-11-03&sekcia=overview');assert.ok(n.body.includes('03.11.2026'));assert.equal(n.tag,'u11-training-2026-11-03');
+assert.equal(n.badge,scope+'assets/app/badge-u11-96.png');assert.notEqual(n.badge,n.icon,'Android silhouette must use a separate transparent badge');
+const badge=fs.readFileSync(new URL(n.badge).pathname.slice(1)),w=badge.readUInt32BE(16),h=badge.readUInt32BE(20);
+assert.equal(w,96);assert.equal(h,96);assert.equal(badge[24],8);assert.equal(badge[25],6,'Badge needs RGBA, not an opaque RGB tile');assert.equal(badge[28],0);
+const chunks=[];for(let offset=8;offset<badge.length;){const length=badge.readUInt32BE(offset);if(badge.toString('ascii',offset+4,offset+8)==='IDAT')chunks.push(badge.subarray(offset+8,offset+8+length));offset+=12+length;}
+const pixels=inflateSync(Buffer.concat(chunks)),alpha=[];let offset=0,previous=Buffer.alloc(w*4);
+const paeth=(a,b,c)=>{const p=a+b-c,pa=Math.abs(p-a),pb=Math.abs(p-b),pc=Math.abs(p-c);return pa<=pb&&pa<=pc?a:pb<=pc?b:c;};
+for(let y=0;y<h;y++){
+ const filter=pixels[offset++],row=Buffer.alloc(w*4);assert.ok(filter>=0&&filter<=4);
+ for(let x=0;x<row.length;x++){const left=x>=4?row[x-4]:0,up=previous[x],upperLeft=x>=4?previous[x-4]:0;const prediction=[0,left,up,Math.floor((left+up)/2),paeth(left,up,upperLeft)][filter];row[x]=(pixels[offset++]+prediction)&255;}
+ for(let x=0;x<w;x++){const a=row[x*4+3];alpha.push(a);if(a)assert.deepEqual([...row.subarray(x*4,x*4+3)],[255,255,255],'Only monochrome white glyph pixels belong in the badge');}
+ previous=row;
+}
+for(const index of [0,w-1,(h-1)*w,w*h-1])assert.equal(alpha[index],0,'Corners must be fully transparent');
+assert.ok(alpha.some(a=>a===255),'U11 glyphs must be visible');assert.ok(alpha.filter(a=>a===0).length>w*h/4,'Opaque background would become a square in Android status bar');
 const invalid=await push({date:'2026-02-30',title:'<script>ignored as plain text</script>'});assert.equal(invalid.data.url,scope+'#sekcia=overview');
 assert.equal(await click('https://evil.invalid/'),scope);assert.equal(await click(scope+'api/push/config'),scope);assert.equal(await click(n.data.url),n.data.url);
 const html=fs.readFileSync('index.html','utf8');assert.ok(html.includes('rel="manifest"'));assert.ok(html.includes('id="push-toggle"'));assert.ok(html.includes('id="install-dialog"'));
