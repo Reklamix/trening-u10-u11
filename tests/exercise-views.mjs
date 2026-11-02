@@ -24,4 +24,5 @@ for(const date of ['2026-10-29','2026-11-02','2026-11-03'])for(const players of 
 }
 const html=read('index.html');assert.ok(html.includes('exercise-views.js'));assert.ok(html.indexOf('exercise-views.js')<html.indexOf('app.js?v='));assert.ok(html.includes('<span>Úvod</span>'));
 const css=read('exercise-views.css');assert.ok(css.includes('body:has(.exercise-focus)>#bottom-nav:not([hidden]){display:flex'));assert.ok(css.includes('touch-action:pan-y pinch-zoom'));assert.ok(css.includes('76px + env(safe-area-inset-bottom)'));
+assert.ok(css.includes('grid-auto-rows:max-content'),'Short desktop view must scroll its square diagram before contextual actions instead of shrinking the grid row beneath it');
 console.log(`PASS: ${checked} real exercise/group/count/pitch view snapshots, swipe thresholds/edge gestures, canonical scene immutability and navigation wiring.`);

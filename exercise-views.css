@@ -21,6 +21,7 @@ body:has(.exercise-focus)>#bottom-nav:not([hidden]){display:flex;z-index:20}
 .dialog-app-nav a{display:flex;flex:1;min-width:0;min-height:48px;align-items:center;justify-content:center;flex-direction:column;gap:4px;border-radius:9px;color:#536b5e;text-decoration:none;font-size:10px;font-weight:650}
 .dialog-app-nav img{width:21px;height:21px}.dialog-app-nav a[aria-current]{background:#eaf1e1;color:#173f33}.dialog-app-nav a:focus-visible{outline:2px solid #14614e;outline-offset:-2px}
 @media(min-width:900px) and (min-height:651px){
+ .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]{grid-auto-rows:max-content}
  .exercise-focus .hybrid-board>.exercise-visual-tabs{grid-column:1;grid-row:1;margin:0}
  .exercise-focus .hybrid-board>.exercise-phase-bar{grid-column:1;grid-row:2;margin:0}
  .exercise-focus .hybrid-board>.football-figure{grid-column:1;grid-row:3}
