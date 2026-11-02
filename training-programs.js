@@ -5,6 +5,8 @@ const SessionPrograms = {
   ids:['u11-touch-2026-11-02','u11-decisions-2026-11-03'],
   supports(t){return this.ids.includes(t?.programId);},
   plain(t){return {...t,programId:undefined};},
+  confidenceCue:'Voľná cesta? Skús 1 na 1 a zrýchli prvé dva kroky. Ak je cesta zavretá, využi spoluhráča; kľučka nie je povinná.',
+  confidenceSupport:'Páruj deti podľa aktuálnej zručnosti a pohybovej vyspelosti. Pri opakovanom neúspechu alebo váhaní zníž tlak obrancu; pri samostatnom zvládaní ho postupne pridaj. Oceň konkrétny pokus, rozhodnutie a nové zapojenie po chybe; bez povinného počtu výhier.',
   duelDose(n){
     const cycles=Math.ceil(600/(n*30)),slot=Math.floor(600/(cycles*n)/5)*5;
     return {cycles,rounds:n,slot,action:10,reset:slot-10,buffer:600-cycles*n*slot,between:180/(cycles-1)};
@@ -60,6 +62,14 @@ const SessionPrograms = {
       b.rotation=Array.from({length:7},(_,j)=>({size:j+2,rounds:j+2,defenders:j===0?0:1,playSeconds:Math.min(45,Math.floor(300/(j+2))-15),restSeconds:15,bufferSeconds:0}));
     }
     if(typeof TrainingLoad!=='undefined')TrainingLoad.apply(t);
+    for(const b of t.blocks)if(['duel','zones','large-game'].includes(b.programKind)){
+      b.adjustments.push(this.confidenceSupport);
+      b.cues.push(this.confidenceCue);
+      b.topics=[...new Set([...b.topics,'duels'])];
+    }
+    t.notes=t.notes.filter(n=>n.title!=='Odvaha v 1 na 1');
+    t.notes.unshift({title:'Odvaha v 1 na 1',text:(tue?'Samostatné krátke súboje, potom rozhodovanie 2 na 1. ':'Súboje 1 na 1 v koncových zónach a záverečnej hre. ')+this.confidenceCue+' '+this.confidenceSupport});
+    t.sources.push({label:'The FA: individuálne výzvy v malých hrách',url:'https://www.thefa.com/bootroom/resources/coaching/challenges-in-small-sided-games'});
     // Dynamic kit totals come from exactly the same scene markers as the maps.
     for(const b of t.blocks){
       const areas=FootballScenes.groups(b.diagram,c.players,t.quarterPitch);
@@ -107,6 +117,7 @@ const SessionPrograms = {
       if(n<=3)rotation+=` V každom ${period/60}-minútovom úseku 6 × (${period/10} s hra + ${period/15} s oddych) = ${period*.6} s hry / ${period*.4} s oddychu.`;
       else if(period%n)rotation+=` Po celom poradí ešte ${period-n*unit} s na výmenu/vydýchanie; celý úsek ${period/60} min.`;
     }
+    if(['duel','zones'].includes(kind))task+=' '+(kind==='duel'?'Voľná cesta? Zrýchli prvé dva kroky. Vyber vlastné riešenie; kľučka nie je povinná.':this.confidenceCue);
     return {...b,skillLabel:TrainingPlanner.levels[level],skillTask:task,summary:task,steps:[task,b.dose,rotation||'Pravidelne vymeň partnerov počas prestávky.'],adjustments:[task,...b.adjustments],rotationText:rotation};
   },
   placement(kind,t,index){

@@ -78,6 +78,7 @@ const TrainingLoad = {
     if(b.programKind==='large-game'){
       const f=this.form(n),d=this.gameDose(n);task=`${f.label}; spolu ${n} detí${members.length>1?' zo skupín '+members.map(i=>['A1','A2','B1','B2'][i]).join('+'):''}. Po prihrávke sa ponúkni, po strate sa zapoj do obrany. ${area.skill==='base'?'Pri príjme približne 2 s bez odoberania.':'Primeraná aktívna obrana.'} Voľné dotyky; ${f.neutral?'N pomáha tímu s loptou a sám neboduje.':'bez N.'}`;
       if(n===2)task='1 na 1. Veď loptu do voľnej cesty a preveď ju cez súperovu bránku. Po strate sa vráť medzi loptu a svoju bránku; bez neutrálneho hráča.';
+      task+=' '+(n===2?'Voľná cesta? Zrýchli prvé dva kroky; kľučka nie je povinná.':SessionPrograms.confidenceCue);
       rotation=f.neutral?`V každom úseku N postupne 1–${n}, po ${d.slot} s hry; odchádzajúci N vymení miesto s prichádzajúcim. Každý rovnako dlho N.`:'Vyrovnané družstvá; všetci zapojení, bez čakajúcich.';
       if(n<=6)rotation+=` Každý 3-minútový úsek: ${d.parts} × (${d.slot} s hra + ${d.rest} s oddych)${d.buffer?' + '+d.buffer+' s vydýchanie':''}.`;
       else if(d.buffer)rotation+=` Po poradí ${d.buffer} s vydýchanie do konca 3 min.`;
