@@ -15,7 +15,7 @@ self.addEventListener('push',event=>{
   const title=typeof data.title==='string'?data.title.slice(0,140):'Otvor si pripravený tréning.';
   event.waitUntil(self.registration.showNotification('Nový tréning U11',{
     body:date?date.split('-').reverse().join('.')+' · '+title:title,
-    icon:new URL('assets/app/icon-training-bold-192.png',self.registration.scope).href,
+    icon:new URL('assets/app/icon-training-wide-192.png',self.registration.scope).href,
     badge:new URL('assets/app/badge-u11-96.png',self.registration.scope).href,
     tag:'u11-training-'+(date||'new'),data:{url:url.href}
   }));
