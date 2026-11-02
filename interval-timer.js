@@ -9,7 +9,7 @@ const TrainingIntervals = {
     let previousWork=null;
     const parts=scene.phases.filter(phase=>phase.actualSeconds>0).map(phase=>{
       const series=phase.name.replace(/ · (?:kolo|časť) .*/,'');
-      const grouped=['football-rondo','football-zones','football-mini-games'].includes(block.diagram)||block.programKind==='duel';
+      const grouped=['football-rondo','football-zones','football-mini-games'].includes(block.diagram)||['duel','speed','large-game'].includes(block.programKind);
       const requiresStart=phase.kind==='work'&&previousWork!==null&&(!grouped||series!==previousWork);
       if(phase.kind==='work')previousWork=series;
       return {name:phase.name,kind:phase.kind,milliseconds:phase.actualSeconds*1000,requiresStart};

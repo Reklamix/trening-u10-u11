@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 const read=n=>readFileSync(new URL('../'+n,import.meta.url),'utf8');
-const {calendar,planner,setup}=runInNewContext(read('training-calendar.js')+read('football.js').split('// FOOTBALL_BROWSER')[0]+read('training-planner.js')+read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0]+read('training-programs.js')+';({calendar:TrainingCalendar,planner:TrainingPlanner,setup:PitchSetupPlan});',{performance:{now:()=>0}});
+const {calendar,planner,setup}=runInNewContext(read('training-calendar.js')+read('football.js').split('// FOOTBALL_BROWSER')[0]+read('training-planner.js')+read('pitch-setup.js').split('// PITCH_SETUP_BROWSER')[0]+read('training-programs.js')+read('training-load.js')+';({calendar:TrainingCalendar,planner:TrainingPlanner,setup:PitchSetupPlan});',{performance:{now:()=>0}});
 const data=JSON.parse(read('trainings.json')),agenda=JSON.parse(read('upcoming.json'));
 const original=JSON.stringify(data),expanded=calendar.expand(data,agenda);
 assert.equal(JSON.stringify(data),original,'Expansion must not mutate existing archived training data');
@@ -34,7 +34,7 @@ for(const training of drafts){
  assert.ok(planner.supports(training));
  assert.equal(training.blocks.reduce((sum,b)=>sum+b.end-b.start,0),75);
  assert.ok(training.blocks.every(b=>training.programId?b.cues.length>0:b.cues.includes(training.cue)));
- assert.equal(training.blocks.length,6);
+ assert.equal(training.blocks.length,training.programId?(training.date==='2026-11-02'?8:7):6);
  if(!training.programId)assert.equal(JSON.stringify(training.blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),JSON.stringify(data.trainings.find(t=>t.date==='2026-10-29').blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),'Unchanged later drafts retain approved template doses');
  for(const players of [10,20,30])for(const pitch of ['quarter','half','full']){
   const t=planner.adapt(training,{...training.defaultConfig,players,pitch,width:planner.pitches[pitch].width,height:planner.pitches[pitch].height,groupSizes:planner.groups(players)});
@@ -42,7 +42,7 @@ for(const training of drafts){
   assert.equal(t.id,training.id);
   assert.ok(setup.supports(t));
   const plan=setup.forExercises(t);
-  assert.equal(plan.steps.length,6);
+  assert.equal(plan.steps.length,t.blocks.length);
   if(!t.startTime)assert.equal(plan.steps[0].when,'0 min–10 min');
   assert.equal(plan.layout.width,planner.pitches[pitch].width);
   assert.ok(t.equipment[0].quantity.includes(String(players+4)));

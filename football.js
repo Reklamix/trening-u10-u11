@@ -17,7 +17,7 @@ class FootballTimeline {
 }
 
 const FootballScenes = {
-  keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-mini-games','football-finish'],
+  keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-mini-games','football-finish','football-strength','football-speed','football-large-game'],
   groups(key,total,layout) {
     const areas=layout?.stages?.[key]?.areas||[];
     return areas.map((area,index)=>({...area,index,count:area.count??(key==='football-warmup'?(layout.warmupCounts?.[index]??(index?Math.ceil(total/2):Math.floor(total/2))):Math.floor(total/areas.length)+(index<total%areas.length?1:0))}));
@@ -384,7 +384,7 @@ const FootballPhaseNavigation={
       phaseNav.style.setProperty('--phase-count',phaseCards.length);phaseNav.classList.toggle('has-many',phaseCards.length>3);
       const rules=html('details','exercise-full-plan'),allSteps=html('ol');data.steps.forEach(text=>allSteps.append(html('li','',text)));rules.append(html('summary','','Celý rozpis a pravidlá'),glance,html('p','exercise-summary-description',data.description),allSteps);rules.open=fullPlanOpen;rules.addEventListener('toggle',()=>{if(rules.isConnected)fullPlanOpen=rules.open;});
       summary.replaceChildren(html('h2','sr-only','Fázy cvičenia'),phaseNav,phaseDetail,rules);syncPhaseCards(FootballPhaseNavigation.index(scene.phases||[],clock.time()));
-      quickFacts.replaceChildren();const noun=(count,one,few,many)=>count===1?one:count>=2&&count<=4?few:many;for(const[label,value,hint,icon,action]of[['Plocha',selectedArea?`${selectedArea.length} × ${selectedArea.width} m`:'Pri trénerovi',`${config.width} × ${config.height} m spolu`,'bounding-box',()=>selectTopic('space')],['Deti',String(localCount),'z '+config.players,'people-fill',()=>selectTopic('space',{settings:true})],['Pomôcky',data.conesLocal?`${data.conesLocal} ${noun(data.conesLocal,'kužeľ','kužele','kužeľov')}`:'Voda',data.ballsLocal?`${data.ballsLocal} ${noun(data.ballsLocal,'lopta','lopty','lôpt')}`:'pre každého','cone-striped',()=>selectTopic('kit')]]){const button=html('button','card-quick-fact');button.type='button';const text=html('span');text.append(html('span','card-fact-label',label),html('strong','',value),html('small','',hint));const factIcon=uiIcon(icon);if(icon==='cone-striped')factIcon.src='./assets/card-cone.webp';button.append(factIcon,text);button.addEventListener('click',action);quickFacts.append(button);}
+      quickFacts.replaceChildren();const noun=(count,one,few,many)=>count===1?one:count>=2&&count<=4?few:many;for(const[label,value,hint,icon,action]of[['Plocha',selectedArea?`${selectedArea.length} × ${selectedArea.width} m`:'Pri trénerovi',`${config.width} × ${config.height} m spolu`,'bounding-box',()=>selectTopic('space')],['Deti',String(localCount),'z '+config.players,'people-fill',()=>selectTopic('space',{settings:true})],['Pomôcky',data.conesLocal?`${data.conesLocal} ${noun(data.conesLocal,'kužeľ','kužele','kužeľov')}`:'Voda',data.ballsLocal?`${data.ballsLocal} ${noun(data.ballsLocal,'lopta','lopty','lôpt')}`:data.conesLocal?'na túto plochu':'pre každého','cone-striped',()=>selectTopic('kit')]]){const button=html('button','card-quick-fact');button.type='button';const text=html('span');text.append(html('span','card-fact-label',label),html('strong','',value),html('small','',hint));const factIcon=uiIcon(icon);if(icon==='cone-striped')factIcon.src='./assets/card-cone.webp';button.append(factIcon,text);button.addEventListener('click',action);quickFacts.append(button);}
 
       const panels={};for(const key of['steps','space','time','coach','kit']){const panel=html('div','exercise-topic-panel');panel.id='exercise-panel-'+key;panel.dataset.panel=key;panel.setAttribute('role','region');panel.setAttribute('aria-label',{steps:'Postup cvičenia',space:'Plocha a skupiny',time:'Práca, oddych a striedanie',coach:'Pokyny trénera',kit:'Pomôcky cvičenia'}[key]);panels[key]=panel;briefRoot.append(panel);}
       for(const key of['space','time','coach','kit']){const back=html('button','secondary-button card-back-visual','← Späť');back.type='button';back.addEventListener('click',backStep);panels[key].append(back);}
@@ -410,8 +410,9 @@ const FootballPhaseNavigation={
     }
     function selection(){return{index:pitchIndex,count:options.size,label:areas[pitchIndex]?.label,areas};}
     function refreshPlan(){
+      const previousMembers=areas[pitchIndex]?.members;
       const training=options.planState();block=training.blocks.find(item=>item.id===block.id);options.total=training.planConfig.players;
-      layout=training.quarterPitch;stage=layout.stages[block.diagram];areas=FootballScenes.groups(block.diagram,options.total,layout);options.size=areas[pitchIndex].count;
+      layout=training.quarterPitch;stage=layout.stages[block.diagram];areas=FootballScenes.groups(block.diagram,options.total,layout);if(previousMembers){const matching=areas.findIndex(area=>area.members?.includes(previousMembers[0]));if(matching>=0)pitchIndex=matching;}if(!areas[pitchIndex])pitchIndex=0;options.size=areas[pitchIndex].count;
       areaSelect.replaceChildren(...areas.map(area=>{const option=html('option','',areaLabel(area));option.value=area.index;return option;}));areaSelect.value=String(pitchIndex);
       if(map){map.setAttribute('viewBox',`-3 -4 ${layout.width+6} ${layout.height+7}`);layoutGuide.firstElementChild.textContent=`${layout.label||'Celá 1/4'}: ${layout.assumed?'pracovný rozmer':'približne'} ${layout.width} × ${layout.height} m`;layoutGuide.children[1].textContent=layout.assumption;layoutGuide.lastElementChild.textContent=stage.instructions;}
     }
@@ -443,11 +444,11 @@ const FootballPhaseNavigation={
     }
     function renderLevelTools(){
       const config=options.levelConfig?.();levelTools.replaceChildren();if(!config||!areas.length)return;
-      const indices=block.diagram==='football-warmup'?[pitchIndex*2,pitchIndex*2+1]:[pitchIndex];
+      const indices=areas[pitchIndex]?.members||(block.diagram==='football-warmup'?[pitchIndex*2,pitchIndex*2+1]:[pitchIndex]);
       for(const index of indices){
         const group=['A1','A2','B1','B2'][index],label=html('label','football-select-label','Náročnosť '+group),select=html('select');select.setAttribute('aria-label','Náročnosť '+group);select.dataset.levelGroup=index;
         for(const[value,title]of Object.entries(TrainingPlanner.levels)){const option=html('option','',title);option.value=value;select.append(option);}select.value=config.levels[index];
-        select.addEventListener('change',()=>{if(options.onLevelChange?.(index,select.value)){const updated=options.levelConfig();if(block.diagram!=='football-warmup')areas.forEach(area=>area.skill=updated.levels[area.index]);build();options.onGroupChange(options.size,pitchIndex);focusControl(levelTools.querySelector(`[data-level-group="${index}"]`));}else select.value=options.levelConfig().levels[index];});
+        select.addEventListener('change',()=>{if(options.onLevelChange?.(index,select.value)){const updated=options.levelConfig();if(block.programKind==='large-game'){refreshPlan();pitchIndex=Math.max(0,areas.findIndex(area=>area.members?.includes(index)));options.size=areas[pitchIndex].count;areaSelect.value=String(pitchIndex);}else if(block.diagram!=='football-warmup')areas.forEach(area=>area.skill=area.members&&typeof TrainingLoad!=='undefined'?TrainingLoad.skill(updated,area.members):updated.levels[area.index]);build();options.onGroupChange(options.size,pitchIndex);focusControl(levelTools.querySelector(`[data-level-group="${index}"]`));}else select.value=options.levelConfig().levels[index];});
         label.append(select);levelTools.append(label);
       }
       const note=html('p','small-note','Ukladá sa pre skupinu v tomto tréningu.');note.style.gridColumn='1 / -1';levelTools.append(note);
@@ -504,6 +505,7 @@ const FootballPhaseNavigation={
       if(p){
         svg.append(svgNode('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:focused?'none':'#e5eddd',stroke:focused?'white':'#638268','stroke-width':1.2}));
         for(const line of scene.lines||[])svg.append(svgNode('line',{x1:line.from.x,y1:line.from.y,x2:line.to.x,y2:line.to.y,stroke:focused?'#ffffffa0':'#638268','stroke-width':1,'stroke-dasharray':'5 4'}));
+        for(const note of scene.annotations||[])svg.append(svgNode('text',{x:note.x,y:note.y,'text-anchor':'middle','font-size':12,fill:focused?'white':'#173b31',stroke:focused?'#173b31':'white','stroke-width':3,'paint-order':'stroke'},note.text));
         if(p.zones){const depth=p.w*2/p.length;for(const x of[p.x,p.x+p.w-depth])svg.append(svgNode('rect',{x,y:p.y,width:depth,height:p.h,fill:focused?'#ffffff22':'#cfdcbd',stroke:focused?'#f5fff080':'#638268'}));}
         for(const cone of scene.cones){
           const g=svgNode('g',{'data-cone':cone.kind,transform:`translate(${cone.x} ${cone.y})`});

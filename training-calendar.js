@@ -41,6 +41,7 @@ const TrainingCalendar = {
       t.planning={status:plan.status,topic:plan.topic,scheduleConfirmed:agenda.scheduleConfirmed===true,assumptions:agenda.assumptions,period:{...agenda.period}};
       if(plan.programId)t.programId=plan.programId;
       t.defaultConfig={players:20,coaches:2,pitch:'quarter',width:35,height:25,levels:['base','base','standard','standard'],groupSizes:[5,5,5,5]};
+      if(t.programId)t.defaultConfig={...t.defaultConfig,pitch:'half',width:50,height:35};
       t.players='Návrh: 20 detí · počet možno upraviť 10–30';
       t.notes.push({title:'Zameranie tohto dňa',text:plan.focus+' '+plan.cue+' Zachovávame známy 75-minútový formát a dávky; mení sa hlavný trénerský podnet. Obsah a podmienky zostávajú pracovný návrh.'});
       for(const block of t.blocks)block.cues.unshift(plan.cue);
