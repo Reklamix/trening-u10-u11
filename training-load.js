@@ -55,7 +55,7 @@ const TrainingLoad = {
     t.equipment[3].quantity=`${team} svetlých + ${team} tmavých${neutral?' + '+neutral+' odlišných pre N':''}`;
     t.equipment[3].detail='Maximum potrebných kusov každej farby naprieč cvikmi; v jednom cviku sa použije len jeho aktuálny počet.';
     const gates=Math.max(...t.blocks.map(b=>SessionPrograms.cones(t,b).filter(p=>p.kind==='gate').length/2));
-    t.equipment[2].quantity=`${gates} bránok zo ${gates*2} pripravených mét`;
+    t.equipment[2].quantity=`${gates} ${gates===1?'bránka':gates<=4?'bránky':'bránok'} zo ${gates*2} pripravených mét`;
     t.equipment[2].detail='Maximum súčasných kužeľových bránok; ich méty už patria do celkového počtu mét.';
   },
   table(t,b,n){
