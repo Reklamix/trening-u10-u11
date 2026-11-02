@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Tréningy U10 / U11",
+  "short_name": "Tréningy",
+  "lang": "sk",
+  "description": "Trénerova karta, cvičenia a nové tréningy poruke.",
+  "start_url": "./#sekcia=overview",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7f1",
+  "theme_color": "#123d35",
+  "icons": [
+    {"src":"./assets/app/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./assets/app/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
