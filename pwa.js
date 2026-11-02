@@ -7,6 +7,10 @@
   let promptEvent=null,registration=null,config=null,busy=false,subscribed=false;
   const message=text=>{status.textContent=text;};
   const storage={get:()=>localStorage.getItem(tokenKey),set:v=>localStorage.setItem(tokenKey,v),remove:()=>localStorage.removeItem(tokenKey)};
+  const settings=document.getElementById('app-settings-dialog'),settingsOpen=document.getElementById('app-settings-open'),settingsClose=document.getElementById('app-settings-close');
+  settingsOpen.addEventListener('click',()=>{settings.showModal();settingsOpen.setAttribute('aria-expanded','true');});
+  settingsClose.addEventListener('click',()=>settings.close());
+  settings.addEventListener('close',()=>settingsOpen.setAttribute('aria-expanded','false'));
   const api=async(path,body)=>{
     const response=await fetch('./api/push/'+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(12000)});
     if(!response.ok)throw Error('Server '+response.status);

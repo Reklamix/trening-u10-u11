@@ -7,10 +7,10 @@
   <meta name="description" content="Klikateľný tréning U10 a U11 priamo na ihrisko. Jedna činnosť, schéma, dávka a ďalší krok.">
   <title>Tréningy U10 / U11</title>
   <link rel="manifest" href="./app.webmanifest">
-  <link rel="apple-touch-icon" href="./assets/app/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="./assets/app/apple-touch-icon-u11.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123d35'/%3E%3Crect x='15' y='10' width='34' height='44' rx='2' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M15 32h34' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" href="./assets/app/icon-u11-192.png">
   <link rel="stylesheet" href="./styles.css?v=24">
   <link rel="stylesheet" href="./exercise-card.css?v=4">
   <link rel="stylesheet" href="./app-shell.css?v=3">
@@ -33,14 +33,14 @@
   <script src="./training-programs.js?v=7" defer></script>
   <script src="./training-load.js?v=6" defer></script>
   <script src="./app.js?v=40" defer></script>
-  <link rel="stylesheet" href="./pwa.css?v=1">
-  <script src="./pwa.js?v=1" defer></script>
+  <link rel="stylesheet" href="./pwa.css?v=2">
+  <script src="./pwa.js?v=2" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
   <header class="site-header"><div class="header-inner">
     <a class="brand" href="./" aria-label="Tréningy U10 a U11, úvod"><img src="./assets/bootstrap-icons/bounding-box.svg" alt=""><span>TRÉNINGY <b>U10 / U11</b></span></a>
-    <div class="header-actions"><button id="open-archive" class="header-button" type="button" disabled>Archív</button><button id="share" class="header-button" type="button" disabled>Zdieľať</button></div>
+    <div class="header-actions"><button id="open-archive" class="header-button" type="button" disabled>Archív</button><button id="share" class="header-button" type="button" disabled>Zdieľať</button><button id="app-settings-open" class="app-settings-open" type="button" aria-label="Nastavenia aplikácie" aria-haspopup="dialog" aria-controls="app-settings-dialog" aria-expanded="false" title="Nastavenia"><img src="./assets/bootstrap-icons/gear.svg" width="22" height="22" alt=""></button></div>
   </div></header>
   <main id="main" class="container" tabindex="-1">
     <div class="session-picker">
@@ -88,12 +88,7 @@
         <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">1 · Pripraviť ihrisko →</button><button id="summary-start" class="button" type="button">2 · Začať cvičenia →</button></div>
         <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky · označ pripravené</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
         <a class="planning-entry" href="#planning" data-view="planning"><span>Plán tréningov</span><small>Najbližšie 2 týždne →</small></a>
-        <section class="mobile-app-panel" aria-labelledby="mobile-app-title">
-          <div class="mobile-app-heading"><img src="./assets/app/icon-192.png" width="44" height="44" alt=""><div><h2 id="mobile-app-title">Tréningy poruke</h2><p>Ikona v mobile. Nové tréningy bez hľadania.</p></div></div>
-          <div class="mobile-app-actions"><button id="install-app" class="secondary-button" type="button">Pridať do mobilu</button><button id="push-toggle" class="button" type="button" disabled>Zapnúť upozornenia</button></div>
-          <p id="push-status" class="mobile-app-status" role="status" aria-live="polite" aria-atomic="true">Overujem dostupnosť upozornení…</p>
-          <a id="push-primary-link" href="https://treningy.begoal.sk/" hidden>Otvoriť aplikáciu na BeGoal →</a>
-        </section>
+
         </div><aside class="overview-tools" aria-label="Podmienky a organizácia tréningu"><h2 class="overview-tools-title">Podmienky a plán</h2>
         <details id="conditions-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/gear.svg" alt="">Nastaviť podmienky<span id="conditions-summary"></span></summary>
         <form id="plan-form" class="plan-card" hidden>
@@ -188,6 +183,15 @@
   <p id="status" class="toast" role="status" aria-live="polite" aria-atomic="true"></p>
   <dialog id="archive-dialog" aria-labelledby="archive-title"><h2 id="archive-title">Archív tréningov</h2><p class="muted">Vyber deň a otvor uložený tréning.</p><label for="archive-date">Dátum tréningu</label><input id="archive-date" type="date"><button id="archive-all" class="text-button" type="button">Zobraziť všetky dni</button><p id="archive-count" class="small-note" role="status"></p><div id="archive-list" class="archive-list"></div><form method="dialog"><button class="secondary-button" type="submit">Zavrieť archív</button></form></dialog>
   <dialog id="share-dialog" aria-labelledby="share-title"><form method="dialog"><h2 id="share-title">Poslať kolegovi</h2><p>Zdieľa sa iba klubový tréning.</p><label for="share-url">Webový odkaz</label><input id="share-url" type="url" readonly><button id="copy-link" class="button" type="button">Skopírovať odkaz</button><button id="native-share" class="secondary-button" type="button" hidden>Zdieľať cez aplikáciu</button><button class="text-button" type="submit">Zavrieť</button></form></dialog>
+  <dialog id="app-settings-dialog" class="mobile-app-dialog app-settings-dialog" aria-labelledby="app-settings-title">
+    <header class="app-settings-top"><div><p>TRÉNINGY U11</p><h2 id="app-settings-title">Nastavenia</h2></div><button id="app-settings-close" type="button" aria-label="Zavrieť nastavenia"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button></header>
+        <section class="mobile-app-panel mobile-app-settings-panel" aria-labelledby="mobile-app-title">
+          <div class="mobile-app-heading"><img src="./assets/app/icon-u11-192.png" width="44" height="44" alt=""><div><h3 id="mobile-app-title">Aplikácia v mobile</h3><p>U11 poruke. Oznámenia na tomto zariadení.</p></div></div>
+          <div class="mobile-app-actions"><button id="install-app" class="secondary-button" type="button">Pridať do mobilu</button><button id="push-toggle" class="button" type="button" disabled>Zapnúť upozornenia</button></div>
+          <p id="push-status" class="mobile-app-status" role="status" aria-live="polite" aria-atomic="true">Overujem dostupnosť upozornení…</p>
+          <a id="push-primary-link" href="https://treningy.begoal.sk/" hidden>Otvoriť aplikáciu na BeGoal →</a>
+        </section>
+  </dialog>
   <dialog id="install-dialog" class="mobile-app-dialog" aria-labelledby="install-title"><h2 id="install-title">Pridať tréningy do mobilu</h2><p id="install-instructions"></p><p>Potom aplikáciu otvor cez jej ikonu. Upozornenia zapneš samostatným tlačidlom.</p><form method="dialog"><button class="button" type="submit">Rozumiem</button></form></dialog>
 </body>
 </html>
