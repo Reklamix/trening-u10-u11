@@ -7,9 +7,9 @@ const SessionPrograms = {
   plain(t){return {...t,programId:undefined};},
   confidenceCue:'Voľná cesta? Skús 1 na 1 a zrýchli prvé dva kroky. Ak je cesta zavretá, využi spoluhráča; kľučka nie je povinná.',
   confidenceSupport:'Páruj deti podľa aktuálnej zručnosti a pohybovej vyspelosti. Pri opakovanom neúspechu alebo váhaní zníž tlak obrancu; pri samostatnom zvládaní ho postupne pridaj. Oceň konkrétny pokus, rozhodnutie a nové zapojenie po chybe; bez povinného počtu výhier.',
-  duelDose(n){
-    const cycles=Math.ceil(600/(n*30)),slot=Math.floor(600/(cycles*n)/5)*5;
-    return {cycles,rounds:n,slot,action:10,reset:slot-10,buffer:600-cycles*n*slot,between:180/(cycles-1)};
+  duelDose(n,budget=600){
+    const cycles=budget===600?Math.ceil(budget/(n*30)):Math.max(1,Math.floor(budget/(n*30))),slot=Math.floor(budget/(cycles*n)/5)*5;
+    return {cycles,rounds:n,slot,action:10,reset:slot-10,buffer:budget-cycles*n*slot,between:180/(cycles-1)};
   },
   pods(n){const pods=Array.from({length:Math.floor(n/2)},()=>2);if(n%2)pods[pods.length-1]=3;return pods;},
   lanes(kind,n){return kind==='duel'?(n>=4?2:1):(n>=6?2:1);},
@@ -22,13 +22,13 @@ const SessionPrograms = {
     const raw={...this.plain(source),blocks:source.blocks.filter(b=>!['strength','speed'].includes(b.programKind))};
     const t=TrainingPlanner.adapt(raw,input),c=t.planConfig,tue=source.programId===this.ids[1];
     t.programId=source.programId;
-    const kinds=['warm',tue?'duel':'pairs',tue?'two-one':'rondo','zones','game','finish'];
+    const kinds=['warm',tue?'duel':'pairs',tue?'two-one':'duel','zones','game','finish'];
     const ends=tue?[10,22,38,54,72,75]:[10,22,36,52,72,75];
-    const names=['Rozohriatie s loptou',tue?'1 na 1 so strelou':'Prijmi a prihraj',tue?'2 na 1 na dve bránky':'Držanie lopty s obrancom','Hra do koncových zón','Minihra podľa počtu','Pokojný záver'];
+    const names=['Rozohriatie s loptou',tue?'1 na 1 so strelou':'Prijmi a prihraj',tue?'2 na 1 na dve bránky':'1 na 1 so strelou','Hra do koncových zón','Minihra podľa počtu','Pokojný záver'];
     const instructions=[
       'Pohybuj sa medzi spoluhráčmi, veď loptu do voľna a potom prihrávaj.',
       tue?'Prekonaj obrancu a po otvorení cesty zakonči krátkou prízemnou strelou na kužeľovú bránku.':'Prijmi loptu, priprav si ju a prihraj spoluhráčovi po zemi.',
-      tue?'Pritiahni obrancu a vyber voľnú bránku alebo spoluhráča.':'Ukáž sa vedľa obrancu a prihraj voľnému spoluhráčovi.',
+      tue?'Pritiahni obrancu a vyber voľnú bránku alebo spoluhráča.':'Prekonaj obrancu a po otvorení cesty zakonči krátkou prízemnou strelou na kužeľovú bránku.',
       'Boduj vedením alebo príjmom prihrávky v súperovej zóne.',
       tue?'Vyber vedenie alebo prihrávku podľa situácie.':'Prijmi, prihraj a znovu sa ponúkni.',
       'Spomaľ, napi sa a povedz jednu vec, ktorá sa dnes podarila.'
@@ -52,7 +52,7 @@ const SessionPrograms = {
       b.adjustments=['Zníž tlak, ak mizne kvalita. Pri dobrej kvalite pridaj aktívnejšiu obranu alebo nový uhol.',
         'Záťaž tvorí hra a krátke zrýchlenia do voľna. Pri zjavnej únave skráť herný úsek a pridaj oddych; žiadne trestné behy.'];
       if(kinds[i]==='duel')b.adjustments.push('Bez brankára, len krátke prízemné strely vo vlastnej dráhe. Za bránkou nechaj voľný priestor. Po strele, strate, aute alebo do 10 s je akcia hotová; obranca po zisku nezakončuje naspäť. Lopty zbieraj až po zastavení oboch dráh, návrat mimo streleckej dráhy.');
-      b.topics=i===1&&tue?['duels','dribbling','coordination']:i===2&&tue?['decisions','passing','dribbling']:TrainingLibrary.tags[b.diagram];
+      b.topics=kinds[i]==='duel'?['duels','dribbling','coordination']:i===2&&tue?['decisions','passing','dribbling']:TrainingLibrary.tags[b.diagram];
       const stage=t.quarterPitch.stages[b.diagram];
       if(stage&&i>0&&i<5){
         stage.areas=gameAreas.map((a,j)=>({...a,programKind:kinds[i],skill:c.levels[j],count:c.groupSizes[j]}));
@@ -69,9 +69,9 @@ const SessionPrograms = {
       b.topics=[...new Set([...b.topics,'duels'])];
     }
     t.notes=t.notes.filter(n=>n.title!=='Odvaha v 1 na 1');
-    t.notes.unshift({title:'Odvaha v 1 na 1',text:(tue?'Samostatné krátke súboje, potom rozhodovanie 2 na 1. ':'Súboje 1 na 1 v koncových zónach a záverečnej hre. ')+this.confidenceCue+' '+this.confidenceSupport});
+    t.notes.unshift({title:'Odvaha v 1 na 1',text:(tue?'Samostatné krátke súboje, potom rozhodovanie 2 na 1. ':'Samostatné 1 na 1 so strelou, potom prenos do koncových zón a záverečnej hry. ')+this.confidenceCue+' '+this.confidenceSupport});
     t.sources.push({label:'The FA: individuálne výzvy v malých hrách',url:'https://www.thefa.com/bootroom/resources/coaching/challenges-in-small-sided-games'});
-    if(tue)t.sources.push({label:'The FA: 1 na 1 so zakončením',url:'https://www.thefa.com/bootroom/resources/coaching/1v1-and-score'});
+    t.sources.push({label:'The FA: 1 na 1 so zakončením',url:'https://www.thefa.com/bootroom/resources/coaching/1v1-and-score'});
     // Dynamic kit totals come from exactly the same scene markers as the maps.
     for(const b of t.blocks){
       const areas=FootballScenes.groups(b.diagram,c.players,t.quarterPitch);
@@ -90,10 +90,10 @@ const SessionPrograms = {
     t.sources=[...new Map(t.sources.map(s=>[s.url,s])).values()];
     return t;
   },
-  table(kind,n){
+  table(kind,n,budget=600){
     const ids=Array.from({length:n},(_,i)=>i+1);
     if(['duel','two-one'].includes(kind)){
-      const roles=this.roles(kind,n),d=this.duelDose(n);
+      const roles=this.roles(kind,n),d=this.duelDose(n,budget);
       return{groupSize:n,caption:`${d.cycles} série. Rovnaký kruh rolí v každej sérii; A útok, D obrana, R plánovaný oddych.`,headers:['Kolo','Útok','Obrana','Oddych','Práca / návrat'],rows:ids.map((_,k)=>[String(k+1),...['A','D','R'].map(role=>ids.filter((_,i)=>roles[i]===role).map(id=>(id-1+k)%n+1).join(', ')||'—'),`do 10 s / ${d.reset} s`])};
     }
     if(kind==='rondo')return{groupSize:n,caption:'2 série, obranca sa mení podľa čísel; nie po chybe.',headers:['Kolo','Obranca','Prihrávajú'],rows:ids.map(id=>[String(id),n===2?'Bez obrancu':String(id),ids.filter(p=>n===2||p!==id).join(', ')])};
@@ -108,7 +108,7 @@ const SessionPrograms = {
     if(kind==='pairs')task=`Vytvor ${this.pods(n).map(v=>v===2?'dvojicu':'trojicu').join(' + ')}. ${base?'Prihrávky na 3–4 m: prijmi, priprav a prihraj.':'Prihrávky na 4–6 m, pohľad pred prijatím, prvý dotyk do voľna a nový uhol po prihrávke.'} Každá podskupina vlastnú loptu; počas oddychu vymeň partnerov.`;
     if(kind==='rondo'){const play=t.loadRevision?TrainingLoad.rondo(n).playSeconds:Math.min(45,Math.floor(300/n)-15),buffer=t.loadRevision?TrainingLoad.rondo(n).bufferSeconds:300-n*(play+15);task=n===2?'Dvojica bez obrancu. Prihrávaj, priprav prvý dotyk a znovu sa ponúkni.':`${n-1} na 1. ${base?'Obranca iba kráča a zachytáva prihrávku, pri nohe neodoberá. Ak sa nedarí, dočasne prihrávajte bez odoberania.':'Obranca aktívne zatvára líniu; ostatní sa ponúkajú. Voľné dotyky.'}`;rotation=`2 série po ${n} kolách: ${play} s práca + ${t.loadRevision?12:15} s oddych/výmena${buffer?`; po poradí ešte ${buffer} s oddych`:''}. ${n===2?'Bez obrancu.':'Obranca podľa čísel 1–'+n+', každý raz v sérii; nikdy nie za chybu.'}`;}
     if(['duel','two-one'].includes(kind)){
-      const d=this.duelDose(n),roles=this.roles(kind,n),lanes=this.lanes(kind,n);
+      const d=this.duelDose(n,b.duelBudget),roles=this.roles(kind,n),lanes=this.lanes(kind,n);
       task=kind==='duel'?`${lanes} ${lanes===1?'dráha':'dráhy'}, v každej 1 na 1 a jedna kužeľová bránka bez brankára. Prekonaj obrancu, otvor si cestu a zakonči krátkou prízemnou strelou. Po strele, strate, aute alebo do 10 s akcia končí; obranca po zisku nezakončuje naspäť. ${base?'Obranca začína o 2 s neskôr a s kontrolovaným odporom.':'Aktívny obranca; zmeň smer alebo rytmus a zrýchli do otvorenej cesty.'}`:n===2?'Pri dvoch hrajte 1 na 1 na dve bránky; tretieho hráča nepridávame.':`${lanes} ${lanes===1?'hra':'hry'} 2 na 1. Voľné vedenie aj prihrávka, bez povinnej kombinácie. ${base?'Obranca najprv iba zatvára cestu/zachytáva prihrávku.':'Pritiahni obrancu a rozhodni podľa jeho reakcie.'}`;
       rotation=`${d.cycles} série × ${n} kôl × ${d.slot} s. Útok najviac 10 s, potom ${d.reset} s návrat/výmena/oddych. Roly ${roles.join(' → ')}; A útok, D obrana, R plánovaný oddych. Po kole sa každý posunie o jednu rolu; po ${n} kolách každý prejde celý kruh.${kind==='two-one'?` Medzi sériami ${t.loadRevision?String(Math.floor(120/(d.cycles-1)))+(120%(d.cycles-1)?'–'+Math.ceil(120/(d.cycles-1)):''):d.between} s oddych.`:''}${d.buffer?` Navyše ${d.buffer} s na oddych a opravu pred vodou.`:''} Oddychujúci v 2 m servisnom páse, nikdy v priechode.`;
     }
@@ -213,7 +213,7 @@ const SessionPrograms = {
       }hold('Voda a príprava zón',t.loadRevision?60:120,'water');
     }
     if(['duel','two-one'].includes(kind)){
-      const d=this.duelDose(n),ids=Array.from({length:n},(_,i)=>'child'+i),roles=this.roles(kind,n);
+      const d=this.duelDose(n,b.duelBudget),ids=Array.from({length:n},(_,i)=>'child'+i),roles=this.roles(kind,n);
       for(let r=0;r<d.cycles;r++){
         for(let k=0;k<n;k++){
           const order=ids.map((_,i)=>ids[(i+k)%n]);
@@ -243,7 +243,7 @@ const SessionPrograms = {
   brief(t,b,index,legacy){
     if(typeof TrainingLoad!=='undefined'&&TrainingLoad.kinds.includes(b.programKind))return TrainingLoad.brief(t,b,index);
     const kind=b.programKind;if(['warm','finish'].includes(kind))return legacy;
-    const v=this.variant(t,b,index),area=t.quarterPitch.stages[b.diagram].areas[index],n=area.count,d=this.duelDose(n),duel=['duel','two-one'].includes(kind);
+    const v=this.variant(t,b,index),area=t.quarterPitch.stages[b.diagram].areas[index],n=area.count,d=this.duelDose(n,b.duelBudget),duel=['duel','two-one'].includes(kind);
     const s=FootballScenes.build(b.diagram,{size:n,total:t.planConfig.players,pitchIndex:index,area});
     const conesLocal=s.cones.length,conesTotal=this.cones(t,b).length,ballsLocal=kind==='pairs'?this.pods(n).length:duel?this.lanes(kind,n):1;
     const ballsTotal=t.planConfig.groupSizes.reduce((sum,size)=>sum+(kind==='pairs'?this.pods(size).length:duel?this.lanes(kind,size):1),0);

@@ -40,8 +40,8 @@ for(const source of programs){
     if(['duel','two-one'].includes(b.programKind)){
      const n=area.count,work=scene.phases.filter(p=>p.kind==='work'),roles=nodes.map(node=>{const r={A:0,B:0,N:0};work.forEach(p=>r[p.roles[node.id].team]++);return r;});
      assert.ok(roles.every(r=>JSON.stringify(r)===JSON.stringify(roles[0])),'Balanced attack/defence/rest for every child');
-     const d=G.duelDose(n);assert.equal(work.length,d.cycles*n);assert.equal(timer.parts.filter(p=>p.requiresStart).length,d.cycles-1,'Only next series requires manual start');
-     if(n===5){assert.equal(roles[0].A,8);assert.equal(roles[0].B,b.programKind==='duel'?8:4);assert.equal(roles[0].N,b.programKind==='duel'?4:8);}
+     const d=G.duelDose(n,b.duelBudget);assert.equal(work.length,d.cycles*n);assert.equal(timer.parts.filter(p=>p.requiresStart).length,d.cycles-1,'Only next series requires manual start');
+     if(n===5){assert.equal(roles[0].A,t.date==='2026-11-02'?6:8);assert.equal(roles[0].B,b.programKind==='duel'?(t.date==='2026-11-02'?6:8):4);assert.equal(roles[0].N,b.programKind==='duel'?(t.date==='2026-11-02'?3:4):8);}
      if(b.programKind==='duel'){
       const lanes=G.lanes('duel',n),gates=base.cones.filter(c=>c.kind==='gate'),shots=base.arrows.filter(a=>a.kind==='shot');
       assert.equal(shots.length,lanes,'Every duel lane ends with a shot');assert.equal(gates.length,2*lanes,'One real cone goal per duel lane');
