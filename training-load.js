@@ -1,6 +1,6 @@
 'use strict';
 
-// Physical preparation belongs inside the two approved 75-minute sessions.
+// Keep the approved block doses; Monday includes the extra rondo requested by the coach.
 const TrainingLoad = {
   kinds:['strength','speed','large-game'],
   merged(c){return c.width>=45&&c.height>=30;},
@@ -25,6 +25,22 @@ const TrainingLoad = {
     if(!tue)old[1].dose='30 s ukážka + 3 × 150 s prihrávky + 2 × 30 s oddych + 1 min voda = 10 min.';
     if(!tue)old[2].duelBudget=480;
     old[2].dose=tue?'30 s ukážka + 10 min útokov/návratov + spolu 2 min medzi sériami + 90 s voda = 14 min. Pri 5: 4 × 5 kôl po 30 s.':'1 min ukážka + 8 min súbojov/návratov vrátane doplnkového oddychu + 1 min voda = 10 min. Pri 5: 3 × 5 kôl po 30 s + 30 s oddych; útok do 10 s, 20 s návrat/oddych.';
+    let rondo;
+    if(!tue){
+      // The former small-game scene slot is free once the final game uses its larger field.
+      const duelStage=t.quarterPitch.stages[old[2].diagram];
+      old[2].diagram='football-mini-games';t.quarterPitch.stages[old[2].diagram]=duelStage;
+      rondo={...old[2],id:'9',programExtra:true,programKind:'rondo',diagram:'football-rondo',title:'Držanie lopty s obrancom',loadSeconds:600};
+      delete rondo.duelBudget;
+      rondo.summary='Ukáž sa vedľa obrancu a prihraj voľnému spoluhráčovi.';
+      rondo.dose='1 min ukážka + 2 × 210 s rotácií + 1 min medzi sériami + 1 min voda = 10 min. Pri 5: 5 × (30 s hra + 12 s oddych) v sérii.';
+      rondo.cues=['Ukáž sa vedľa obrancu.'];rondo.topics=['passing','touch','decisions'];
+      rondo.steps=[rondo.summary,rondo.dose,'Obranca sa mení podľa čísel, nie po chybe. Pri dvoch deťoch prihrávajte bez obrancu.'];
+      rondo.adjustments=['Základy: obranca iba kráča a zachytáva prihrávky, pri nohe neodoberá. Pri opakovanom neúspechu zníž tlak.','Upevnenie: primerane aktívny obranca a voľné dotyky; po prihrávke vytvor nový uhol.'];
+      const rondoAreas=areas.map((a,i)=>{const length=c.levels[i]==='base'?6:8,width=c.levels[i]==='base'?6:7;return{...a,x:a.x+(a.w-length)/2,y:a.y+(a.h-width)/2,w:length,h:width,length,width,count:c.groupSizes[i],skill:c.levels[i],programKind:'rondo'};});
+      rondo.space='Štyri samostatné plochy: Základy 6 × 6 m, Upevnenie/Výzva 8 × 7 m. Priechody a obvod zostávajú voľné.';
+      t.quarterPitch.stages[rondo.diagram]={areas:rondoAreas,instructions:rondo.space};
+    }
     old[3].dose=tue?'1 min ukážka + 2 × 4 min herný úsek + 1 min oddych medzi úsekmi + 2 min voda/prestavba = 12 min.':'1 min ukážka + 2 × 5 min herný úsek + 1 min oddych medzi úsekmi + 2 min voda/prestavba = 14 min.';
     const game=old[4];game.diagram='football-large-game';game.programKind='large-game';game.title='Hra s nábehmi a návratmi';game.summary='Po prihrávke podpor útok; po strate sa vráť medzi loptu a vlastnú bránku.';
     game.dose='1 min organizácia + 4 × 3 min herný úsek + 3 × 1 min oddych + 2 min voda/spätná väzba = 18 min. Pri 2–6 v hre je v každom úseku aj oddych.';
@@ -38,15 +54,17 @@ const TrainingLoad = {
     }else games=areas.map((a,i)=>({...a,members:[i],count:c.groupSizes[i],skill:c.levels[i],programKind:'large-game'}));
     t.quarterPitch.stages[game.diagram]={areas:games,instructions:this.merged(c)?`${games.length} hry podľa náročnosti: A1+A2 alebo B1+B2 sa spoja iba pri rovnakej úrovni; rozdielne skupiny ostávajú oddelené. Priechody aspoň 3 m, obvod aspoň 2 m.`:'Na malej ploche zostávajú štyri malé hry; väčšiu hru zvoľ až s reálne dostupným priestorom.'};
     game.space=t.quarterPitch.stages[game.diagram].instructions;
-    t.blocks=tue?[old[0],speed,...old.slice(1)]:[old[0],strength,speed,...old.slice(1)];
+    t.blocks=tue?[old[0],speed,...old.slice(1)]:[old[0],strength,speed,old[1],rondo,...old.slice(2)];
     let elapsed=0;for(const b of t.blocks){const seconds=b.loadSeconds??(b===strength?240:b===speed?360:(b.end-b.start)*60);b.start=elapsed/60;elapsed+=seconds;b.end=elapsed/60;}
-    if(elapsed!==4500)throw Error('Physical session must remain 75 minutes');
+    t.duration=tue?75:85;
+    if(elapsed!==t.duration*60)throw Error('Session blocks must match the approved duration');
     t.loadRevision=1;t.physicalGoal='Príprava z 6+1 na 10+1 od leta: pohybová sila, kvalitné zrýchlenie, podpora útoku a návrat po strate.';
     t.sources.push({label:'The FA: fyzický rozvoj hráčov 9–12 rokov',url:'https://www.thefa.com/bootroom/resources/coaching/how-to-support-physical-development'});
     t.focus=t.physicalGoal+' '+(tue?'Krátke súboje a rozhodovanie.':'Prvý dotyk, presná prihrávka a odvaha v 1 na 1 so zakončením.');
     for(const b of t.blocks)if(b.programKind==='rondo')b.rotation=Array.from({length:7},(_,i)=>this.rondo(i+2));
     for(const b of t.blocks)if(!['warm','finish','large-game'].includes(b.programKind))b.tables=Array.from({length:7},(_,i)=>this.table(t,b,i+2));
     t.organizationNotes.push(t.physicalGoal,'Väčšia hra spája iba susedné technické skupiny A1+A2 a B1+B2 s rovnakou náročnosťou. Rozdielne úrovne ostávajú oddelené; fyzickú dávku uprav individuálne podľa pripravenosti.');
+    if(!tue)t.organizationNotes.push('Dnes 85 minút: rondo zostáva a 1 na 1 so strelou je navyše. Ak klesá kvalita, pripravenosť alebo chuť hrať, záver skráť; 85 minút nie je povinná dávka pre každé dieťa.');
   },
   rondo(n){const work=Math.max(10,Math.min(35,Math.floor(210/n)-12));return{size:n,rounds:n,defenders:n===2?0:1,playSeconds:work,restSeconds:12,bufferSeconds:210-n*(work+12)};},
   gameDose(n,seconds=180){const small=n<=6,work=small?Math.floor(seconds*2/3):seconds,parts=n%2?n:(small?2:1),slot=Math.floor(work/parts),rest=small?Math.floor((seconds-work)/parts):0;return{parts,slot,rest,buffer:seconds-parts*(slot+rest)};},

@@ -12,11 +12,11 @@ assert.equal(expanded.trainings.filter(t=>t.planning?.status==='draft').length,4
 let scenes=0;
 for(const source of programs){
  assert.equal(source.planning.status,'ready');
- const expected=source.date==='2026-11-02'?[10,14,20,30,40,54,72,75]:[10,16,28,42,54,72,75];
+ const expected=source.date==='2026-11-02'?[10,14,20,30,40,50,64,82,85]:[10,16,28,42,54,72,75];
  assert.deepEqual(Array.from(source.blocks,b=>b.end),expected);
  for(const players of [10,14,19,20,22,24,26,30])for(const pitch of ['quarter','half','full'])for(const level of ['base','standard','challenge']){
   const t=P.adapt(source,{...source.defaultConfig,players,pitch,width:P.pitches[pitch].width,height:P.pitches[pitch].height,groupSizes:P.groups(players),levels:[level,level,level,level]});
-  assert.equal(t.blocks.at(-1).end,75);assert.equal(t.duration,75);
+  assert.equal(t.blocks.at(-1).end,expected.at(-1));assert.equal(t.duration,expected.at(-1));
   assert.equal(t.planConfig.groupSizes.reduce((a,b)=>a+b,0),players);
   const prep=U.forExercises(t);assert.equal(prep.steps.length,t.blocks.length);
   for(const [i,b]of t.blocks.entries()){

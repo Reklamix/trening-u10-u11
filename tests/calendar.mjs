@@ -30,11 +30,11 @@ for(const training of drafts){
  assert.equal(training.planning.status,training.programId?'ready':'draft');
  assert.equal(training.planning.scheduleConfirmed,true);
  assert.equal(training.startTime,'18:00');
- assert.equal(training.duration,75);
+ assert.equal(training.duration,training.date==='2026-11-02'?85:75);
  assert.ok(planner.supports(training));
- assert.equal(training.blocks.reduce((sum,b)=>sum+b.end-b.start,0),75);
+ assert.equal(training.blocks.reduce((sum,b)=>sum+b.end-b.start,0),training.date==='2026-11-02'?85:75);
  assert.ok(training.blocks.every(b=>training.programId?b.cues.length>0:b.cues.includes(training.cue)));
- assert.equal(training.blocks.length,training.programId?(training.date==='2026-11-02'?8:7):6);
+ assert.equal(training.blocks.length,training.programId?(training.date==='2026-11-02'?9:7):6);
  if(!training.programId)assert.equal(JSON.stringify(training.blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),JSON.stringify(data.trainings.find(t=>t.date==='2026-10-29').blocks.map(b=>[b.diagram,b.start,b.end,b.dose])),'Unchanged later drafts retain approved template doses');
  for(const players of [10,20,30])for(const pitch of ['quarter','half','full']){
   const t=planner.adapt(training,{...training.defaultConfig,players,pitch,width:planner.pitches[pitch].width,height:planner.pitches[pitch].height,groupSizes:planner.groups(players)});
@@ -46,7 +46,7 @@ for(const training of drafts){
   if(!t.startTime)assert.equal(plan.steps[0].when,'0 min–10 min');
   assert.equal(plan.layout.width,planner.pitches[pitch].width);
   assert.ok(t.equipment[0].quantity.includes(String(players+4)));
-  assert.equal(t.blocks.at(-1).end,75);
+  assert.equal(t.blocks.at(-1).end,training.date==='2026-11-02'?85:75);
   adaptations++;
  }
 }

@@ -19,7 +19,7 @@ const SessionPrograms = {
   },
   adapt(source,input){
     // Use the existing normalization/geometry; replace only the two approved programs.
-    const raw={...this.plain(source),blocks:source.blocks.filter(b=>!['strength','speed'].includes(b.programKind))};
+    const raw={...this.plain(source),blocks:source.blocks.filter(b=>!['strength','speed'].includes(b.programKind)&&!b.programExtra)};
     const t=TrainingPlanner.adapt(raw,input),c=t.planConfig,tue=source.programId===this.ids[1];
     t.programId=source.programId;
     const kinds=['warm',tue?'duel':'pairs',tue?'two-one':'duel','zones','game','finish'];
