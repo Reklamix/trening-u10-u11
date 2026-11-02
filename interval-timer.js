@@ -53,7 +53,7 @@ class IntervalClock {
     this.progressBase=this.total-this.left;this.deadline=now+this.left;this.started=true;
   }
   pause(now=Date.now()){this.left=this.remaining(now);this.deadline=null;}
-  reset(){this.parts=[{name:'Priprav sa',kind:'ready',milliseconds:5000},...this.originalParts.map(part=>({...part}))];this.total=this.trainingTotal+5000;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
+  reset(){this.parts=this.originalParts.map(part=>({...part}));this.total=this.trainingTotal;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
   snapshot(now=Date.now()){
     const elapsed=this.elapsed(now);let offset=0,overall=0;
     for(const part of this.parts){const end=offset+part.milliseconds;if(part.kind!=='ready'&&elapsed<end)overall+=end-Math.max(offset,elapsed);offset=end;}offset=0;
@@ -93,7 +93,7 @@ const TimerTonePatterns={
   }
   function bind(next,initial=false){
     cancel();clock=next;const elapsed=next.elapsed();cursor=next.signals.findIndex(event=>event.at>elapsed);if(cursor<0)cursor=next.signals.length;
-    if(initial)tone('countdown',context?.currentTime||0);
+    if(initial){const kind=next.snapshot().part.kind;tone(kind==='ready'?'countdown':kind==='work'?'start':'transition',context?.currentTime||0);}
   }
   function update(next){
     if(next.deadline===null||next.remaining()===0){

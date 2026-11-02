@@ -123,7 +123,7 @@ Tabuľka má `caption`, pole `headers` a pole riadkov `rows`. Každý riadok má
 
 ## Časovač sérií a zvuk
 
-Spustiť odpočíta5s na prípravu a potom meria skutočné fázy aktuálne zobrazenej skupiny. Posledných5sekúnd práce aj oddychu pípa raz za sekundu. Koniec práce, pripravenosť na ďalšiu sériu, štart a úplný koniec majú odlišné tóny. Po odmeraní oddychu čaká ďalšia séria na **Spustiť ďalšiu sériu**; tlačidlo pridá nový5s nástup. Vnútorné výmeny obrancov v jednej rondovej sérii a súvislé polovice minihry ostávajú plynulé. Úvodné a dodatočné nástupy ani čakanie nemenia schválenú tréningovú dávku. Na ďalšie cvičenie prechádza tréner cez Hotovo.
+Spustiť hneď meria prvú plánovanú fázu aktuálne zobrazenej skupiny; pred cvičením sa nepridáva 5-sekundová príprava. Rovnako funguje reset a opätovný štart dokončeného cvičenia. Posledných5sekúnd práce aj oddychu pípa raz za sekundu. Koniec práce, pripravenosť na ďalšiu sériu, štart a úplný koniec majú odlišné tóny. Po odmeraní oddychu čaká ďalšia séria na **Spustiť ďalšiu sériu**; tlačidlo pridá nový5s nástup. Vnútorné výmeny obrancov v jednej rondovej sérii a súvislé polovice minihry ostávajú plynulé. Dodatočné nástupy ani čakanie nemenia schválenú tréningovú dávku. Na ďalšie cvičenie prechádza tréner cez Hotovo.
 
 Plán pochádza z FootballSequences.actualSeconds, nie zo zrýchlenej animácie. Práve bežiaci časovač si drží pôvodnú zostavu; po zmene podmienok to oznámi a Od začiatku načíta aktuálnu skupinu. Nákres, animácia a časovač sú nezávislé. Pauza zastaví čas aj naplánované zvuky. Staršie archívy majú celkový blok bez vymyslených sérií. Obnovenie stránky časovač resetuje, rovnako ako predtým.
 

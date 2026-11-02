@@ -75,6 +75,6 @@ assert.ok(L.filter(expanded.trainings,{topic:'duels',mode:'drills'}).some(i=>i.t
 assert.throws(()=>C.expand(original,{...agenda,sessions:[{...agenda.sessions[0],programId:'unknown'}]}));
 // Representative interval crosses work → recovery automatically, stops before next series.
 const tue=programs[1],b=tue.blocks[1],spec=I.build(tue,b,0),clock=new IntervalClock(spec);clock.start(1000);
-let boundary=5000+60000;assert.equal(clock.snapshot(1000+boundary+10000).part.kind,'rest');
-clock.remaining(1000+5000+60000+150000);assert.equal(clock.waiting,true);assert.equal(clock.snapshot(1000+5000+60000+150000).part.kind,'work');
+let boundary=60000;assert.equal(clock.snapshot(1000+boundary+10000).part.kind,'rest');
+clock.remaining(1000+60000+150000);assert.equal(clock.waiting,true);assert.equal(clock.snapshot(1000+60000+150000).part.kind,'work');
 console.log(`PASS: ${scenes} program scenes/briefs/timers; all doses, 10–30 counts, 3 pitches/levels, fair roles, kit, prep and manual series boundaries.`);

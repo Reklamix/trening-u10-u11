@@ -12,10 +12,10 @@ const $=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},setAttrib
 const app=read('app.js'),start=app.indexOf('  function updateTimer() {'),end=app.indexOf('  function attendanceCase()',start);
 const scope={$,Date:{now:()=>now},state:{selected:training,view:"field"},document:{hidden:false},finishAdvance:null,finishedClockRuns:new WeakSet(),setTimeout:callback=>{scheduled.push(callback);return scheduled.length;},clearTimeout(){},completeCurrentExercise:()=>advances++,currentClock:()=>clock,clockKey:()=>training.id+'/'+block.id,clockSignature:()=> 'current',clockText:ms=>{const s=Math.ceil(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');},lastTimerState:'',timerVisualKey:'',window:{FootballBoard:{followInterval:part=>followed.push(part)},TimerAudio:{status:()=> 'running',update(){},keepAwake(){}}}};
 const update=runInNewContext(app.slice(start,end)+'\nupdateTimer',scope);
-update();assert.equal($('exercise-clock-value').textContent,'00:05');assert.equal(followed.length,0);
-clock.start(now);now=5000;update();assert.equal($('exercise-clock-value').textContent,'02:00');assert.match($('exercise-clock-phase').textContent,/Práca.*Rozhýbanie/);assert.equal(followed.at(-1).name,'Rozhýbanie');
+update();assert.equal($('exercise-clock-value').textContent,'02:00');assert.equal(followed.length,0);
+clock.start(now);update();assert.equal($('exercise-clock-value').textContent,'02:00');assert.match($('exercise-clock-phase').textContent,/Práca.*Rozhýbanie/);assert.equal(followed.at(-1).name,'Rozhýbanie');
 update();assert.equal(followed.length,1,'Only the real work boundary synchronizes, never every tick');
-now=125000;update();assert.equal(clock.waiting,true);assert.equal($('exercise-clock-toggle').textContent,'Ďalšia séria');assert.equal($('exercise-clock-value').textContent,'03:00');
+now=120000;update();assert.equal(clock.waiting,true);assert.equal($('exercise-clock-toggle').textContent,'Ďalšia séria');assert.equal($('exercise-clock-value').textContent,'03:00');
 now=999000;update();assert.equal($('exercise-clock-value').textContent,'03:00','Waiting does not consume the next series');
 clock.start(now);update();assert.equal($('exercise-clock-value').textContent,'00:05');now+=5000;update();assert.equal($('exercise-clock-value').textContent,'03:00');
 now+=180000;update();assert.equal(clock.waiting,true);clock.start(now);now+=5000;update();assert.equal($('exercise-clock-value').textContent,'01:00');
@@ -26,7 +26,7 @@ for(const part of followed.filter(part=>part.kind!=='ready'))assert.ok(scene.pha
 assert.equal(scheduled.length,0,'No advance during work, rest or a manual gate');
 while(!clock.snapshot().finished){if(clock.waiting)clock.start(now);now+=clock.remaining();clock.snapshot();}
 update();assert.equal(scheduled.length,1,'Only the full exercise completion schedules navigation');assert.equal(advances,0,'Final sound can finish before navigation');scheduled[0]();assert.equal(advances,1);update();assert.equal(scheduled.length,1,'Completion is handled once');
-clock.reset();update();assert.equal($('exercise-clock-value').textContent,'00:05');assert.equal(clock.deadline,null,'Next/reset clock is not auto-started');
+clock.reset();update();assert.equal($('exercise-clock-value').textContent,'02:00');assert.equal(clock.deadline,null,'Next/reset clock is not auto-started and shows its first planned phase');
 for(const item of training.blocks){
  const areas=scenes.groups(item.diagram,24,training.quarterPitch);
  for(const [index,group]of (areas.length?areas:[null]).entries()){

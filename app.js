@@ -444,7 +444,7 @@ const PersonalPlans = [
     $('timer-panel').dataset.kind=snapshot.part.kind;
     $('timer-next').textContent=snapshot.next?'Ďalej: '+snapshot.next.name+' · '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
     const audioState=window.TimerAudio?.status();$('timer-sound-state').textContent=audioState==='off'?'Bez zvuku':audioState==='running'?'Zvuk aktivovaný':clock.started?'Zvuk neaktívny · vyskúšaj zvuk':'Zvuk sa zapne pri štarte';
-    const status = remaining === 0 ? 'Cvičenie dokončené' : clock.waiting?'Pripravené na ďalšiu sériu':clock.deadline !== null ? 'Beží' : clock.started ? 'Pozastavený' : 'Pripravený · 5 s na prípravu';
+    const status = remaining === 0 ? 'Cvičenie dokončené' : clock.waiting?'Pripravené na ďalšiu sériu':clock.deadline !== null ? 'Beží' : clock.started ? 'Pozastavený' : 'Pripravený';
     if (status !== lastTimerState) { $('timer-state').textContent = status; lastTimerState = status; }
     $('timer-toggle').textContent = clock.waiting?'Spustiť ďalšiu sériu':clock.deadline !== null && remaining > 0 ? 'Pauza' : remaining === 0 ? 'Spustiť znova' : clock.started ? 'Pokračovať' : 'Spustiť';
     window.TimerAudio?.update(clock);window.TimerAudio?.keepAwake(clock.deadline!==null&&remaining>0);
