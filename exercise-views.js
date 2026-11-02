@@ -2,6 +2,7 @@
 
 const ExerciseVisualViews = (()=>{
   const saved=new Map();
+  const coneCount=count=>`${count} ${count===1?'kužeľ':count>=2&&count<=4?'kužele':'kužeľov'}`;
   function swipeTarget(index,{dx,dy,startX,width,duration}){
     if(startX<24||startX>width-24||duration>900||Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.4)return index;
     return Math.max(0,Math.min(2,index+(dx<0?1:-1)));
@@ -25,7 +26,7 @@ const ExerciseVisualViews = (()=>{
     figure.setAttribute('aria-roledescription','karusel');
     function drawCones(s,info){
       const p=s.scene.pitch;if(!p)return el('p','exercise-view-note','Toto cvičenie nemá samostatné rozloženie kužeľov.');
-      const drawing=svg('svg',{viewBox:primarySvg.getAttribute('viewBox'),role:'img','aria-label':`${info.areaLabel}: ${info.cones} kužeľov · ${p.length} × ${p.width} m`});
+      const drawing=svg('svg',{viewBox:primarySvg.getAttribute('viewBox'),role:'img','aria-label':`${info.areaLabel}: ${coneCount(info.cones)} · ${p.length} × ${p.width} m`});
       drawing.append(svg('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:'none',stroke:'white','stroke-width':1.4}));
       for(const line of s.scene.lines||[])drawing.append(svg('line',{x1:line.from.x,y1:line.from.y,x2:line.to.x,y2:line.to.y,stroke:'#ffffffaa','stroke-width':1,'stroke-dasharray':'4 4'}));
       for(const[c,cone]of (s.scene.cones||[]).entries()){
@@ -37,15 +38,15 @@ const ExerciseVisualViews = (()=>{
     }
     function refresh(){
       if(destroyed)return;const s=state();if(!s.scene)return;
-      const info=describe(s),coneNote=el('p','exercise-view-note',`${info.areaLabel} · ${info.selectedPlayers} detí · ${info.cones} kužeľov`);
+      const info=describe(s),coneNote=el('p','exercise-view-note',`${info.areaLabel} · ${info.selectedPlayers} detí · ${coneCount(info.cones)}`);
       panes[1].replaceChildren(drawCones(s,info),coneNote);
       if(map){
         const whole=map.cloneNode(true);whole.removeAttribute('id');whole.setAttribute('aria-label',`Celá plocha ${info.pitchWidth} × ${info.pitchHeight} m · ${info.totalPlayers} detí`);
         const radius=Math.max(.42,(info.pitchWidth||35)/90);
         whole.querySelectorAll('[data-map-player]').forEach(node=>node.setAttribute('r',radius));
-        panes[2].replaceChildren(whole,el('p','exercise-view-note',`${info.totalPlayers} detí spolu · ${info.pitchWidth} × ${info.pitchHeight} m · ${whole.querySelectorAll('[data-map-cone]').length} kužeľov`));
+        panes[2].replaceChildren(whole,el('p','exercise-view-note',`${info.totalPlayers} detí spolu · ${info.pitchWidth} × ${info.pitchHeight} m · ${coneCount(whole.querySelectorAll('[data-map-cone]').length)}`));
       }else panes[2].replaceChildren(el('p','exercise-view-note','Celkové rozmiestnenie nie je v tomto staršom pláne uložené.'));
-      meta.textContent=current===1?`${info.areaLabel} · rozlož ${info.cones} kužeľov`:`Celá plocha · ${info.totalPlayers} detí`;
+      meta.textContent=current===1?`${info.areaLabel} · rozlož ${coneCount(info.cones)}`:`Celá plocha · ${info.totalPlayers} detí`;
       paint();
     }
     function paint(){
