@@ -4,10 +4,12 @@ import vm from 'node:vm';
 const manifest=JSON.parse(fs.readFileSync('app.webmanifest','utf8'));
 assert.equal(manifest.scope,'./');assert.equal(manifest.id,'./');assert.equal(manifest.display,'standalone');assert.equal(manifest.start_url,'./#sekcia=overview');
 for(const icon of manifest.icons){const data=fs.readFileSync(icon.src);assert.equal(data.subarray(1,4).toString(),'PNG');const[n]=icon.sizes.split('x').map(Number);assert.equal(data.readUInt32BE(16),n);assert.equal(data.readUInt32BE(20),n);}
-const source=fs.readFileSync('sw.js','utf8');assert.ok(!/addEventListener\(['"]fetch|caches\./.test(source));
+const source=fs.readFileSync('sw.js','utf8');assert.ok(!/caches\./.test(source));
 const listeners={},notifications=[],opened=[],scope='https://treningy.begoal.sk/';
 const self={registration:{scope,showNotification:(title,data)=>{notifications.push({title,...data});return Promise.resolve();}},skipWaiting:()=>Promise.resolve(),clients:{claim:()=>Promise.resolve(),matchAll:()=>Promise.resolve([]),openWindow:url=>{opened.push(url);return Promise.resolve();}},addEventListener:(name,fn)=>listeners[name]=fn};
-vm.runInNewContext(source,{self,URL,Date});
+const network=[];vm.runInNewContext(source,{self,URL,Date,fetch:(request,options)=>{network.push({request,options});return Promise.resolve('network-only');}});
+let response;listeners.fetch({request:{method:'GET',mode:'navigate',url:scope+'#sekcia=overview'},respondWith:p=>response=p});assert.equal(await response,'network-only');assert.equal(network.length,1);assert.equal(network[0].options.cache,'no-store');
+for(const request of [{method:'GET',mode:'cors',url:scope+'personal-plan.enc.json'},{method:'POST',mode:'cors',url:scope+'api/push/subscribe'},{method:'GET',mode:'navigate',url:'https://evil.invalid/'}])listeners.fetch({request,respondWith:()=>assert.fail('Must not intercept private/API/cross-origin requests')});assert.equal(network.length,1);
 async function push(data){let promise;listeners.push({data:{json:()=>data},waitUntil:p=>promise=p});await promise;return notifications.at(-1);}
 async function click(url){let promise;listeners.notificationclick({notification:{data:{url},close(){}},waitUntil:p=>promise=p});await promise;return opened.at(-1);}
 const n=await push({date:'2026-11-03',title:'Súboje',url:'https://evil.invalid/'});assert.equal(n.data.url,scope+'#trening=2026-11-03&sekcia=overview');assert.ok(n.body.includes('03.11.2026'));assert.equal(n.tag,'u11-training-2026-11-03');

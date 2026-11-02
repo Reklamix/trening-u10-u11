@@ -1,7 +1,13 @@
 'use strict';
-// Intentionally no fetch handler or cache: training JSON and private plans stay online-only.
+// Network-only navigation supports Chromium install prompts without caching training/private data.
 self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
+self.addEventListener('fetch',event=>{
+  const request=event.request,url=new URL(request.url),root=new URL('./',self.registration.scope);
+  if(request.method==='GET'&&request.mode==='navigate'&&url.origin===root.origin&&url.pathname===root.pathname){
+    event.respondWith(fetch(request,{cache:'no-store'}));
+  }
+});
 self.addEventListener('push',event=>{
   let data={};try{data=event.data?.json()||{};}catch{}
   const date=typeof data.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(data.date)&&Number.isFinite(Date.parse(data.date))&&new Date(data.date).toISOString().slice(0,10)===data.date?data.date:null;
