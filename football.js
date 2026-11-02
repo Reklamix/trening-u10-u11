@@ -237,6 +237,7 @@ const FootballPhaseNavigation={
     if(areas.length)options.size=areas[pitchIndex].count;
     const focused=Boolean(options.brief),root=html('div',focused?'football-board exercise-flow hybrid-board':'football-board');
     const briefRoot=html('div','exercise-info'),tweaks=html('details','exercise-tweaks');
+    let visualViews=null;
     const uiIcon=name=>{const icon=html('img','card-ui-icon');icon.src='./assets/bootstrap-icons/'+name+'.svg';icon.alt='';return icon;};
     const groupBar=html('div','card-group-bar'),glance=html('section','card-glance'),quickFacts=html('div','card-quick-facts'),summary=html('section','exercise-summary'),phaseDetail=html('div','phase-detail');glance.setAttribute('aria-label','Čas a dávkovanie cvičenia');
     summary.id='exercise-summary';summary.tabIndex=-1;summary.setAttribute('aria-label','Popis a postup');
@@ -322,6 +323,7 @@ const FootballPhaseNavigation={
     }else root.append(coneGuide,layoutGuide,selectors,settings,...(focused?[fineControls]:[]),status,progress,scrub,note,legend);
     parent.append(root);
     if(focused){figure.id='exercise-visual';figure.tabIndex=-1;figure.setAttribute('aria-label','Nákres a animácia cvičenia');}
+    if(focused&&stage&&window.ExerciseVisualViews)visualViews=window.ExerciseVisualViews.mount({root,figure,primarySvg:svg,phaseBar,map,key:(options.planState?.()?.id||'training')+':'+block.id,pause:()=>pause(),state:()=>({scene,layout,areas,index:pitchIndex,total:options.total})});
     let actors=new Map(),arrowLayers=[];
     function focusControl(element){element.focus({preventScroll:true});if(focused){const box=element.getBoundingClientRect();if(box.top<12||box.bottom>innerHeight-150)element.scrollIntoView({block:'nearest',behavior:'instant'});}}
     function selectTopic(key,settings={}){
@@ -537,6 +539,7 @@ const FootballPhaseNavigation={
       if(focused)note.textContent='Celé cvičenie je ukázané v skrátenom čase. Uvedené dávky platia v tréningu; tréningový časovač je samostatný.';
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)note.textContent='Prehrávanie spustíš iba tlačidlom. Pri obmedzenom pohybe môžeš použiť Ďalší krok alebo posuvník.';
       renderBrief();
+      visualViews?.refresh();
       delete phaseBar.dataset.phase;
       render();
     }
@@ -607,6 +610,7 @@ const FootballPhaseNavigation={
     function previousPhase(){const target=FootballPhaseNavigation.target(scene.phases||[],clock.time(),-1);if(target===null)return false;topicTrail.length=0;goToTime(target);return true;}
     function backStep(){
       const before=document.activeElement,inside=root.contains(before);
+      if(topic==='steps'&&!instructionMode&&visualViews?.back())return true;
       if(topic==='steps'&&instructionMode&&instructionIndex>0){instructionIndex--;renderBrief();if(inside)focusControl(briefRoot.querySelector('[data-panel="steps"] .card-back-visual'));return true;}
       const previous=topicTrail.pop();
       if(previous){pause();({topic,instructionIndex,equipmentIndex,timePart,instructionMode,heroAnchor,fullPlanOpen}=previous);restoreTimerView(previous);renderBrief();root.scrollTo({top:previous.scrollTop||0,behavior:'instant'});window.scrollTo({top:previous.pageScroll||0,behavior:'instant'});if(inside&&!before.isConnected)focusControl(topic==='steps'&&!instructionMode?(phasePrevious.disabled?play:phasePrevious):briefRoot.querySelector('[data-panel="'+topic+'"] .card-back-visual'));return true;}
@@ -621,7 +625,7 @@ const FootballPhaseNavigation={
     speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));if(focused)playback.rate=Number(speed.value);render();});
     repeat.addEventListener('change',()=>{clock.setLoop(repeat.checked);if(focused)playback.loop=repeat.checked;render();});
     function followInterval(part){const phase=scene.phases?.find(phase=>phase.name===part.name&&phase.kind===part.kind);if(!phase)return;pause();clock.seek(phase.start);render();}
-    active={pause,selection,selectArea,followInterval,showTimer:()=>navigateTopic('time'),showDoses:()=>selectTopic('time',{part:'work'}),back:backStep,destroy:()=>{pause();moreMenu.remove();document.removeEventListener('click',closeMenuOutside);root.remove();if(layoutDialog){const dialog=layoutDialog;layoutDialog=null;dialog.close();dialog.remove();}if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
+    active={pause,selection,selectArea,followInterval,showTimer:()=>navigateTopic('time'),showDoses:()=>selectTopic('time',{part:'work'}),back:backStep,destroy:()=>{pause();visualViews?.destroy();moreMenu.remove();document.removeEventListener('click',closeMenuOutside);root.remove();if(layoutDialog){const dialog=layoutDialog;layoutDialog=null;dialog.close();dialog.remove();}if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
   }
   function clear(){active?.destroy();active=null;}
   window.FootballBoard={supports:key=>FootballScenes.keys.includes(key),mount,pause:()=>active?.pause(),selection:()=>active?.selection(),selectArea:index=>active?.selectArea(index),followInterval:part=>active?.followInterval(part),showTimer:()=>active?.showTimer(),showDoses:()=>active?.showDoses(),back:()=>active?.back()||false,clear};

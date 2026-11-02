@@ -1,0 +1,29 @@
+/* Exercise views and permanent app navigation; doses, animation geometry and timer are unchanged. */
+body:has(.exercise-focus)>#bottom-nav:not([hidden]){display:flex;z-index:20}
+.exercise-focus:has(.hybrid-board){padding-bottom:calc(148px + env(safe-area-inset-bottom))}
+.exercise-focus .step-actions,.exercise-focus:has(.hybrid-board) .step-actions{bottom:calc(76px + env(safe-area-inset-bottom));z-index:19}
+.exercise-focus .hybrid-board .exercise-topic-nav{position:static;left:auto;bottom:auto;transform:none;width:100%;max-width:none;margin:12px 0 8px;padding:0;flex:none;grid-column:1/-1}
+.exercise-visual-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:none;width:100%;margin:0 0 8px}
+.exercise-visual-tabs button{min-height:44px;min-width:0;padding:9px 4px;border:1px solid #dce5d7;border-radius:10px;background:#fff;color:#345f4d;font:inherit;font-size:13px;font-weight:650;line-height:1.3;cursor:pointer;touch-action:manipulation}
+.exercise-visual-tabs button[aria-pressed=true]{background:#145c49;color:white;border-color:#145c49}.exercise-visual-tabs button:focus-visible{outline:3px solid #89ab63;outline-offset:2px}
+.hybrid-board:not([data-topic=steps])>.exercise-visual-tabs,.hybrid-board[data-instructions=true]>.exercise-visual-tabs{display:none}
+.hybrid-board>.football-figure{touch-action:pan-y pinch-zoom}
+.exercise-visual-pane{position:absolute;inset:0;display:flex;flex-direction:column;padding:16px 10px 10px;min-width:0;min-height:0;overflow:hidden}
+.exercise-visual-pane[hidden],.exercise-animation-hidden,.hybrid-board>.football-figure>svg[hidden]{display:none!important}
+.exercise-visual-pane>svg{display:block;width:100%;height:0;flex:1;min-height:0;max-height:none;padding:0;overflow:visible}
+.exercise-visual-pane .football-layout-map{background:#eef3e8;border-radius:9px}
+.exercise-focus .exercise-visual-pane .football-layout-map text,.football-focus .exercise-visual-pane .football-layout-map text{fill:#173b31;filter:none;text-shadow:none}
+.exercise-view-note{flex:none;margin:8px 0 0;min-height:34px;text-align:center;color:white;font-size:12px;line-height:1.45;font-weight:600}
+.exercise-view-meta{display:none;width:100%;font-size:14px;line-height:1.4;font-weight:650;text-align:center;color:#315e4b}
+.hybrid-board[data-visual-view=cones]>.exercise-phase-bar>:not(.exercise-view-meta),.hybrid-board[data-visual-view=pitch]>.exercise-phase-bar>:not(.exercise-view-meta){display:none}
+.hybrid-board[data-visual-view=cones] .exercise-view-meta,.hybrid-board[data-visual-view=pitch] .exercise-view-meta{display:block}
+.dialog-app-nav{position:sticky;bottom:0;display:flex;flex:none;justify-content:center;gap:2px;width:100%;padding:6px 5px calc(6px + env(safe-area-inset-bottom));margin-top:auto;background:#fafbf6;border-top:1px solid #dce5d7;z-index:5}
+.dialog-app-nav a{display:flex;flex:1;min-width:0;min-height:48px;align-items:center;justify-content:center;flex-direction:column;gap:4px;border-radius:9px;color:#536b5e;text-decoration:none;font-size:10px;font-weight:650}
+.dialog-app-nav img{width:21px;height:21px}.dialog-app-nav a[aria-current]{background:#eaf1e1;color:#173f33}.dialog-app-nav a:focus-visible{outline:2px solid #14614e;outline-offset:-2px}
+@media(min-width:900px) and (min-height:651px){
+ .exercise-focus .hybrid-board>.exercise-visual-tabs{grid-column:1;grid-row:1;margin:0}
+ .exercise-focus .hybrid-board>.exercise-phase-bar{grid-column:1;grid-row:2;margin:0}
+ .exercise-focus .hybrid-board>.football-figure{grid-column:1;grid-row:3}
+ .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.hybrid-details{grid-row:1 / span 3}
+}
+@media(prefers-reduced-motion:reduce){.exercise-visual-tabs button{transition:none}}

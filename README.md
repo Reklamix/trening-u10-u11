@@ -224,6 +224,10 @@ Väčšia hra pri aspoň45 × 30m spája A1+A2 a B1+B2 iba pri rovnakej nastaven
 
 Dávky sú vlastný organizačný návrh pre tieto podmienky, nie výstup fyzického testovania ani automatické predpisovanie záťaže každému dieťaťu. Tréner sleduje pripravenosť a kvalitu; pri únave uberie odpor/čas hry alebo pridá oddych. Verejná aplikácia neobsahuje osobné víkendové aktivity dieťaťa a nemení aplikáciu Rozvoj hráča. Overenie: `node tests/programs.mjs` (nové dávky, férové roly, nákresy, príprava, pomôcky, časovače), `node tests/calendar.mjs` a existujúce regresné testy.
 
+## Tri pohľady a dostupný úvod
+
+`exercise-views.js/css` pridáva pri cvičení prepínanie Animácia → Kužele → Celá plocha tlačidlami alebo vodorovným potiahnutím cez nákres. Kužele vychádzajú z aktuálnej schémy vybranej skupiny; statická celková mapa používa existujúce rozmiestnenie, všetky deti vrátane čakajúcich a nastavené rozmery. Zvislé posúvanie, zväčšenie a okrajové systémové gestá ostávajú dostupné. Klávesnica: šípky, Home/End. Statický pohľad pozastaví iba ukážku, tréningový časovač pokračuje. Spodná hlavná navigácia s Úvodom je dostupná aj pri cvičení a v otvorených dialógoch. Hotovo je nad ňou; Postup/Pomôcky/Nastaviť sú v posúvateľnom obsahu. Overenie: `node tests/exercise-views.mjs` a mobilná/desktopová DOM kontrola. Fyzické gesto na telefóne treba potvrdiť na zariadení.
+
 ## Časovač priamo pri cvičení
 
 `app.js?v=35`, `football.js?v=33`, `app-unified.css?v=4` a `exercise-hybrid.css?v=1` zobrazujú kompaktný časovač priamo pod animáciou. Ukazuje zostávajúci čas aktuálneho meraného úseku, jeho názov a Spustiť/Pauza/Pokračovať/Ďalšia séria. Používa rovnaký IntervalClock aj zvuky ako podrobný panel Časovač; meranie sa nezdvojuje a ručný výber animačnej fázy ho nepretáča. Pri prechode skutočného merania na novú fázu sa ukáže jej nákres; časovač označí Prácu/Oddych/Vodu a nasledujúci úsek. Podrobnosti, reset, dávkovanie a zvukové možnosti zostávajú v existujúcom paneli. Každú ďalšiu sériu naďalej spúšťa tréner.
