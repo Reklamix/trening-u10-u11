@@ -103,3 +103,33 @@
 .exercise-focus .hybrid-board[data-task-mode=true][data-visual-view=animation]>.exercise-phase-bar{display:none!important}
 
 .exercise-task-rotation{white-space:pre-line;font-weight:650;line-height:1.65}.exercise-focus .step-actions:has(#exercise-wave:not([hidden])){display:grid;grid-template-columns:1.1fr .8fr 1fr;gap:5px}.exercise-focus #exercise-wave{min-height:52px;padding:7px;font-size:14px}
+
+/* Simple execution: visual, clock, roles, instruction. Details stay behind controls. */
+.exercise-focus:has(.hybrid-board){max-width:800px}
+.exercise-focus:has(.hybrid-board) .activity-heading{min-height:48px;margin-bottom:6px}
+.exercise-focus:has(.hybrid-board) .activity-heading h1{font-size:23px}
+.exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]{display:flex;flex-direction:column;gap:0}
+.exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.hybrid-details{display:contents}
+.exercise-focus .hybrid-board>.football-figure{order:0;grid-column:auto;grid-row:auto}
+.exercise-focus .hybrid-board .exercise-clock{order:1}
+.exercise-focus .hybrid-board #exercise-rotation{order:2;margin:0 0 8px;padding:8px 10px;font-size:13px;line-height:1.5}
+.exercise-focus .hybrid-board .exercise-summary{order:3}
+.exercise-focus .hybrid-board .phase-choice-nav{display:none}
+.exercise-focus .hybrid-board .hybrid-cue{min-height:0;padding:9px 10px;margin:0 0 8px}
+.exercise-focus .hybrid-board .hybrid-cue-icon{display:none}
+.exercise-focus .hybrid-board .phase-current-cue{font-size:14px;line-height:1.4}
+.exercise-focus .exercise-animation-options{order:4;margin:0 0 8px;border:1px solid #dce5d7;border-radius:10px;background:#fff;padding:0 10px}
+.exercise-focus .exercise-animation-options>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:13px;font-weight:650;color:#184b3e}
+.exercise-focus .exercise-animation-options>summary::after{content:'⌄';margin-left:auto}
+.exercise-focus .exercise-animation-options .exercise-phase-bar{display:flex;align-items:center;gap:6px;padding:0 0 8px;margin:0}
+.exercise-focus .exercise-animation-options .exercise-phase-bar>button{width:44px;min-width:44px;min-height:44px;padding:8px}
+.exercise-focus .hybrid-board .exercise-info{order:5}
+.exercise-focus .hybrid-board .exercise-summary .exercise-full-plan{margin-top:0;margin-bottom:8px}
+
+.exercise-focus .hybrid-board .exercise-topic-nav{order:6;position:static;width:100%;margin:0 0 8px}
+@media(max-width:600px){
+ .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.football-figure{width:min(100%,max(240px,calc(100dvh - 540px)));align-self:center}
+}
+
+.exercise-focus .hybrid-board[data-visual-view=cones]>.exercise-animation-options,.exercise-focus .hybrid-board[data-visual-view=pitch]>.exercise-animation-options{display:none}
+.exercise-focus .hybrid-board>.exercise-view-group{order:0;margin-bottom:8px}

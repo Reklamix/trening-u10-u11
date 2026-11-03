@@ -27,7 +27,7 @@ const ExerciseVisualViews = (()=>{
     const trail=[];let current=saved.get(key)||0,start=null,destroyed=false,descriptionDialog=null;
     panes[1].setAttribute('aria-label','Rozloženie kužeľov vybranej skupiny');panes[2].setAttribute('aria-label','Celá plocha a všetky skupiny');
     for(let i=0;i<3;i++){const button=el('button','',labels[i]);button.type='button';button.setAttribute('aria-label',`${i+1} z 3 · ${labels[i]}`);button.addEventListener('click',()=>select(i));buttons.push(button);nav.append(button);}
-    nav.append(next);root.insertBefore(nav,phaseBar);phaseBar.append(meta,groupTools);figure.append(panes[1],panes[2]);
+    nav.append(next);root.insertBefore(nav,figure);phaseBar.append(meta);root.insertBefore(groupTools,figure);figure.append(panes[1],panes[2]);
     figure.setAttribute('aria-roledescription','karusel');
     function drawCones(s,info){
       const p=s.scene.pitch;if(!p)return el('p','exercise-view-note','Toto cvičenie nemá samostatné rozloženie kužeľov.');

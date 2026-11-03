@@ -313,7 +313,8 @@ const FootballPhaseNavigation={
     if(options.levelConfig?.()&&areas.length)toolsParent.append(levelTools);
     if(options.onCountChange&&options.levelConfig?.()&&areas.length)toolsParent.append(countTools);
     if(options.onPitchChange&&options.levelConfig?.()&&areas.length)toolsParent.append(pitchTools);
-    if(focused){const details=html('div','hybrid-details');details.append(summary);figure.append(groupBar);root.append(phaseBar,figure,details,quickFacts,briefRoot,itemPager,topicNav);}else root.append(skill,figure,controls);
+    const phaseOptions=html('details','exercise-animation-options');phaseOptions.append(html('summary','','Fázy animácie'),phaseBar);
+    if(focused){const details=html('div','hybrid-details');details.append(summary);figure.append(groupBar);root.append(figure,details,phaseOptions,quickFacts,briefRoot,itemPager,topicNav);}else root.append(skill,figure,controls);
     let guide;
     if(options.onGuide){
       guide=html('button','football-guide-entry');guide.type='button';guide.setAttribute('aria-haspopup','dialog');
@@ -358,7 +359,7 @@ const FootballPhaseNavigation={
       const oldPager=itemPager.firstElementChild;if(oldPager)briefRoot.querySelector('[data-panel="'+oldPager.dataset.panel+'"]')?.append(oldPager);itemPager.replaceChildren();const activePager=briefRoot.querySelector('[data-panel="'+topic+'"] .exercise-pager');if(activePager)itemPager.append(activePager);itemPager.hidden=topic==='steps'&&!instructionMode||!activePager;
       briefRoot.hidden=topic==='steps'&&!instructionMode;
       for(const panel of briefRoot.children)panel.hidden=panel.dataset.panel!==topic;
-      const showHero=topic==='steps'&&!instructionMode;groupBar.hidden=!showHero;glance.hidden=false;summary.hidden=!showHero;quickFacts.hidden=!showHero;phaseBar.hidden=!showHero;
+      const showHero=topic==='steps'&&!instructionMode;phaseOptions.hidden=!showHero||!!scene?.taskMode;groupBar.hidden=!showHero;glance.hidden=false;summary.hidden=!showHero;quickFacts.hidden=!showHero;phaseBar.hidden=!showHero;
       for(const section of briefRoot.querySelectorAll('[data-time-part]'))section.hidden=section.dataset.timePart!==timePart;
       for(const button of briefRoot.querySelectorAll('.exercise-time-nav button'))button.setAttribute('aria-pressed',String(button.getAttribute('aria-controls')==='exercise-time-'+timePart));
       const stepsButton=topicNav.querySelector('[data-topic=steps]');if(stepsButton){const backToDiagram=topic!=='steps'||instructionMode;stepsButton.replaceChildren(uiIcon(backToDiagram?'bounding-box':'list-ul'),document.createTextNode(backToDiagram?'Nákres':'Postup'));stepsButton.setAttribute('aria-controls',backToDiagram?'exercise-visual':'exercise-panel-steps');}
