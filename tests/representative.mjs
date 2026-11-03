@@ -38,6 +38,15 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
     assert.ok(runs.every(p=>p.milliseconds===60000),'One minute per series includes recovery, no individual sprint countdown');
     assert.equal(runs.filter(p=>p.requiresStart).length,3);
   }
+  const peopleClock=new Clock(schedule),initial=I.participantsText(peopleClock,peopleClock.snapshot());
+  for(const label of ['Cvičia:','Oddychujú:','Ďalší:'])assert.ok(initial.includes(label),'All three participation rows visible for every drill');
+  assert.ok(!/undefined|NaN/.test(initial));
+  if(b.programKind==='speed'){
+    peopleClock.start(0);const first=schedule.parts[0].milliseconds;const snap=peopleClock.snapshot(first+1);
+    const before=I.participantsText(peopleClock,snap);peopleClock.waves[snap.index]=1;
+    assert.notEqual(I.participantsText(peopleClock,snap),before,'Manual wave confirmation changes current and next children');
+    peopleClock.reset();assert.equal(Object.keys(peopleClock.waves).length,0);
+  }
   cases++;
  }}
 }

@@ -436,7 +436,8 @@ const PersonalPlans = [
     const phaseKinds={task:'Celá úloha',ready:'Príprava',work:'Práca',rest:'Oddych',water:'Voda',setup:'Rozloženie',end:'Hotovo'};
     $('exercise-clock-phase').textContent=regroup?'Preskupenie':(phaseKinds[snapshot.part.kind]||'Úsek')+' · '+snapshot.part.name;
     $('exercise-rotate').hidden=!clock.rotation;$('exercise-rotate').disabled=!clock.started||clock.taskRegroup||snapshot.finished;
-    $('exercise-rotation').hidden=!clock.rotation;const rotationText=TrainingIntervals.rotationText(clock);if($('exercise-rotation').textContent!==rotationText)$('exercise-rotation').textContent=rotationText;
+    $('exercise-rotation').hidden=false;const rotationText=clock.scope+'\n'+TrainingIntervals.participantsText(clock,snapshot);if($('exercise-rotation').textContent!==rotationText)$('exercise-rotation').textContent=rotationText;
+    $('exercise-wave').hidden=!clock.speed||snapshot.part.kind!=='work';$('exercise-wave').disabled=!clock.started||clock.waiting||snapshot.finished||(clock.waves[snapshot.index]||0)>=Math.ceil(clock.participants/(clock.participants>=4?2:1));
     $('exercise-clock-next').textContent=clock.rotation?(clock.taskRegroup?'Čas celej úlohy zahŕňa aj návrat a oddych. Ďalší útok až po potvrdení.':'Obrancu meň po dokončení útoku. Čas zahŕňa aj oddych.'):regroup?(snapshot.part.cue||'Priprav ďalšiu úlohu a rozostav deti.')+' Preskupenie nemá odpočet; tento čas je navyše.':clock.waiting?'Ďalšiu sériu spustíš tlačidlom':snapshot.next?'Potom: '+(phaseKinds[snapshot.next.kind]||snapshot.next.name)+' '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
     $('exercise-clock-phase').title=clock.scope+' · '+snapshot.part.name;
     $('exercise-clock-toggle').textContent=regroup?'Pripravení — pokračovať':clock.waiting?'Ďalšia séria':clock.deadline!==null&&remaining>0?'Pauza':remaining===0?'Znova':clock.started?'Pokračovať':'Spustiť';
@@ -1101,6 +1102,7 @@ const PersonalPlans = [
   }
   $('timer-toggle').addEventListener('click',toggleExerciseClock);
   $('exercise-clock-toggle').addEventListener('click',()=>{const clock=currentClock();if(clock.taskRegroup&&clock.deadline!==null&&clock.remaining()>0){clock.taskRegroup=false;updateTimer();return;}void toggleExerciseClock();});
+  $('exercise-wave').addEventListener('click',()=>{const clock=currentClock(),snapshot=clock.snapshot();if(!clock.speed||!clock.started||clock.waiting||snapshot.part.kind!=='work')return;const key=snapshot.index,limit=Math.ceil(clock.participants/(clock.participants>=4?2:1));clock.waves[key]=Math.min(limit,(clock.waves[key]||0)+1);updateTimer();});
   $('exercise-rotate').addEventListener('click',()=>{const clock=currentClock();if(!clock.rotation||!clock.started||clock.taskRegroup||clock.snapshot().finished)return;clock.rotationRound++;clock.taskRegroup=true;updateTimer();});
   $('exercise-clock-details').addEventListener('click',()=>{if(state.selected.planConfig)window.FootballBoard?.showTimer();else $('timer-panel').open=true;});
   $('timer-reset').addEventListener('click',()=>{currentClock().reset();window.TimerAudio.cancel();updateTimer();});

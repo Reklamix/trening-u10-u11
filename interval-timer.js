@@ -21,7 +21,7 @@ const TrainingIntervals = {
         }else if(series&&phase.kind==='rest'){series.milliseconds+=phase.actualSeconds*1000;}
         else {series=null;parts.push({name:phase.name,kind:phase.kind,milliseconds:phase.actualSeconds*1000,cue:phase.cue});}
       }
-      return {scope:`${area.label} · ${area.count} detí`,parts};
+      return {scope:`${area.label} · ${area.count} detí`,participants:area.count,speed:true,parts};
     }
     let previousWork=null;
     const parts=scene.phases.filter(phase=>phase.actualSeconds>0).map(phase=>{
@@ -29,9 +29,29 @@ const TrainingIntervals = {
       const grouped=['football-rondo','football-zones','football-mini-games'].includes(block.diagram)||['speed','large-game'].includes(block.programKind);
       const requiresStart=phase.kind==='work'&&previousWork!==null&&(!grouped||series!==previousWork);
       if(phase.kind==='work')previousWork=series;
-      return {name:phase.name,kind:phase.kind,milliseconds:phase.actualSeconds*1000,requiresStart,regroupBefore:requiresStart,cue:phase.cue};
+      return {name:phase.name,kind:phase.kind,milliseconds:phase.actualSeconds*1000,requiresStart,regroupBefore:requiresStart,cue:phase.cue,roles:phase.roles};
     });
-    return {scope:area?`${area.label} · ${area.count} detí`:'Celé mužstvo',parts};
+    return {scope:area?`${area.label} · ${area.count} detí`:'Celé mužstvo',participants:scene.nodes.filter(n=>n.kind==='player').length,parts};
+  },
+  participantsText(clock,snapshot){
+    const ids=Array.from({length:clock.participants||clock.rotation?.count||0},(_,i)=>i+1),list=values=>values.length?values.join(', '):'nikto';
+    if(!ids.length)return 'Cvičia: podľa pôvodného rozpisu\nOddychujú: podľa pôvodného rozpisu\nĎalší: '+(snapshot.next?.name||'ďalšie cvičenie');
+    if(snapshot.finished)return 'Cvičia: nikto\nOddychujú: všetci\nĎalší: ďalšie cvičenie';
+    if(clock.rotation){
+      const describe=round=>{const roles=clock.rotation.roles;return roles.map((role,i)=>({role,id:(i+round)%clock.rotation.count+1}));};
+      const now=describe(clock.rotationRound),next=describe(clock.rotationRound+1),names=entries=>entries.filter(p=>p.role!=='R').map(p=>`${p.id} (${p.role==='D'?'obrana':'útok'})`).join(', ');
+      return `Cvičia: ${clock.taskRegroup?'nikto — pripravujú sa '+names(now):names(now)}\nOddychujú: ${clock.taskRegroup?'všetci počas výmeny':list(now.filter(p=>p.role==='R').map(p=>p.id))}\nĎalší: ${clock.taskRegroup?names(now):names(next)}`;
+    }
+    if(clock.speed&&snapshot.part.kind==='work'){
+      const lanes=ids.length>=4?2:1,wave=clock.waves[snapshot.index]||0,active=ids.slice(wave*lanes,(wave+1)*lanes),next=ids.slice((wave+1)*lanes,(wave+2)*lanes);
+      return `Cvičia: ${clock.waiting?'nikto — čakajú na štart':list(active)}\nOddychujú: ${clock.waiting?'všetci':list(ids.filter(id=>!active.includes(id)))}\nĎalší: ${clock.waiting?list(active):next.length?list(next):'ďalšia séria až po zotavení'} · vlnu potvrdí tréner`;
+    }
+    const work=snapshot.part.kind==='work'&&!clock.waiting,roles=snapshot.part.roles||{},rest=work?ids.filter(id=>roles['child'+(id-1)]?.label?.endsWith('R')):ids;
+    const next=clock.parts.slice(snapshot.index+(work?1:0)).find(p=>p.kind==='work');
+    const nextIds=next?ids.filter(id=>!next.roles?.['child'+(id-1)]?.label?.endsWith('R')):[];
+    const named=(values,roles)=>values.map(id=>{const label=roles?.['child'+(id-1)]?.label||'';return String(id)+(label.endsWith('D')?' (obrana)':label.endsWith('N')?' (neutrálny)':'');});
+    const detail=next?.cue&&/Obranca| N:/.test(next.cue)?' · '+next.cue:'';
+    return `Cvičia: ${work?list(named(ids.filter(id=>!rest.includes(id)),roles)):'nikto — '+(snapshot.part.kind==='setup'?'ukážka trénera':'prestávka/príprava')}\nOddychujú: ${list(rest)}\nĎalší: ${next?list(named(nextIds,next.roles))+detail:'ďalšie cvičenie'}`;
   },
   rotationText(clock){
     if(!clock.rotation)return '';
@@ -57,7 +77,7 @@ const TrainingIntervals = {
 
 class IntervalClock {
   constructor(spec){
-    this.rotation=spec.rotation;this.scope=spec.scope;this.originalParts=spec.parts.map(part=>({...part}));
+    this.participants=spec.participants;this.speed=spec.speed;this.rotation=spec.rotation;this.scope=spec.scope;this.originalParts=spec.parts.map(part=>({...part}));
     this.trainingTotal=spec.parts.reduce((sum,part)=>sum+part.milliseconds,0);
     this.reset();
   }
@@ -80,7 +100,7 @@ class IntervalClock {
     this.progressBase=this.total-this.left;this.deadline=now+this.left;this.started=true;
   }
   pause(now=Date.now()){this.left=this.remaining(now);this.deadline=null;}
-  reset(){this.rotationRound=0;this.taskRegroup=false;this.parts=this.originalParts.map(part=>({...part}));this.total=this.trainingTotal;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
+  reset(){this.waves={};this.rotationRound=0;this.taskRegroup=false;this.parts=this.originalParts.map(part=>({...part}));this.total=this.trainingTotal;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
   snapshot(now=Date.now()){
     const elapsed=this.elapsed(now);let offset=0,overall=0;
     for(const part of this.parts){const end=offset+part.milliseconds;if(part.kind!=='ready'&&elapsed<end)overall+=end-Math.max(offset,elapsed);offset=end;}offset=0;
