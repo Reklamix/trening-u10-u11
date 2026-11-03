@@ -158,3 +158,7 @@ body:has(#main[data-view=overview]) #session-meta{display:none}
  #main[data-view=overview] #summary-equipment>button:nth-child(n){height:100px;min-height:100px}
  #main[data-view=overview] #summary-equipment{grid-auto-rows:100px}
 }
+
+/* The Exercises tab opens the existing dated list, not an active drill. */
+#main[data-list-only=true] .overview-hero,#main[data-list-only=true] .summary-kit,#main[data-list-only=true] .summary-journey,#main[data-list-only=true] .overview-tools,#main[data-list-only=true] #training-plan-status{display:none}
+#main[data-list-only=true] .overview-schedule{margin-top:0}

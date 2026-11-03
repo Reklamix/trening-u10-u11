@@ -820,13 +820,14 @@ const PersonalPlans = [
     if(view!=='field')window.FootballBoard?.pause();
     if (state.view === 'private' && view !== 'private') lockVault();
     state.view = view;
-    $('main').dataset.view=view;
-    $('open-pitch-setup').hidden = ['private','overview','catalog','planning'].includes(view) || !window.PitchSetup?.supports(state.selected);
+    $('main').dataset.view=view==='plan'?'overview':view;
+    $('main').dataset.listOnly=String(view==='plan');
+    $('open-pitch-setup').hidden = ['private','overview','plan','catalog','planning'].includes(view) || !window.PitchSetup?.supports(state.selected);
     $('main').classList.toggle('private-mode', view === 'private');
     $('main').classList.toggle('exercise-focus',view==='field'&&Boolean(state.selected?.planConfig));
     const cardToolbar=document.querySelector('.exercise-toolbar'),cardHeading=document.querySelector('.activity-heading');
     if(view==='field'&&state.selected?.planConfig)cardToolbar.append($('share-block'));else cardHeading.append($('share-block'));
-    for (const name of ['field', 'overview', 'equipment', 'coaching', 'catalog', 'private', 'planning']) $(name + '-view').hidden = name !== view;
+    for (const name of ['field', 'overview', 'equipment', 'coaching', 'catalog', 'private', 'planning']) $(name + '-view').hidden = name !== (view==='plan'?'overview':view);
     document.querySelectorAll('a[data-view]').forEach(a => {
       if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -854,7 +855,7 @@ const PersonalPlans = [
     else if (training.attendanceCases) { $('attendance').value = String(state.attendance); updateSessionMeta(); }
     state.blockIndex = index;
     if (blockChanged || initial) renderActive();
-    const view = ['overview', 'equipment', 'coaching', 'catalog', 'private', 'planning'].includes(current.section) ? current.section : current.block?'field':'overview';
+    const view = ['overview', 'plan', 'equipment', 'coaching', 'catalog', 'private', 'planning'].includes(current.section) ? current.section : current.block?'field':'overview';
     $('training-plan-status').hidden=!training.planning||training.planning.status==='ready';
     $('training-plan-status').textContent=training.planning?(training.planning.status==='ready'?'Pripravený tréning · podmienky uprav podľa dochádzky.':training.planning.scheduleConfirmed?'Pracovný návrh obsahu · termín potvrdený.':'Pracovný návrh · termín a čas potvrdiť.'):'';
     setView(view);
