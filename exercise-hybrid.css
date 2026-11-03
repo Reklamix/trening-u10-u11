@@ -185,5 +185,5 @@
 }
 
 @media(max-width:600px) and (max-height:740px){
- .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.football-figure{width:min(100%,max(240px,calc(100dvh - 390px)));align-self:center}
+ .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.football-figure{width:100%;align-self:stretch}
 }

@@ -47,6 +47,7 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
     assert.notEqual(I.participantsText(peopleClock,snap),before,'Manual wave confirmation changes current and next children');
     peopleClock.reset();assert.equal(Object.keys(peopleClock.waves).length,0);
   }
+  const videoExpected=t.date==='2026-11-03'&&b.programKind==='speed';assert.equal(!!coach.referenceVideo,videoExpected,'Reference video is restricted to today’s speed block');if(videoExpected){assert.ok(coach.steps.some(s=>s.includes('3. a 4. sérii')));assert.ok(coach.steps.some(s=>s.includes('Nákres a animácia ukazujú základný priamy beh')));}
   cases++;
  }}
 }
