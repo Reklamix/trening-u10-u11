@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {inflateSync} from 'node:zlib';
 const manifest=JSON.parse(fs.readFileSync('app.webmanifest','utf8'));
 assert.equal(manifest.scope,'./');assert.equal(manifest.id,'./');assert.equal(manifest.display,'standalone');assert.equal(manifest.start_url,'./#sekcia=overview');
-assert.equal(manifest.short_name,'U11 Tréningy');assert.equal(manifest.name,'U11 Tréningy');assert.ok(manifest.icons.every(icon=>icon.src.includes('icon-training-')));
+assert.equal(manifest.short_name,'Tréningy U11');assert.equal(manifest.name,'Tréningy U11');assert.ok(manifest.icons.every(icon=>icon.src.includes('icon-training-')));
 for(const icon of manifest.icons){const data=fs.readFileSync(icon.src);assert.equal(data.subarray(1,4).toString(),'PNG');const[n]=icon.sizes.split('x').map(Number);assert.equal(data.readUInt32BE(16),n);assert.equal(data.readUInt32BE(20),n);}
 const source=fs.readFileSync('sw.js','utf8');assert.ok(!/caches\./.test(source));
 const listeners={},notifications=[],opened=[],scope='https://treningy.begoal.sk/';
