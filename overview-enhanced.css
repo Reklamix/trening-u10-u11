@@ -146,3 +146,15 @@ body:has(#main[data-view=overview]) #session-meta{display:none}
 #main[data-view=overview] #summary-equipment small{font-size:12px;line-height:1.3}
 #main[data-view=overview] #summary-equipment .summary-gear-status{display:none}
 #main[data-view=overview] #summary-equipment>button[aria-pressed=true]::after{content:'✓';position:absolute;right:4px;top:1px;color:#12614e;font-size:13px}
+
+@media(min-width:700px){
+ #main[data-view=overview] .overview-grid{max-width:1100px}
+ #main[data-view=overview] #summary-equipment{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #main[data-view=overview] .overview-hero h1{font-size:30px}
+ #main[data-view=overview] .overview-item{min-height:66px}
+}
+@media(min-width:1050px){
+ #main[data-view=overview] #summary-equipment{grid-template-columns:repeat(5,minmax(0,1fr))}
+ #main[data-view=overview] #summary-equipment>button:nth-child(n){height:100px;min-height:100px}
+ #main[data-view=overview] #summary-equipment{grid-auto-rows:100px}
+}
