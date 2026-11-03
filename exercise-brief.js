@@ -32,6 +32,18 @@ const ExerciseBrief = {
   },
   slogans:{'football-warmup':'Malé dotyky, hlava hore.','football-pass':'Prihraj a ukáž sa znova.','football-rondo':'Ukáž sa vedľa obrancu.','football-zones':'Prihraj do pohybu.','football-mini-games':'Prihraj, ponúkni sa, zakonči.','football-finish':'Čo sa ti dnes podarilo?'},
   build(training,block,index=0){
+    const brief=this.raw(training,block,index);if(!brief)return brief;
+    const kind=block.programKind||block.diagram;
+    const end=({warm:'Na signál spoločne zmeňte úlohu.', 'football-warmup':'Na signál spoločne zmeňte úlohu.', pairs:'Po prihrávke pokračujte ďalšou prihrávkou; séria končí na signál.', 'football-pass':'Prihrávajte plynulo až do konca série.', rondo:'Po zisku alebo aute obnovte hru s rovnakým obrancom; vymeň ho až na signál, nie za chybu.', 'football-rondo':'Po zisku alebo aute obnovte hru; obrancu vymeň na signál podľa poradia.', duel:'Útok končí strelou, stratou alebo autom. Potom vymeňte roly.', 'two-one':'Útok končí strelou, stratou alebo autom. Pri dvoch dráhach počkaj na oba útoky.', speed:'Každý beží iba raz za sériu. Ďalšia vlna až po uvoľnení dráhy a signále trénera; časovač neodpočítava jednotlivý beh.', strength:'Na signál ukončite úlohu a oddýchnite si. Kvalita pohybu má prednosť pred počtom opakovaní.', finish:'Pokojná chôdza, voda a spoločné zhodnotenie.', 'football-finish':'Pokojná chôdza, voda a spoločné zhodnotenie.'})[kind]||'Po góle alebo aute obnovte hru. Herný úsek končí na signál; roly meň podľa poradia.';
+    brief.steps=[`Čo robiť: ${brief.shortInstruction}`,`Kedy skončiť: ${end}`,`Striedanie: ${brief.rotation}`,`Oddych: ${brief.rest}`, ...brief.steps.filter(v=>v&&!/^(Čo robiť|Kedy skončiť|Striedanie|Oddych):/.test(v))];
+    if(kind==='speed'){
+      brief.rotation=brief.rotation.replace('ďalšia vlna po 7 s','ďalšia vlna najskôr po 7 s a až po uvoľnení dráhy');
+      brief.steps=brief.steps.map(v=>v.replace('Ďalšia vlna na signál po 7 s','Ďalšia vlna na signál najskôr po 7 s a po uvoľnení dráhy').replace('ďalšia vlna po 7 s','ďalšia vlna najskôr po 7 s a po uvoľnení dráhy'));
+      brief.timing.note=brief.rotation;brief.timing.workHint='séria vrátane návratu a zotavenia';
+    }
+    return brief;
+  },
+  raw(training,block,index=0){
     if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training))return SessionPrograms.brief(training,block,index,this.build(SessionPrograms.plain(training),block,index));
     if(!training?.planConfig||!this.slogans[block.diagram])return null;
     const config=training.planConfig,key=block.diagram,warm=key==='football-warmup',finish=key==='football-finish',labels=['A1','A2','B1','B2'];

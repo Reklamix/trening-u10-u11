@@ -26,6 +26,18 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
    assert.ok(counts.every(c=>JSON.stringify(c)===JSON.stringify(counts[0])),'A complete circle gives every child the same attack/defence/recovery turns');
    assert.ok(B.phasePlan(preview).every(g=>B.phaseDoses(g).some(d=>d.kind==='task')),'Preview never presents a per-attack seconds dose');
   }else assert.equal(B.phasePlan(preview).flatMap(g=>g.parts).reduce((n,p)=>n+p.actualSeconds,0),full.phases.reduce((n,p)=>n+p.actualSeconds,0),'Full work/rest dose remains visible despite representative playback');
+  const coach=B.build(t,b,index);
+  assert.ok(coach.steps[0].startsWith('Čo robiť:'));
+  assert.ok(coach.steps[1].startsWith('Kedy skončiť:'));
+  assert.ok(coach.steps[2].startsWith('Striedanie:'));
+  assert.ok(coach.steps[3].startsWith('Oddych:'));
+  const schedule=I.build(t,b,index);
+  assert.equal(schedule.parts.reduce((sum,p)=>sum+p.milliseconds,0),(b.end-b.start)*60000,'Timer preserves complete approved dose');
+  if(b.programKind==='speed'){
+    const runs=schedule.parts.filter(p=>p.kind==='work');assert.equal(runs.length,4);
+    assert.ok(runs.every(p=>p.milliseconds===60000),'One minute per series includes recovery, no individual sprint countdown');
+    assert.equal(runs.filter(p=>p.requiresStart).length,3);
+  }
   cases++;
  }}
 }

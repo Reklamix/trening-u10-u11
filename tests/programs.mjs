@@ -86,7 +86,7 @@ for(const source of programs){
      for(const node of nodes)assert.equal(work.filter(p=>p.roles[node.id].team==='A').length,4,'Each child has exactly four runs');
      assert.equal(timer.parts.filter(p=>p.requiresStart).length,3,'Only next running series needs manual start');
      const signals=I.signals(timer.parts);assert.ok(signals.every(e=>e.at>=0),'Short running phases never create negative five-second warnings');
-     const firstRun=timer.parts.findIndex(p=>p.kind==='work');assert.equal(signals.filter(e=>e.index===firstRun&&e.type==='countdown').map(e=>e.seconds).join(','),'4,3,2,1','A four-second run warns only for its actual four seconds');
+     const firstRun=timer.parts.findIndex(p=>p.kind==='work');assert.equal(signals.filter(e=>e.index===firstRun&&e.type==='countdown').map(e=>e.seconds).join(','),'5,4,3,2,1','Warnings apply to the whole running series, never to each short sprint');
      assert.ok(scene.phases.some(p=>p.kind==='rest'&&p.name.startsWith('Návrat')),'Full walking return and recovery phase');
      assert.equal(area.runDistance,Math.min(t.date==='2026-11-03'?15:10,area.length-5));
      assert.ok(area.length-2-area.runDistance>=3,'Braking stays inside field with at least three metres');

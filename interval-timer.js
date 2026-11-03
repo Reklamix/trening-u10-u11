@@ -10,6 +10,19 @@ const TrainingIntervals = {
       const n=area.count,roles=SessionPrograms.roles(block.programKind,n),lanes=SessionPrograms.lanes(block.programKind,n);
       return {scope:`${area.label} · ${n} detí`,rotation:{roles,lanes,count:n,recovery:SessionPrograms.duelDose(n,block.duelBudget).reset},parts:[{name:block.title,kind:'task',milliseconds:(block.end-block.start)*60000,cue:'Akcia končí strelou, stratou, autom alebo pokynom trénera. Po dokončení kola vymeň roly.'}]};
     }
+    if(block.programKind==='speed'){
+      // The coach releases each wave; a stopwatch cannot determine a safe running time.
+      const parts=[];let series=null;
+      for(const phase of scene.phases.filter(p=>p.actualSeconds>0)){
+        const match=phase.name.match(/^Séria (\d+)\/4/);
+        if(match){
+          if(!series||series.number!==match[1]){series={number:match[1],name:`Séria ${match[1]}/4 · jeden beh na dieťa`,kind:'work',milliseconds:0,requiresStart:match[1]!=='1',regroupBefore:match[1]!=='1',cue:'Vlny spúšťa tréner po uvoľnení dráhy. Každý raz; zvyšok série návrat a zotavenie.'};parts.push(series);}
+          series.milliseconds+=phase.actualSeconds*1000;
+        }else if(series&&phase.kind==='rest'){series.milliseconds+=phase.actualSeconds*1000;}
+        else {series=null;parts.push({name:phase.name,kind:phase.kind,milliseconds:phase.actualSeconds*1000,cue:phase.cue});}
+      }
+      return {scope:`${area.label} · ${area.count} detí`,parts};
+    }
     let previousWork=null;
     const parts=scene.phases.filter(phase=>phase.actualSeconds>0).map(phase=>{
       const series=phase.name.replace(/ · (?:kolo|časť) .*/,'');
