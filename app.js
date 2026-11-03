@@ -693,7 +693,7 @@ const PersonalPlans = [
     $('training-title').textContent = training.title;
     $('training-focus').textContent = training.focus;
     $('training-cue').textContent = '„' + training.cue + '“';
-    document.title = training.title + ' · Tréningy U10 / U11';
+    document.title = 'Tréningy U11';
     $('attendance-wrap').hidden = !training.attendanceCases;
     if (training.attendanceCases) {
       $('attendance').replaceChildren(...training.attendanceCases.map(item => {
