@@ -379,12 +379,13 @@ const FootballPhaseNavigation={
       ExerciseBrief.phasePlan(scene).forEach((group,index)=>{
         const button=html('button','phase-choice'),label=html('span','phase-choice-copy');button.type='button';
         const shortTitle=group.title.startsWith('Ukážka')?'Ukážka':group.title.startsWith('Organizácia')?'Príprava':group.title==='Vedenie lopty'?'Vedenie':group.title==='Pokojná chôdza'?'Chôdza':group.title.startsWith('Otázka')?'Rozhovor':group.title.replace(/\/\d+$/,'');
-        label.append(html('strong','',shortTitle),html('small','',ExerciseBrief.duration(group.parts.reduce((sum,part)=>sum+part.actualSeconds,0))));button.append(html('span','phase-choice-number',String(index+1)),label);button.setAttribute('aria-label',`Fáza ${index+1}: ${group.title}. Zobraziť nákres`);button.setAttribute('aria-controls','exercise-visual');
+        label.append(html('strong','',shortTitle),html('small','',group.taskMode?'Jedna vzorová akcia':ExerciseBrief.duration(group.parts.reduce((sum,part)=>sum+part.actualSeconds,0))));button.append(html('span','phase-choice-number',String(index+1)),label);button.setAttribute('aria-label',`Fáza ${index+1}: ${group.title}. Zobraziť nákres`);button.setAttribute('aria-controls','exercise-visual');
         button.addEventListener('click',()=>{topicTrail.length=0;goToTime(group.start);});phaseNav.append(button);phaseCards.push({button,group});
       });
       phaseSelect.replaceChildren(...phaseCards.map((card,index)=>{const option=html('option','',`${card.group.title} ${index+1}/${phaseCards.length}`);option.value=String(index);return option;}));
       phaseNav.style.setProperty('--phase-count',phaseCards.length);phaseNav.classList.toggle('has-many',phaseCards.length>3);
       const rules=html('details','exercise-full-plan'),allSteps=html('ol');data.steps.forEach(text=>allSteps.append(html('li','',text)));rules.append(html('summary','','Celý rozpis a pravidlá'),glance,html('p','exercise-summary-description',data.description),allSteps);rules.open=fullPlanOpen;rules.addEventListener('toggle',()=>{if(rules.isConnected)fullPlanOpen=rules.open;});
+      phaseBar.hidden=!!scene.taskMode;phaseNav.hidden=!!scene.taskMode;
       summary.replaceChildren(html('h2','sr-only','Fázy cvičenia'),phaseNav,phaseDetail,rules);syncPhaseCards(FootballPhaseNavigation.index(scene.phases||[],clock.time()));
       quickFacts.replaceChildren();const noun=(count,one,few,many)=>count===1?one:count>=2&&count<=4?few:many;for(const[label,value,hint,icon,action]of[['Plocha',selectedArea?`${selectedArea.length} × ${selectedArea.width} m`:'Pri trénerovi',`${config.width} × ${config.height} m spolu`,'bounding-box',()=>selectTopic('space')],['Deti',String(localCount),'z '+config.players,'people-fill',()=>selectTopic('space',{settings:true})],['Pomôcky',data.conesLocal?`${data.conesLocal} ${noun(data.conesLocal,'kužeľ','kužele','kužeľov')}`:'Voda',data.ballsLocal?`${data.ballsLocal} ${noun(data.ballsLocal,'lopta','lopty','lôpt')}`:data.conesLocal?'na túto plochu':'pre každého','cone-striped',()=>selectTopic('kit')]]){const button=html('button','card-quick-fact');button.type='button';const text=html('span');text.append(html('span','card-fact-label',label),html('strong','',value),html('small','',hint));const factIcon=uiIcon(icon);if(icon==='cone-striped')factIcon.src='./assets/card-cone.webp';button.append(factIcon,text);button.addEventListener('click',action);quickFacts.append(button);}
 
@@ -488,7 +489,7 @@ const FootballPhaseNavigation={
       dialog.addEventListener('close',()=>{dialog.remove();if(layoutDialog===dialog)layoutDialog=null;const target=returnFocus?.isConnected?returnFocus:briefRoot.querySelector('[data-exercise-map]')||areaTools.querySelector('button');target?.focus();},{once:true});dialog.showModal();
     }
     function build() {
-      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});if(focused&&options.planState?.())scene=FootballSequences.build(options.planState(),block,pitchIndex,scene);clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});if(focused&&options.planState?.())scene=FootballSequences.representative(FootballSequences.build(options.planState(),block,pitchIndex,scene),{taskDuration:['duel','two-one'].includes(block.programKind)?(block.end-block.start)*60:0,taskInstruction:options.brief?.()?.shortInstruction||''});root.dataset.taskMode=String(!!scene.taskMode);clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
       renderLevelTools();
       renderCountTools();
       renderPitchTools();
@@ -565,7 +566,7 @@ const FootballPhaseNavigation={
       const doses=html('div','phase-current-doses');
       for(const dose of ExerciseBrief.phaseDoses(current.group)){const part=html('div');part.dataset.kind=dose.kind;part.append(html('span','',dose.label),html('strong','',dose.value));doses.append(part);}
       const cue=html('div','hybrid-cue');const cueIcon=html('img','hybrid-cue-icon');cueIcon.src='./assets/card-ball.webp';cueIcon.alt='';cue.append(cueIcon,html('p','phase-current-cue',phase.cue));phaseDetail.append(doses,cue);
-      if(phase.kind==='rest'||phase.kind==='water')phaseDetail.prepend(html('p','phase-current-status',(phase.kind==='rest'?'Práve oddych':'Práve voda')+' · '+ExerciseBrief.duration(phase.actualSeconds)));
+      if(!scene.taskMode&&(phase.kind==='rest'||phase.kind==='water'))phaseDetail.prepend(html('p','phase-current-status',(phase.kind==='rest'?'Práve oddych':'Práve voda')+' · '+ExerciseBrief.duration(phase.actualSeconds)));
       const nav=current.button.parentElement,left=current.button.offsetLeft-nav.offsetLeft;if(left<nav.scrollLeft||left+current.button.offsetWidth>nav.scrollLeft+nav.clientWidth)nav.scrollTo({left:Math.max(0,left-(nav.clientWidth-current.button.offsetWidth)/2),behavior:'instant'});
     }
     function render() {
@@ -623,7 +624,7 @@ const FootballPhaseNavigation={
     scrub.addEventListener('input',()=>{const value=scrub.value;pause();clock.seek(value);render();});
     speed.addEventListener('change',()=>{clock.setRate(Number(speed.value));if(focused)playback.rate=Number(speed.value);render();});
     repeat.addEventListener('change',()=>{clock.setLoop(repeat.checked);if(focused)playback.loop=repeat.checked;render();});
-    function followInterval(part){const phase=scene.phases?.find(phase=>phase.name===part.name&&phase.kind===part.kind);if(!phase)return;pause();clock.seek(phase.start);render();}
+    function followInterval(part){const phase=scene.phases?.find(phase=>(phase.name===part.name||phase.sourceNames?.includes(part.name)||part.kind==='task'&&phase.kind==='work')&&(phase.kind===part.kind||part.kind==='task'));if(!phase)return;pause();clock.seek(phase.start);render();}
     active={pause,selection,selectArea,followInterval,showTimer:()=>navigateTopic('time'),showDoses:()=>selectTopic('time',{part:'work'}),back:backStep,destroy:()=>{pause();visualViews?.destroy();moreMenu.remove();document.removeEventListener('click',closeMenuOutside);root.remove();if(layoutDialog){const dialog=layoutDialog;layoutDialog=null;dialog.close();dialog.remove();}if(focusDialog){const dialog=focusDialog;focusDialog=null;dialog.close();dialog.remove();}}};build();
   }
   function clear(){active?.destroy();active=null;}

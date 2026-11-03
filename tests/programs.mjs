@@ -40,7 +40,7 @@ for(const source of programs){
     if(['duel','two-one'].includes(b.programKind)){
      const n=area.count,work=scene.phases.filter(p=>p.kind==='work'),roles=nodes.map(node=>{const r={A:0,B:0,N:0};work.forEach(p=>r[p.roles[node.id].team]++);return r;});
      assert.ok(roles.every(r=>JSON.stringify(r)===JSON.stringify(roles[0])),'Balanced attack/defence/rest for every child');
-     const d=G.duelDose(n,b.duelBudget);assert.equal(work.length,d.cycles*n);assert.equal(timer.parts.filter(p=>p.requiresStart).length,d.cycles-1,'Only next series requires manual start');
+     const d=G.duelDose(n,b.duelBudget);assert.equal(work.length,d.cycles*n);assert.equal(timer.parts.length,1,'Open-ended duels time the whole task, never individual attacks');assert.equal(timer.parts[0].kind,'task');assert.equal(timer.rotation.count,n);
      if(n===5){assert.equal(roles[0].A,t.date==='2026-11-02'?6:8);assert.equal(roles[0].B,b.programKind==='duel'?(t.date==='2026-11-02'?6:8):4);assert.equal(roles[0].N,b.programKind==='duel'?(t.date==='2026-11-02'?3:4):8);}
      if(b.programKind==='duel'){
       const lanes=G.lanes('duel',n),gates=base.cones.filter(c=>c.kind==='gate'),shots=base.arrows.filter(a=>a.kind==='shot');
@@ -126,8 +126,7 @@ for(const levels of [['base','challenge','standard','standard'],['base','challen
 // Date library uses the actual new content rather than the inherited diagram slot.
 assert.ok(L.filter(expanded.trainings,{topic:'duels',mode:'drills'}).some(i=>i.training.date==='2026-11-03'&&i.block.programKind==='duel'));
 assert.throws(()=>C.expand(original,{...agenda,sessions:[{...agenda.sessions[0],programId:'unknown'}]}));
-// Representative interval crosses work → recovery automatically, stops before next series.
+// Open-ended duels retain a whole-task clock instead of forcing a ten-second attack.
 const tue=programs[1],b=tue.blocks.find(b=>b.programKind==='duel'),spec=I.build(tue,b,0),clock=new IntervalClock(spec);clock.start(1000);
-let boundary=60000;assert.equal(clock.snapshot(1000+boundary+10000).part.kind,'rest');
-clock.remaining(1000+60000+150000);assert.equal(clock.waiting,true);assert.equal(clock.snapshot(1000+60000+150000).part.kind,'work');
+assert.equal(clock.snapshot(71000).part.kind,'task');assert.equal(clock.snapshot(211000).part.kind,'task');assert.equal(clock.waiting,false);assert.equal(spec.parts.length,1);assert.equal(clock.trainingTotal,(b.end-b.start)*60000);
 console.log(`PASS: ${scenes} program scenes/briefs/timers; all doses, 10–30 counts, 3 pitches/levels, fair roles, kit, prep and manual series boundaries.`);

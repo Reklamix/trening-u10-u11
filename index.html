@@ -19,23 +19,23 @@
   <link rel="stylesheet" href="./ui-refinements.css?v=3">
   <link rel="stylesheet" href="./exercise-layout.css?v=1">
   <link rel="stylesheet" href="./app-unified.css?v=4">
-  <link rel="stylesheet" href="./exercise-hybrid.css?v=1">
+  <link rel="stylesheet" href="./exercise-hybrid.css?v=2">
   <link rel="stylesheet" href="./overview-enhanced.css?v=2">
   <link rel="stylesheet" href="./preparation-enhanced.css?v=1">
   <link rel="stylesheet" href="./equipment-enhanced.css?v=1">
   <link rel="stylesheet" href="./training-calendar.css?v=1">
   <script src="./training-calendar.js?v=4" defer></script>
-  <script src="./football.js?v=38" defer></script>
+  <script src="./football.js?v=39" defer></script>
   <script src="./training-planner.js?v=7" defer></script>
-  <script src="./football-sequence.js?v=4" defer></script>
-  <script src="./exercise-brief.js?v=8" defer></script>
+  <script src="./football-sequence.js?v=5" defer></script>
+  <script src="./exercise-brief.js?v=9" defer></script>
   <script src="./coaching-guide.js?v=5" defer></script>
   <script src="./pitch-setup.js?v=11" defer></script>
-  <script src="./interval-timer.js?v=4" defer></script>
-  <script src="./training-programs.js?v=7" defer></script>
+  <script src="./interval-timer.js?v=5" defer></script>
+  <script src="./training-programs.js?v=8" defer></script>
   <script src="./training-load.js?v=6" defer></script>
   <script src="./exercise-views.js?v=5" defer></script>
-  <script src="./app.js?v=42" defer></script>
+  <script src="./app.js?v=43" defer></script>
   <link rel="stylesheet" href="./pwa.css?v=2">
   <link rel="stylesheet" href="./exercise-views.css?v=5">
   <script src="./pwa.js?v=2" defer></script>
@@ -62,6 +62,7 @@
         <div class="activity-heading"><div><p id="block-meta" class="eyebrow"></p><h1 id="activity-title"></h1><p id="hybrid-meta" class="hybrid-meta"></p></div><button id="share-block" class="icon-button" type="button" aria-label="Zdieľať túto činnosť" title="Zdieľať túto činnosť"><img class="card-share-icon" src="./assets/bootstrap-icons/share.svg" alt=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m4 0 2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" transform="translate(2 0) scale(.85 1)"/></svg></button></div>
         <div id="active-diagram"></div>
         <section class="exercise-clock" aria-label="Časovač pri cvičení"><button id="exercise-clock-details" type="button" class="exercise-clock-copy" aria-label="Otvoriť podrobný časovač"><span class="exercise-clock-label"><span id="exercise-clock-phase">Časovač</span><small id="exercise-clock-next"></small></span><output id="exercise-clock-value" aria-label="Zostávajúci čas aktuálneho úseku" aria-live="off">00:05</output></button><button id="exercise-clock-toggle" class="button" type="button">Spustiť</button></section>
+        <p id="exercise-rotation" class="exercise-task-rotation" aria-live="polite" hidden></p>
         <div class="essentials"><p class="essentials-label">DÁVKA A ODDYCH</p><p id="active-dose"></p></div>
         <p id="active-cue" class="active-cue"></p>
         <div id="detail-buttons" class="detail-buttons" aria-label="Podrobnosti činnosti">
@@ -73,7 +74,7 @@
         <details id="timer-panel" class="timer-panel"><summary><span>Časovač sérií</span><span id="timer-preview" class="timer-preview">00:00</span></summary>
           <div class="timer-body"><div class="timer-display"><p id="timer-scope" class="small-note"></p><p id="timer-config-note" class="small-note" hidden>Časovač používa pôvodnú zostavu. Od začiatku načíta nové nastavenie.</p><p id="timer-phase" class="timer-phase"></p><output id="timer-value" aria-label="Zostávajúci čas aktuálnej fázy" aria-live="off">00:00</output><p id="timer-state" role="status" aria-atomic="true">Pripravený</p><p id="timer-next" class="small-note"></p><p id="timer-sound-state"></p></div><div class="timer-actions"><button id="timer-toggle" type="button" class="button">Spustiť</button><button id="timer-reset" type="button" class="secondary-button">Od začiatku</button></div><button id="timer-dose-toggle" class="text-button" type="button">Dávkovanie a striedanie →</button><details class="timer-options"><summary>Zvuk a možnosti</summary><label class="timer-sound-choice"><input id="timer-sound" type="checkbox" checked>Zvukové signály</label><button id="timer-test" class="secondary-button" type="button">Vyskúšať zvuk</button><p id="timer-audio-status" class="small-note" role="status">Zvuk aktivuješ tlačidlom Spustiť.</p><p class="small-note">Pípanie 5–1 s pred koncom práce aj oddychu. Krátky signál ukončí prácu, vyšší tón oznámi štart po tvojom spustení. Nechaj stránku otvorenú; nastav hlasitosť telefónu.</p></details><p class="small-note">Po práci sa odmeria oddych. Každú ďalšiu sériu spustíš ty tlačidlom; potom máš 5 s na prípravu. Na ďalšie cvičenie prejdeš tlačidlom Hotovo.</p></div>
         </details>
-        <div class="step-actions"><button id="previous-block" type="button" class="secondary-button">← Späť</button><button id="preview-next-block" type="button" class="secondary-button" aria-haspopup="dialog" hidden><span>Nasleduje</span><small>Náhľad</small></button><button id="complete-block" type="button" class="button">Hotovo → ďalej</button></div>
+        <div class="step-actions"><button id="previous-block" type="button" class="secondary-button">← Späť</button><button id="exercise-rotate" class="secondary-button" type="button" aria-label="Kolo skončilo — vymeniť roly" hidden>Výmena rolí</button><button id="preview-next-block" type="button" class="secondary-button" aria-haspopup="dialog" hidden><span>Nasleduje</span><small>Náhľad</small></button><button id="complete-block" type="button" class="button">Hotovo → ďalej</button></div>
         <p id="next-preview" class="next-preview"></p>
         <div id="finished" class="finished" hidden><h2>Tréning je dokončený</h2><p>Časti máš označené. Doprajte si vodu a pokojný záver.</p><button id="review-training" class="secondary-button" type="button">Pozrieť prehľad</button></div>
       </section>

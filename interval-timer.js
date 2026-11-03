@@ -6,15 +6,28 @@ const TrainingIntervals = {
     const areas=FootballScenes.groups(block.diagram,training.planConfig.players,training.quarterPitch),area=areas[index]||areas[0];
     const base=FootballScenes.build(block.diagram,{total:training.planConfig.players,size:area?.count,pitchIndex:index,area});
     const scene=FootballSequences.build(training,block,index,base);
+    if(['duel','two-one'].includes(block.programKind)){
+      const n=area.count,roles=SessionPrograms.roles(block.programKind,n),lanes=SessionPrograms.lanes(block.programKind,n);
+      return {scope:`${area.label} · ${n} detí`,rotation:{roles,lanes,count:n,recovery:SessionPrograms.duelDose(n,block.duelBudget).reset},parts:[{name:block.title,kind:'task',milliseconds:(block.end-block.start)*60000,cue:'Akcia končí strelou, stratou, autom alebo pokynom trénera. Po dokončení kola vymeň roly.'}]};
+    }
     let previousWork=null;
     const parts=scene.phases.filter(phase=>phase.actualSeconds>0).map(phase=>{
       const series=phase.name.replace(/ · (?:kolo|časť) .*/,'');
-      const grouped=['football-rondo','football-zones','football-mini-games'].includes(block.diagram)||['duel','speed','large-game'].includes(block.programKind);
+      const grouped=['football-rondo','football-zones','football-mini-games'].includes(block.diagram)||['speed','large-game'].includes(block.programKind);
       const requiresStart=phase.kind==='work'&&previousWork!==null&&(!grouped||series!==previousWork);
       if(phase.kind==='work')previousWork=series;
-      return {name:phase.name,kind:phase.kind,milliseconds:phase.actualSeconds*1000,requiresStart};
+      return {name:phase.name,kind:phase.kind,milliseconds:phase.actualSeconds*1000,requiresStart,regroupBefore:requiresStart,cue:phase.cue};
     });
     return {scope:area?`${area.label} · ${area.count} detí`:'Celé mužstvo',parts};
+  },
+  rotationText(clock){
+    if(!clock.rotation)return '';
+    const {roles,count,lanes}=clock.rotation,round=clock.rotationRound||0;
+    const children=role=>roles.flatMap((value,i)=>value===role?[(i+round)%count+1]:[]).join(', ')||'—';
+    const recovery=` Návrat chôdzou a aspoň ${clock.rotation.recovery} s oddychu; pri únave dlhšie.`;
+    if(lanes===1)return `Útok: ${children('A')} · Obrana: ${children('D')} · Oddych: ${children('R')}.`+recovery;
+    const perLane=roles.filter(role=>role!=='R').length/lanes;
+    return Array.from({length:lanes},(_,lane)=>{const entries=roles.slice(lane*perLane,(lane+1)*perLane).map((role,i)=>({role,id:(lane*perLane+i+round)%count+1}));return `${lane+1}. dráha: útok ${entries.filter(e=>e.role==='A').map(e=>e.id).join(', ')} / obrana ${entries.filter(e=>e.role==='D').map(e=>e.id).join(', ')}`;}).join(' · ')+` · Oddych: ${children('R')}. Výmena až po oboch útokoch.`+recovery;
   },
   signals(parts){
     const events=[];let offset=0;
@@ -31,7 +44,7 @@ const TrainingIntervals = {
 
 class IntervalClock {
   constructor(spec){
-    this.scope=spec.scope;this.originalParts=spec.parts.map(part=>({...part}));
+    this.rotation=spec.rotation;this.scope=spec.scope;this.originalParts=spec.parts.map(part=>({...part}));
     this.trainingTotal=spec.parts.reduce((sum,part)=>sum+part.milliseconds,0);
     this.reset();
   }
@@ -48,12 +61,13 @@ class IntervalClock {
   elapsed(now=Date.now()){return this.total-this.remaining(now);}
   start(now=Date.now()){
     if(this.remaining(now)<=0)this.reset();
+    this.taskRegroup=false;
     if(this.deadline!==null)return;
     if(this.waiting){this.parts[this.waitIndex].requiresStart=false;this.parts.splice(this.waitIndex,0,{name:'Priprav sa na ďalšiu sériu',kind:'ready',milliseconds:5000});this.total+=5000;this.left+=5000;this.signals=TrainingIntervals.signals(this.parts);this.waiting=false;}
     this.progressBase=this.total-this.left;this.deadline=now+this.left;this.started=true;
   }
   pause(now=Date.now()){this.left=this.remaining(now);this.deadline=null;}
-  reset(){this.parts=this.originalParts.map(part=>({...part}));this.total=this.trainingTotal;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
+  reset(){this.rotationRound=0;this.taskRegroup=false;this.parts=this.originalParts.map(part=>({...part}));this.total=this.trainingTotal;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
   snapshot(now=Date.now()){
     const elapsed=this.elapsed(now);let offset=0,overall=0;
     for(const part of this.parts){const end=offset+part.milliseconds;if(part.kind!=='ready'&&elapsed<end)overall+=end-Math.max(offset,elapsed);offset=end;}offset=0;

@@ -12,16 +12,17 @@ const ExerciseBrief = {
       }
       const group=groups[groups.length-1];
       if(!group)continue;
-      group.parts.push({...phase,index});group.last=index;group.end=phase.end;
+      group.parts.push(...(phase.doseParts||[phase]).map(part=>({...part,index})));group.taskMode=!!scene.taskMode;group.taskDuration=scene.taskDuration;group.representative=!!scene.representative;group.last=index;group.end=phase.end;
     }
     return groups;
   },
   duration(seconds){return seconds%60===0?`${seconds/60} min`:seconds>60?`${Math.floor(seconds/60)} min ${seconds%60} s`:`${seconds} s`;},
   phaseDoses(group){
+    if(group.taskMode)return [{kind:'task',label:'Celá úloha',value:this.duration(group.taskDuration)},{kind:'rest',label:'Striedanie a oddych',value:'Po dokončení útoku, bez odpočtu sekúnd. Preskupenie ukončí tréner tlačidlom.'}];
     const categories=[['work','Práca'],['setup','Ukážka / organizácia'],['rest','Oddych'],['water','Voda']];
     const doses=categories.flatMap(([kind,label])=>{
       const values=[];let previousKind=null;
-      for(const part of group.parts){if(part.kind===kind){if(kind==='work'&&previousKind===kind)values[values.length-1]+=part.actualSeconds;else values.push(part.actualSeconds);}previousKind=part.kind;}
+      for(const part of group.parts){if(part.kind===kind){if(kind==='work'&&previousKind===kind&&!group.representative)values[values.length-1]+=part.actualSeconds;else values.push(part.actualSeconds);}previousKind=part.kind;}
       if(!values.length)return [];
       const counts=new Map();for(const value of values)counts.set(value,(counts.get(value)||0)+1);
       return [{kind,label:kind==='setup'&&group.title.startsWith('Otázka')?'Rozhovor':label,value:[...counts].map(([seconds,count])=>(count>1?`${count} × `:'')+this.duration(seconds)).join(' + ')}];

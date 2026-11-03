@@ -241,3 +241,9 @@ Po úplnom skončení cvičenia a dohraní záverečného signálu (1,2 s) sa oz
 ## Zjednotené ikony · 3. 11. 2026
 
 Plocha mobilu používa tmavozelenú ikonu s hrubým U11 v strede a nápisom TRÉNINGY pod ním. Hlavička a favicon používajú rovnakú značku U11 bez malého podnadpisu. Natívne obrysy písma sú v assets/app/*unified.svg, rastrové veľkosti sú odvodené z rovnakého zdroja. Samostatná maskable verzia ponecháva značku v bezpečnom kruhovom výreze Androidu. Identita aplikácie/id, scope, start_url, oznámenia/badge a tréningové údaje ostávajú zachované; automatickú výmenu už nainštalovanej ikony riadi prehliadač/systém. Overenie: node tests/pwa.mjs a mobilná kontrola hlavičky.
+
+## Vzorová ukážka a riadenie skupiny · 3. 11. 2026
+
+Animácia ukáže jeden kompletný príklad rovnakého typu činnosti; neopakuje ho pre každé dieťa či ďalšiu sériu. Počty detí, rozmiestnenie a celá mapa zostávajú. Dávky v prehľade pochádzajú z celého plánu. Pri časovaných spoločných úlohách sa časovač zastaví pred ďalšou prácou na Preskupení a čaká na Pripravení — pokračovať; čas na čakanie je navyše.
+
+Pri 1 na 1 a 2 na 1 časovač meria celú úlohu, nie desať sekúnd na útok. Kolo končí strelou, stratou, autom alebo pokynom trénera; pri dvoch dráhach až po oboch akciách. Tlačidlo Kolo skončilo — vymeniť roly posunie kruh a ukáže ďalší útok/obranu/oddych. Čas celej úlohy beží aj počas návratu a oddychu, aby sa nezvyšovali aktívne minúty; nový útok uvoľní tréner tlačidlom Pripravení — pokračovať. Celú úlohu možno výslovne pozastaviť v podrobnom časovači. Nejde o časomer individuálneho výkonu ani automaticky predpísaný počet útokov. Únava/strata kvality znamená viac oddychu alebo koniec; naplánované minúty nie sú dôkaz intenzity či absolvovania.

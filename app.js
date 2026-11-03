@@ -427,26 +427,30 @@ const PersonalPlans = [
     if (!state.selected) return;
     const clock = currentClock();
     const remaining = clock.remaining(),snapshot=clock.snapshot();
-    const value = clockText(snapshot.remaining);
+    const regroup=!snapshot.finished&&(clock.taskRegroup||clock.waiting&&snapshot.part.regroupBefore);
+    const value = regroup&&!clock.rotation?'—':clockText(snapshot.remaining);
     $('timer-value').textContent = value;
     $('timer-preview').textContent = value;
     $('exercise-clock-value').textContent=value;
-    const phaseKinds={ready:'Príprava',work:'Práca',rest:'Oddych',water:'Voda',setup:'Rozloženie',end:'Hotovo'};
-    $('exercise-clock-phase').textContent=(phaseKinds[snapshot.part.kind]||'Úsek')+' · '+snapshot.part.name;
-    $('exercise-clock-next').textContent=clock.waiting?'Ďalšiu sériu spustíš tlačidlom':snapshot.next?'Potom: '+(phaseKinds[snapshot.next.kind]||snapshot.next.name)+' '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
+    $('exercise-clock-value').setAttribute('aria-label',clock.rotation?'Zostávajúci čas celej úlohy':'Zostávajúci čas aktuálneho úseku');
+    const phaseKinds={task:'Celá úloha',ready:'Príprava',work:'Práca',rest:'Oddych',water:'Voda',setup:'Rozloženie',end:'Hotovo'};
+    $('exercise-clock-phase').textContent=regroup?'Preskupenie':(phaseKinds[snapshot.part.kind]||'Úsek')+' · '+snapshot.part.name;
+    $('exercise-rotate').hidden=!clock.rotation;$('exercise-rotate').disabled=!clock.started||clock.taskRegroup||snapshot.finished;
+    $('exercise-rotation').hidden=!clock.rotation;const rotationText=TrainingIntervals.rotationText(clock);if($('exercise-rotation').textContent!==rotationText)$('exercise-rotation').textContent=rotationText;
+    $('exercise-clock-next').textContent=clock.rotation?(clock.taskRegroup?'Čas celej úlohy zahŕňa aj návrat a oddych. Ďalší útok až po potvrdení.':'Obrancu meň po dokončení útoku. Čas zahŕňa aj oddych.'):regroup?(snapshot.part.cue||'Priprav ďalšiu úlohu a rozostav deti.')+' Preskupenie nemá odpočet; tento čas je navyše.':clock.waiting?'Ďalšiu sériu spustíš tlačidlom':snapshot.next?'Potom: '+(phaseKinds[snapshot.next.kind]||snapshot.next.name)+' '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
     $('exercise-clock-phase').title=clock.scope+' · '+snapshot.part.name;
-    $('exercise-clock-toggle').textContent=clock.waiting?'Ďalšia séria':clock.deadline!==null&&remaining>0?'Pauza':remaining===0?'Znova':clock.started?'Pokračovať':'Spustiť';
-    $('exercise-clock-toggle').setAttribute('aria-label',clock.waiting?'Spustiť ďalšiu sériu':clock.deadline!==null&&remaining>0?'Pozastaviť časovač':remaining===0?'Spustiť cvičenie znova':clock.started?'Pokračovať v časovači':'Spustiť časovač');
+    $('exercise-clock-toggle').textContent=regroup?'Pripravení — pokračovať':clock.waiting?'Ďalšia séria':clock.deadline!==null&&remaining>0?'Pauza':remaining===0?'Znova':clock.started?'Pokračovať':'Spustiť';
+    $('exercise-clock-toggle').setAttribute('aria-label',regroup?'Pripravení — pokračovať':clock.waiting?'Spustiť ďalšiu sériu':clock.deadline!==null&&remaining>0?'Pozastaviť časovač':remaining===0?'Spustiť cvičenie znova':clock.started?'Pokračovať v časovači':'Spustiť časovač');
     $('exercise-clock-toggle').setAttribute('aria-pressed',String(clock.deadline!==null&&remaining>0));
     $('timer-scope').textContent=clock.scope+' · cvičenie zostáva '+clockText(snapshot.overall);
     $('timer-config-note').hidden=!clock.started||clock.signature===clockSignature();
-    $('timer-phase').textContent=snapshot.part.name;
+    $('timer-phase').textContent=regroup?'Preskupenie':snapshot.part.name;
     $('timer-panel').dataset.kind=snapshot.part.kind;
-    $('timer-next').textContent=snapshot.next?'Ďalej: '+snapshot.next.name+' · '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
+    $('timer-next').textContent=clock.rotation?TrainingIntervals.rotationText(clock):regroup?(snapshot.part.cue||'Rozostav deti na ďalšiu úlohu.'):snapshot.next?'Ďalej: '+snapshot.next.name+' · '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
     const audioState=window.TimerAudio?.status();$('timer-sound-state').textContent=audioState==='off'?'Bez zvuku':audioState==='running'?'Zvuk aktivovaný':clock.started?'Zvuk neaktívny · vyskúšaj zvuk':'Zvuk sa zapne pri štarte';
-    const status = remaining === 0 ? 'Cvičenie dokončené' : clock.waiting?'Pripravené na ďalšiu sériu':clock.deadline !== null ? 'Beží' : clock.started ? 'Pozastavený' : 'Pripravený';
+    const status = remaining === 0 ? 'Cvičenie dokončené' : regroup?'Preskupenie skupiny':clock.waiting?'Pripravené na ďalšiu sériu':clock.deadline !== null ? 'Beží' : clock.started ? 'Pozastavený' : 'Pripravený';
     if (status !== lastTimerState) { $('timer-state').textContent = status; lastTimerState = status; }
-    $('timer-toggle').textContent = clock.waiting?'Spustiť ďalšiu sériu':clock.deadline !== null && remaining > 0 ? 'Pauza' : remaining === 0 ? 'Spustiť znova' : clock.started ? 'Pokračovať' : 'Spustiť';
+    $('timer-toggle').textContent = clock.rotation?(clock.deadline!==null&&remaining>0?'Pauza celej úlohy':remaining===0?'Spustiť znova':clock.started?'Pokračovať v úlohe':'Spustiť'):regroup?'Pripravení — pokračovať':clock.waiting?'Spustiť ďalšiu sériu':clock.deadline !== null && remaining > 0 ? 'Pauza' : remaining === 0 ? 'Spustiť znova' : clock.started ? 'Pokračovať' : 'Spustiť';
     window.TimerAudio?.update(clock);window.TimerAudio?.keepAwake(clock.deadline!==null&&remaining>0);
     const visualKey=clockKey()+'|'+clock.signature+'|'+snapshot.index;
     if(clock.started&&clock.signature===clockSignature()&&visualKey!==timerVisualKey){timerVisualKey=visualKey;window.FootballBoard?.followInterval(snapshot.part);}
@@ -501,14 +505,14 @@ const PersonalPlans = [
   }
   function renderDiagram() {
     const inlineClock=document.querySelector('.exercise-clock');
-    $('active-diagram').after(inlineClock);
+    $('active-diagram').after(inlineClock,$('exercise-rotation'));
     window.FootballBoard?.clear();
     $('active-diagram').replaceChildren();
     timerVisualKey='';
     const block=activeBlock();
     addDiagram($('active-diagram'),block.diagram,state.selected.id+'-'+block.id,block.title);
     const visual=document.querySelector('#active-diagram .exercise-flow > .football-figure');
-    if(visual){const details=document.querySelector('#active-diagram .hybrid-details');if(details)details.prepend(inlineClock);else visual.after(inlineClock);}
+    if(visual){const details=document.querySelector('#active-diagram .hybrid-details');if(details)details.prepend(inlineClock,$('exercise-rotation'));else visual.after(inlineClock,$('exercise-rotation'));}
     renderGroupCue();
   }
   function renderCardSession(){
@@ -1096,7 +1100,8 @@ const PersonalPlans = [
     finally{$('timer-toggle').disabled=false;$('exercise-clock-toggle').disabled=false;}
   }
   $('timer-toggle').addEventListener('click',toggleExerciseClock);
-  $('exercise-clock-toggle').addEventListener('click',toggleExerciseClock);
+  $('exercise-clock-toggle').addEventListener('click',()=>{const clock=currentClock();if(clock.taskRegroup&&clock.deadline!==null&&clock.remaining()>0){clock.taskRegroup=false;updateTimer();return;}void toggleExerciseClock();});
+  $('exercise-rotate').addEventListener('click',()=>{const clock=currentClock();if(!clock.rotation||!clock.started||clock.taskRegroup||clock.snapshot().finished)return;clock.rotationRound++;clock.taskRegroup=true;updateTimer();});
   $('exercise-clock-details').addEventListener('click',()=>{if(state.selected.planConfig)window.FootballBoard?.showTimer();else $('timer-panel').open=true;});
   $('timer-reset').addEventListener('click',()=>{currentClock().reset();window.TimerAudio.cancel();updateTimer();});
   $('timer-sound').addEventListener('change',async()=>{window.TimerAudio.setEnabled($('timer-sound').checked);const ready=$('timer-sound').checked?await window.TimerAudio.unlock():false;$('timer-audio-status').textContent=$('timer-sound').checked?(ready?'Zvuk je aktívny.':'Zvuk aktivuješ tlačidlom Spustiť.'):'Zvuk je vypnutý.';updateTimer();});

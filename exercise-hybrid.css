@@ -96,3 +96,8 @@
 @media(min-width:900px) and (min-height:651px) {
  .exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.hybrid-details {display:flex;flex-direction:column;gap:14px;grid-column:2;grid-row:1 / span 2;align-self:start}
 }
+
+/* Role changes are a full-width instruction, outside the compact clock. */
+.exercise-task-rotation{padding:10px 12px;margin:4px 0 8px;background:#edf4e8;border:1px solid #d6e2d5;border-radius:12px;font-size:14px;line-height:1.5;color:#173b31}.exercise-focus #exercise-rotate{width:auto;min-height:52px;margin:0;padding:7px 5px;white-space:normal;font-size:14px;font-weight:750;line-height:1.2}.exercise-focus .step-actions:has(#exercise-rotate:not([hidden])){display:grid;grid-template-columns:1fr .85fr 1.15fr;gap:6px}.exercise-focus .step-actions:has(#exercise-rotate:not([hidden])) #complete-block{font-size:15px}
+.exercise-focus .exercise-phase-bar[hidden],.exercise-focus .phase-choice-nav[hidden]{display:none!important}
+.exercise-focus .hybrid-board[data-task-mode=true][data-visual-view=animation]>.exercise-phase-bar{display:none!important}

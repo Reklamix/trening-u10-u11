@@ -2,6 +2,42 @@
 
 // A compressed walkthrough of the approved doses. The training clock is independent.
 const FootballSequences = {
+  // Keep the complete session for doses/roles. Only the explicit preview is compacted.
+  representative(scene,{taskDuration=0,taskInstruction=''}={}){
+    if(!scene.phases?.length)return scene;
+    const key=p=>p.kind+':'+p.name.replace(/ · (?:kolo|časť) .*/,'').replace(/\d+\/\d+/g,'#/#').replace(/\d+\.(?=\s*(?:séri|kole|úseku))/g,'#.');
+    const selected=[],seen=new Map();
+    for(const phase of scene.phases){
+      if(taskDuration&&phase.kind!=='work'&&phase.kind!=='end')continue;
+      const id=taskDuration?phase.kind:key(phase),existing=seen.get(id);
+      if(existing){existing.sources.push(phase);continue;}
+      const item={source:phase,sources:[phase]};selected.push(item);seen.set(id,item);
+    }
+    const out={...scene,representative:true,taskMode:!!taskDuration,taskDuration,tracks:{},arrows:[],transfers:[],phases:[],steps:[],duration:0};
+    const clean=name=>name.replace(/ · (?:kolo|časť) .*/,'').replace(/^(?:Séria|Úsek|Pokus) \d+\/\d+$/,'Vzorová akcia').replace(/ \d+\/\d+$/,'');
+    for(const {source,sources}of selected){
+      const start=out.duration,end=start+source.end-source.start,shift=t=>Number.isFinite(t)?start+t-source.start:t;
+      const name=source.kind==='end'?'Vzorová ukážka dokončená':clean(source.name);
+      const cue=source.kind==='end'?'Vzorová ukážka skončila. Tréningový časovač je samostatný; pokračujte podľa rozdelenia a striedania.':source.kind==='work'&&taskDuration&&taskInstruction?'Vzorová ukážka. '+taskInstruction+' Ostatné deti opakujú rovnaký postup podľa striedania.':source.cue;
+      const phase={...source,name,cue,start,end,ready:start,sourceNames:sources.map(p=>p.name),doseParts:sources,actualSeconds:sources.reduce((n,p)=>n+p.actualSeconds,0)};
+      if(source.kind==='end'&&out.phases.length){
+        phase.roles=out.phases.at(-1).roles;out.phases.push(phase);out.steps.push({time:start,text:'Vzorová ukážka je dokončená. Ostatní pokračujú rovnakým postupom podľa striedania.'});
+        for(const frames of Object.values(out.tracks)){const last=frames.at(-1);frames.push([end,last[1],last[2]]);}out.duration=end;continue;
+      }
+      out.phases.push(phase);out.steps.push({time:start,text:source.kind==='end'?'Vzorový priebeh je prejdený. Ostatné deti pokračujú podľa rozdelenia a striedania.':cue});
+      for(const node of scene.nodes){
+        const frames=scene.tracks[node.id];if(!frames?.length)continue;
+        const samples=frames.filter(f=>f[0]>=source.start&&f[0]<source.end);
+        const first=FootballScenes.sample(frames,source.start),last=FootballScenes.sample(frames,source.end-1e-6),track=out.tracks[node.id]||(out.tracks[node.id]=[]);
+        track.push([start,first.x,first.y,'cut'],...samples.map(f=>[shift(f[0]),f[1],f[2],...(f[3]?[f[3]]:[])]),[end,last.x,last.y]);
+      }
+      for(const arrow of scene.arrows||[])if(arrow.start>=source.start&&arrow.start<source.end)out.arrows.push({...arrow,start:shift(arrow.start),end:shift(Math.min(arrow.end,source.end))});
+      for(const transfer of scene.transfers||[])if(transfer.depart>=source.start&&transfer.depart<source.end)out.transfers.push({...transfer,depart:shift(transfer.depart),arrive:shift(transfer.arrive),settled:shift(transfer.settled)});
+      out.duration=end;
+    }
+    out.caption='Jedna kompletná vzorová ukážka. Ostatné deti a dvojice cvičia rovnakým postupom podľa rozdelenia a striedania. Čísla v ukážke sú vzorové; aktuálne poradie určuje časovač a pokyny.';
+    return out;
+  },
   build(training, block, index, base) {
     const config=training.planConfig;
     if(!config)return base;
