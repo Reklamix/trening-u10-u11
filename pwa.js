@@ -4,7 +4,7 @@
   if(!install||!push||!status)return;
   const tokenKey='u11-push-owner-v1',standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   const ios=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  let promptEvent=null,registration=null,config=null,busy=false,subscribed=false;
+  let promptEvent=null,registration=null,config=null,busy=false,subscribed=false,initialized=false;
   const message=text=>{status.textContent=text;};
   const storage={get:()=>localStorage.getItem(tokenKey),set:v=>localStorage.setItem(tokenKey,v),remove:()=>localStorage.removeItem(tokenKey)};
   const settings=document.getElementById('app-settings-dialog'),settingsOpen=document.getElementById('app-settings-open'),settingsClose=document.getElementById('app-settings-close');
@@ -18,8 +18,9 @@
   };
   function render(){
     install.textContent=standalone()?'Aplikácia je pridaná':'Pridať do mobilu';
-    push.disabled=busy||!config;
-    push.textContent=busy?'Chvíľku…':subscribed?'Vypnúť upozornenia':'Zapnúť upozornenia';
+    push.disabled=busy||!config||!initialized||subscribed;
+    const off=document.getElementById('push-disable');off.hidden=!subscribed;off.disabled=busy;
+    push.textContent=busy?'Chvíľku…':subscribed?'Upozornenia zapnuté ✓':'Zapnúť upozornenia';
   }
   function instructions(){
     document.getElementById('install-instructions').textContent=standalone()?'Aplikáciu už máš otvorenú cez ikonu na ploche.':ios()?'V Safari otvor Zdieľať (prípadne najprv menu ⋯), potom Pridať na plochu a potvrď Pridať. Ak vidíš voľbu Otvárať ako webovú aplikáciu, nechaj ju zapnutú.':'V menu prehliadača otvor Inštalovať aplikáciu alebo Pridať na plochu a potvrď. Ak túto voľbu nevidíš, otvor stránku priamo v Chrome alebo inom podporovanom prehliadači.';
@@ -34,27 +35,32 @@
     render();
   });
   push.addEventListener('click',async()=>{
-    if(busy||!config)return;
+    if(busy||!config||!initialized||subscribed)return;
     if(ios()&&!standalone()){instructions();message('Na iPhone najprv pridaj aplikáciu na plochu a otvor ju cez ikonu.');return;}
     // Permission must be requested directly from the user's gesture, before any await.
-    const permission=subscribed?null:Notification.requestPermission();
+    const permission=Notification.requestPermission();
     busy=true;render();
     let created=null;
     try{
-      if(subscribed){
-        const sub=await registration.pushManager.getSubscription(),token=storage.get();
-        if(sub&&token)await api('unsubscribe',{endpoint:sub.endpoint,token});
-        if(sub&&!(await sub.unsubscribe()))throw Error('Odhlásenie zariadenia zlyhalo');
-        storage.remove();subscribed=false;message('Upozornenia sú na tomto zariadení vypnuté.');
-      }else{
-        if(await permission!=='granted'){message(Notification.permission==='denied'?'Upozornenia sú zablokované. Povoľ ich v nastaveniach stránky alebo telefónu.':'Upozornenia zostali vypnuté.');return;}
+        if(await permission!=='granted'){message(Notification.permission==='denied'?'Upozornenia sú zablokované. Povoľ ich v nastaveniach stránky alebo telefónu.':'Prehliadač neudelil povolenie. Pri otázke na upozornenia vyber Povoliť a skús znova.');return;}
         let token=storage.get();if(!token){const bytes=crypto.getRandomValues(new Uint8Array(32));token=btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');storage.set(token);}
         let sub=await registration.pushManager.getSubscription();
         if(!sub){const key=Uint8Array.from(atob(config.publicKey.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));sub=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});created=sub;}
         await api('subscribe',{subscription:sub.toJSON(),token});
         subscribed=true;message('Zapnuté na tomto zariadení. Nový pripravený tréning sa ohlási aj po zatvorení aplikácie. Zvuk riadi telefón.');
-      }
     }catch{if(created){try{await created.unsubscribe();}catch{}}message('Zmenu sa nepodarilo dokončiť. Skontroluj pripojenie a skús znova.');}
+    finally{busy=false;render();}
+  });
+  document.getElementById('push-disable').addEventListener('click',async()=>{
+    if(busy||!initialized||!subscribed)return;
+    if(!window.confirm('Naozaj vypnúť upozornenia na nové tréningy na tomto zariadení?'))return;
+    busy=true;render();
+    try{
+      const sub=await registration.pushManager.getSubscription(),token=storage.get();
+      if(sub&&token)await api('unsubscribe',{endpoint:sub.endpoint,token});
+      if(sub&&!(await sub.unsubscribe()))throw Error('Odhlásenie zariadenia zlyhalo');
+      storage.remove();subscribed=false;message('Upozornenia sú na tomto zariadení vypnuté.');
+    }catch{message('Vypnutie sa nepodarilo dokončiť. Skús znova.');}
     finally{busy=false;render();}
   });
   async function init(){
@@ -79,7 +85,7 @@
       config=null;message(location.hostname==='reklamix.github.io'?'Upozornenia sú dostupné na novej adrese BeGoal.':'Upozornenia sa teraz nedajú načítať. Skontroluj pripojenie a obnov stránku.');
       document.getElementById('push-primary-link').hidden=location.hostname!=='reklamix.github.io';
     }
-    render();
+    initialized=true;render();
   }
   init();
 })();
