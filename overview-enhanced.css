@@ -113,3 +113,36 @@ body:has(#main[data-view=overview]) .header-button {min-height:44px;border:1px s
  #main[data-view=overview] .summary-gear-grid {grid-template-columns:repeat(5,minmax(0,1fr))}
  #main[data-view=overview] .summary-gear,#main[data-view=overview] .summary-gear-grid:has(>button:nth-child(5):last-child)>button:nth-child(n) {grid-column:auto}
 }
+
+/* A single preparation screen; drill execution remains on the exercise screen. */
+#main[data-view=overview] .overview-grid{display:block;max-width:760px;margin:auto}
+#main[data-view=overview] .overview-hero{padding:16px;margin-bottom:12px}
+#main[data-view=overview] .overview-hero>.eyebrow,#main[data-view=overview] #training-cue{display:none}
+#main[data-view=overview] .overview-hero h1{font-size:24px;margin-bottom:8px;text-align:left}
+#main[data-view=overview] .overview-hero .summary-facts{display:block;min-height:0;padding:0;border:0}
+#main[data-view=overview] .summary-facts>button{display:none}
+#main[data-view=overview] .summary-facts>button:first-child{display:flex;justify-content:flex-start;min-height:36px;padding:0;pointer-events:none}
+#main[data-view=overview] .summary-facts>button:first-child span{display:flex;align-items:center;gap:10px}
+#main[data-view=overview] .summary-kit{margin:0 0 12px;padding:14px 12px}
+#main[data-view=overview] .summary-kit h2{font-size:18px}
+#main[data-view=overview] .summary-gear-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#main[data-view=overview] .summary-gear{height:84px;min-height:84px;min-width:0;padding:8px;overflow:hidden}
+#main[data-view=overview] .summary-gear img{width:38px;height:38px;object-fit:contain;flex:none}
+#main[data-view=overview] .summary-journey{margin:0 0 12px;gap:8px}
+#main[data-view=overview] .summary-journey button{font-size:14px;min-height:52px}
+#main[data-view=overview] .overview-schedule{padding:14px 10px 8px;margin-bottom:12px}
+#main[data-view=overview] .overview-item{min-height:60px}
+#main[data-view=overview] .overview-settings .schedule-details{display:block}
+#main[data-view=overview] .overview-tools{position:static;margin:0;padding:0;background:transparent;border:0;box-shadow:none}
+#main[data-view=overview] .overview-settings{border:1px solid #dce5d7;border-radius:12px;background:#fff;padding:0 12px}
+#main[data-view=overview] .overview-settings>summary{min-height:48px;display:flex;gap:10px;align-items:center;font-weight:650;cursor:pointer}
+#main[data-view=overview] .overview-settings:not([open])>*:not(summary){display:none}
+body:has(#main[data-view=overview]) #session-meta{display:none}
+
+#main[data-view=overview] #summary-equipment{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:84px}
+#main[data-view=overview] #summary-equipment>button:nth-child(n){grid-column:auto;display:grid;grid-template-columns:28px minmax(0,1fr);gap:7px;align-items:center;text-align:left;height:84px;min-height:84px;padding:8px}
+#main[data-view=overview] #summary-equipment>button img{width:28px;height:28px}
+#main[data-view=overview] #summary-equipment strong{font-size:11px;line-height:1.25}
+#main[data-view=overview] #summary-equipment small{font-size:12px;line-height:1.3}
+#main[data-view=overview] #summary-equipment .summary-gear-status{display:none}
+#main[data-view=overview] #summary-equipment>button[aria-pressed=true]::after{content:'✓';position:absolute;right:4px;top:1px;color:#12614e;font-size:13px}

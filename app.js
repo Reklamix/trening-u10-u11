@@ -667,7 +667,7 @@ const PersonalPlans = [
     if(dirty)$('plan-saved').textContent='Potvrď Hotovo · uložiť.';
   }
   function openSummaryPanel(id,focusId) {
-    const panel=$(id);
+    const panel=$(id);$('overview-settings').open=true;
     document.querySelectorAll('#overview-view .shell-disclosure').forEach(other=>{other.open=other===panel;});
     if(focusId==='plan-pitch'||focusId==='plan-coaches')showPlanTab(focusId==='plan-pitch'?'pitch':'coaches');
     const target=focusId?document.querySelector(`[data-plan-control="${focusId}"][aria-pressed=true]`)||$(focusId):panel.querySelector('summary,h2');
@@ -753,14 +753,14 @@ const PersonalPlans = [
     if(config){syncPlanDraft();showPlanGroup(Number($('plan-groups').dataset.activeGroup)||0);}
     $('summary-timeline-title').textContent='Cvičenia a časy';
     $('summary-schedule-count').textContent=`${training.blocks.length} cvičení`;
-    $('summary-schedule-range').textContent=`${timeRange(training)} · ${training.duration} min · Klikni na cvičenie a otvor jeho celý postup.`;
+    $('summary-schedule-range').textContent=`${timeRange(training)}`;
     $('plan-saved').textContent=configSaved?'Uložené pre tento tréning.':'Uloženie zlyhalo. Zachovaj si variant cez Zdieľať.';
     const notes=training.organizationNotes||[training.players,training.coaches];
     const list=el('ul');notes.forEach(note=>list.append(el('li','',note)));$('plan-recommendation').replaceChildren(list);
     $('summary-equipment').replaceChildren(...training.equipment.map(item=>{const button=el('button','summary-gear');button.type='button';button.dataset.gear=item.name;button.setAttribute('aria-label',item.name+': '+item.quantity);const text=el('span'),status=el('span','summary-gear-status');status.setAttribute('aria-hidden','true');text.append(el('strong','',item.name),el('small','',overviewQuantity(item)),status);button.append(kitImage(item.name),text);button.addEventListener('click',()=>setEquipmentReady(item.name,!checkedGear().includes(item.name)));return button;}));
     syncEquipmentState();
     const canPrepare=Boolean(window.PitchSetup?.supports(training));
-    $('summary-setup').hidden=!canPrepare;$('equipment-prepare').hidden=!canPrepare;$('summary-start').textContent='Otvoriť celý tréning →';
+    $('summary-setup').hidden=!canPrepare;$('equipment-prepare').hidden=!canPrepare;$('summary-start').textContent='Začať tréning →';
   }
   function renderCatalog(){
     const mode=$('catalog-mode').value,items=TrainingLibrary.filter(state.trainings,{mode,topic:$('catalog-topic').value,query:$('catalog-query').value.trim()});
@@ -855,7 +855,7 @@ const PersonalPlans = [
     state.blockIndex = index;
     if (blockChanged || initial) renderActive();
     const view = ['overview', 'equipment', 'coaching', 'catalog', 'private', 'planning'].includes(current.section) ? current.section : current.block?'field':'overview';
-    $('training-plan-status').hidden=!training.planning;
+    $('training-plan-status').hidden=!training.planning||training.planning.status==='ready';
     $('training-plan-status').textContent=training.planning?(training.planning.status==='ready'?'Pripravený tréning · podmienky uprav podľa dochádzky.':training.planning.scheduleConfirmed?'Pracovný návrh obsahu · termín potvrdený.':'Pracovný návrh · termín a čas potvrdiť.'):'';
     setView(view);
     if (!current.id || current.id !== training.id) {

@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="./exercise-layout.css?v=1">
   <link rel="stylesheet" href="./app-unified.css?v=4">
   <link rel="stylesheet" href="./exercise-hybrid.css?v=3">
-  <link rel="stylesheet" href="./overview-enhanced.css?v=2">
+  <link rel="stylesheet" href="./overview-enhanced.css?v=3">
   <link rel="stylesheet" href="./preparation-enhanced.css?v=1">
   <link rel="stylesheet" href="./equipment-enhanced.css?v=1">
   <link rel="stylesheet" href="./training-calendar.css?v=1">
@@ -35,7 +35,7 @@
   <script src="./training-programs.js?v=8" defer></script>
   <script src="./training-load.js?v=6" defer></script>
   <script src="./exercise-views.js?v=5" defer></script>
-  <script src="./app.js?v=44" defer></script>
+  <script src="./app.js?v=45" defer></script>
   <link rel="stylesheet" href="./pwa.css?v=2">
   <link rel="stylesheet" href="./exercise-views.css?v=5">
   <script src="./pwa.js?v=2" defer></script>
@@ -84,17 +84,19 @@
         <div id="summary-facts" class="summary-facts" aria-label="Dnešné podmienky"></div>
         </header>
         <p id="training-plan-status" class="planning-notice" hidden></p>
+        <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
+        <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">Pripraviť plochu</button><button id="summary-start" class="button" type="button">Začať tréning</button></div>
         <section id="timeline-panel" class="overview-schedule" aria-labelledby="summary-timeline-title">
-          <header class="schedule-heading"><div><p class="schedule-eyebrow">Celý tréning na jednom mieste</p><h2 id="summary-timeline-title" tabindex="-1">Cvičenia a časy</h2></div><span id="summary-schedule-count" class="schedule-count"></span></header>
+          <header class="schedule-heading"><div><h2 id="summary-timeline-title" tabindex="-1">Cvičenia a časy</h2></div><span id="summary-schedule-count" class="schedule-count"></span></header>
           <p id="summary-schedule-range" class="schedule-range"></p>
           <nav id="overview-blocks" class="overview-blocks" aria-label="Cvičenia podľa časového plánu"></nav>
-          <details class="schedule-details"><summary>Rozdelenie a dokončené časti</summary><div id="grouping" class="grouping"></div><p id="completion-count" class="small-note"></p><button id="reset-progress" class="text-button" type="button">Zrušiť označenie dokončených častí</button></details>
-        </section>
-        <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">1 · Pripraviť ihrisko →</button><button id="summary-start" class="button" type="button">2 · Začať cvičenia →</button></div>
-        <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky · označ pripravené</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
-        <a class="planning-entry" href="#planning" data-view="planning"><span>Plán tréningov</span><small>Najbližšie 2 týždne →</small></a>
 
-        </div><aside class="overview-tools" aria-label="Podmienky a organizácia tréningu"><h2 class="overview-tools-title">Podmienky a plán</h2>
+        </section>
+
+
+
+
+        </div><aside class="overview-tools" aria-label="Podmienky a organizácia tréningu"><details id="overview-settings" class="overview-settings"><summary><img src="./assets/bootstrap-icons/gear.svg" width="20" height="20" alt="">Nastavenia tréningu</summary>
         <details id="conditions-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/gear.svg" alt="">Nastaviť podmienky<span id="conditions-summary"></span></summary>
         <form id="plan-form" class="plan-card" hidden>
           <nav class="plan-tabs" aria-label="Čo nastaviť">
@@ -124,7 +126,9 @@
           <button class="button" type="submit">Hotovo · uložiť</button><p id="plan-saved" class="small-note" role="status"></p>
         </form></details>
         <details id="organization-panel" class="shell-disclosure"><summary><img src="./assets/bootstrap-icons/people-fill.svg" alt="">Zameranie a organizácia</summary><div class="disclosure-body"><p id="training-focus" class="muted"></p><div id="training-topics" class="topic-chips"></div><div id="plan-recommendation"></div><button id="show-coaching" type="button" class="text-button">Spoločné pokyny trénerov →</button></div></details>
-        </aside></div>
+          <details class="schedule-details"><summary>Rozdelenie a dokončené časti</summary><div id="grouping" class="grouping"></div><p id="completion-count" class="small-note"></p><button id="reset-progress" class="text-button" type="button">Zrušiť označenie dokončených častí</button></details>
+        <a class="planning-entry" href="#planning" data-view="planning"><span>Plán tréningov</span><small>Najbližšie 2 týždne →</small></a>
+        </details></aside></div>
       </section>
       <section id="catalog-view" class="view" hidden aria-labelledby="catalog-title">
         <p class="eyebrow">Uložené podľa tém a dátumov</p><h1 id="catalog-title">Knižnica tréningov</h1><p class="muted">Vráť sa k celému tréningu alebo nájdi konkrétne cvičenie.</p>
