@@ -170,7 +170,7 @@ const FootballScenes = {
       track('ball',[[0,.21,.34],[2,.36,.72],[4,.36,.72],[6,.56,.14],[7,.84,.5],[8,1.015,.5]]);
       line('pass',1,[[.18,.32],[.33,.7]]);line('run',2,[[.18,.32],[.28,.1],[.53,.12]]);line('pass',3,[[.33,.7],[.53,.12]]);line('dribble',4,[[.53,.12],[.81,.48]]);line('pass',5,[[.81,.48],[1.015,.5]]);
       step(0,n>4?'1. Prihraj spoluhráčovi; neutrálny pomáha tímu s loptou.':'1. Prihraj spoluhráčovi.');step(2,'2. Znovu sa ponúkni do voľného priestoru.');step(4,'3. Spoluhráč vráti loptu do nábehu.');step(6,'4. Priprav si presné zakončenie.');step(7,'5. Pošli loptu po zemi cez kužeľovú bránku.');step(8,n>4?'Príklad jednej akcie. Neutrálny sám neboduje; v hre hráči rozhodujú sami.':'Príklad jednej akcie; v hre hráči rozhodujú sami.');
-      const team=n>=7?3:2,neutral=n-2*team;scene.caption=`Ihrisko ${['A1','A2','B1','B2'][pitchIndex]}: ${team} na ${team}${neutral?' + '+neutral+' N':''} = ${n} detí. Všetky štyri ihriská spolu ${total}. Dve kužeľové bránky široké 2 m; zakončenie po zemi.`;
+      const team=n>=7?3:2,neutral=n-2*team;scene.caption=`Ihrisko ${area?.label||'Skupina'}: ${team} na ${team}${neutral?' + '+neutral+' N':''} = ${n} detí. Všetky skupiny spolu ${total}. Dve kužeľové bránky široké 2 m; zakončenie po zemi.`;
     } else if(key==='football-matches') {
       const n=pitchIndex?Math.floor(total/2):Math.ceil(total/2),side=Math.floor(n/2),large=total>=23;
       scene.pitch=pitch(40,40,280,large?36:32,large?26:24,{goals:true});
@@ -438,7 +438,10 @@ const FootballPhaseNavigation={
       const signature=JSON.stringify(config.groupSizes);if(signature===countSignature)return;countSignature=signature;countTools.replaceChildren();
       countTools.append(html('summary','',`Počty skupín · spolu ${config.players}`));
       const form=html('form'),grid=html('div','football-count-grid'),fields=[];
-      config.groupSizes.forEach((size,index)=>{const group=['A1','A2','B1','B2'][index],label=html('label','football-select-label','Detí '+group),input=html('input');input.type='number';input.min='2';input.max='8';input.step='1';input.required=true;input.value=size;input.setAttribute('aria-label','Detí '+group);label.append(input);fields.push(input);grid.append(label);});
+      const countLabel=html('label','football-select-label','Počet skupín'),countSelect=html('select');countSelect.setAttribute('aria-label','Počet skupín pri cvičení');
+      for(const count of [2,3,4]){const option=html('option','',`${count} skupiny`);option.value=count;option.disabled=config.players<count*2||config.players>count*8;countSelect.append(option);}countSelect.value=String(config.groupSizes.length);
+      countSelect.addEventListener('change',()=>{if(options.onCountChange(TrainingPlanner.groups(config.players,Number(countSelect.value)))){refreshPlan();build();options.onGroupChange(options.size,pitchIndex);}});countLabel.append(countSelect);form.append(countLabel);
+      config.groupSizes.forEach((size,index)=>{const group=TrainingPlanner.labels(config.groupSizes.length)[index],label=html('label','football-select-label','Detí '+group),input=html('input');input.type='number';input.min='2';input.max='8';input.step='1';input.required=true;input.value=size;input.setAttribute('aria-label','Detí '+group);label.append(input);fields.push(input);grid.append(label);});
       const preview=html('p','small-note');preview.setAttribute('role','status');
       const apply=html('button','button','Použiť rozdelenie');apply.type='submit';
       const update=()=>{const sizes=fields.map(input=>Number(input.value)),sum=sizes.reduce((a,b)=>a+b,0),valid=Boolean(TrainingPlanner.regroup(config,sizes));apply.disabled=!valid;preview.textContent=valid?(sum===config.players?`Spolu ${sum} detí; celkový počet ostane.`:`Spolu ${config.players} → ${sum} detí. Zmení sa aj počet detí spolu.`):'Každá skupina musí mať 2–8 detí, spolu 10–30.';apply.textContent=sum===config.players?'Použiť rozdelenie':`Použiť: ${Number.isFinite(sum)?sum:'—'} detí spolu`;};
@@ -448,9 +451,9 @@ const FootballPhaseNavigation={
     }
     function renderLevelTools(){
       const config=options.levelConfig?.();levelTools.replaceChildren();if(!config||!areas.length)return;
-      const indices=areas[pitchIndex]?.members||(block.diagram==='football-warmup'?[pitchIndex*2,pitchIndex*2+1]:[pitchIndex]);
+      const indices=areas[pitchIndex]?.members||(block.diagram==='football-warmup'?TrainingPlanner.warmMembers(config,pitchIndex):[pitchIndex]);
       for(const index of indices){
-        const group=['A1','A2','B1','B2'][index],label=html('label','football-select-label','Náročnosť '+group),select=html('select');select.setAttribute('aria-label','Náročnosť '+group);select.dataset.levelGroup=index;
+        const group=TrainingPlanner.labels(config.groupSizes.length)[index],label=html('label','football-select-label','Náročnosť '+group),select=html('select');select.setAttribute('aria-label','Náročnosť '+group);select.dataset.levelGroup=index;
         for(const[value,title]of Object.entries(TrainingPlanner.levels)){const option=html('option','',title);option.value=value;select.append(option);}select.value=config.levels[index];
         select.addEventListener('change',()=>{if(options.onLevelChange?.(index,select.value)){const updated=options.levelConfig();if(block.programKind==='large-game'){refreshPlan();pitchIndex=Math.max(0,areas.findIndex(area=>area.members?.includes(index)));options.size=areas[pitchIndex].count;areaSelect.value=String(pitchIndex);}else if(block.diagram!=='football-warmup')areas.forEach(area=>area.skill=area.members&&typeof TrainingLoad!=='undefined'?TrainingLoad.skill(updated,area.members):updated.levels[area.index]);build();options.onGroupChange(options.size,pitchIndex);focusControl(levelTools.querySelector(`[data-level-group="${index}"]`));}else select.value=options.levelConfig().levels[index];});
         label.append(select);levelTools.append(label);

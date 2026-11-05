@@ -110,11 +110,11 @@ const FootballSequences = {
       mobilize.nodes=mobilize.nodes.filter(node=>node.kind!=='ball');mobilize.duration=6;
       action('Rozhýbanie',120,mobilize,{seconds:6,cue:'Ľahký pohyb medzi spoluhráčmi, zmeny smeru a rozhýbanie. Lopty zatiaľ stoja.'});
       action('Vedenie lopty',180,base,{seconds:16,cue:'Každý vedie svoju loptu medzi spoluhráčmi. Hlava hore, vyhni sa im a zrýchli do voľna.'});
-      const pass={...base,nodes:[],tracks:{},arrows:[],duration:8,transfers:[]},counts=config.groupSizes.slice(index*2,index*2+2);let offset=0,podIndex=0;
+      const pass={...base,nodes:[],tracks:{},arrows:[],duration:8,transfers:[]},counts=TrainingPlanner.warmMembers(config,index).map(i=>config.groupSizes[i]);let offset=0,podIndex=0;
       counts.forEach((count,group)=>{
         const pods=Array.from({length:Math.floor(count/2)},()=>2);if(count%2)pods[pods.length-1]=3;
         pods.forEach((size,row)=>{
-          const y=(row+1)/(pods.length+1),cx=group?.73:.27,dx=1.75/base.pitch.length,dy=3.5*Math.sqrt(3)/4/base.pitch.width;
+          const y=(row+1)/(pods.length+1),cx=counts.length===1?.5:group?.73:.27,dx=1.75/base.pitch.length,dy=3.5*Math.sqrt(3)/4/base.pitch.width;
           const poses=size===3?[[cx-dx,y-dy],[cx+dx,y-dy],[cx,y+dy]]:[[cx-dx,y],[cx+dx,y]],personIds=[];
           poses.forEach(([u,v])=>{const id='p'+offset,p={x:base.pitch.x+u*base.pitch.w,y:base.pitch.y+v*base.pitch.h};personIds.push(id);pass.nodes.push({id,label:String(++offset),...p,team:'A',kind:'player'});});
           const ballId=podIndex?'b'+podIndex:'ball',first=pass.nodes.find(node=>node.id===personIds[0]);pass.nodes.push({id:ballId,label:'',x:first.x+base.pitch.w*.03,y:first.y+base.pitch.h*.02,team:'A',kind:'ball'});

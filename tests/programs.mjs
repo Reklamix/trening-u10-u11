@@ -104,7 +104,7 @@ for(const source of programs){
      assert.equal(timer.parts.filter(p=>p.requiresStart).length,3);
      assert.equal(nodes.filter(node=>node.team==='A').length,Math.floor(area.count/2));
      assert.equal(areas.reduce((sum,a)=>sum+a.count,0),players,'Larger games include every child');
-     if(pitch==='quarter'){assert.equal(areas.length,4);assert.equal(area.members.length,1);}else{assert.equal(areas.length,2);assert.equal(area.members.length,2);assert.ok(area.length>=30);}
+     if(pitch==='quarter'||t.planConfig.groupSizes.length!==4){assert.equal(areas.length,t.planConfig.groupSizes.length);assert.equal(area.members.length,1);}else{assert.equal(areas.length,2);assert.equal(area.members.length,2);assert.ok(area.length>=30);}
      if(area.count<=6)assert.equal(work.reduce((sum,p)=>sum+p.actualSeconds,0),480,'Small teams have additional rest within four game periods');
      for(const node of base.nodes.filter(n=>n.team==='A'&&n.kind==='player'))assert.ok(F.sample(base.tracks[node.id],12).x<F.sample(base.tracks[node.id],6).x,'The large-game example really shows a defensive return after losing possession');
     }

@@ -456,9 +456,9 @@ const {planner,library}=runInNewContext(footballPure+'\n'+plannerPure+'\n({plann
 const plannerSource=JSON.stringify(thu);
 equal(planner.normalize({players:9}).players,10,'Attendance lower bound is ten');
 equal(planner.normalize({players:31}).players,30,'Attendance upper bound remains thirty');
-equal(JSON.stringify(planner.groups(10)),JSON.stringify([3,3,2,2]),'Ten attendees are assigned exactly once without inventing players');
+equal(JSON.stringify(planner.groups(10)),JSON.stringify([5,5]),'Ten attendees are assigned exactly once without inventing players');
 for(let players=10;players<=30;players++)for(const pitch of ['quarter','half','full']){
-  const training=planner.adapt(thu,{players,pitch,coaches:2}),groups=planner.groups(players),config=training.planConfig;
+  const training=planner.adapt(thu,{players,pitch,coaches:2,groupMode:'manual',groupSizes:planner.groups(players,4)}),groups=planner.groups(players,4),config=training.planConfig;
   equal(groups.reduce((sum,n)=>sum+n,0),players,'Adaptive plan assigns every attendee once');
   check(groups.every(n=>n>=2&&n<=8),'Every supported group has an implemented drill form');
   equal(training.duration,75,'Adaptive training retains the full 75 minutes');
@@ -521,9 +521,9 @@ for(const size of[2,3,7,8])for(const key of['football-pass','football-rondo']){
   const scene=FootballScenes.build(key,{size});
   for(const transfer of scene.transfers){const ball=FootballScenes.sample(scene.tracks.ball,transfer.settled),receiver=FootballScenes.sample(scene.tracks[transfer.to],transfer.settled);check(Math.hypot(ball.x-receiver.x,ball.y-receiver.y)<12,'New group sizes complete each pass at the actual receiving player');}
 }
-equal(Object.keys(planner.normalize({players:20,privateNotes:'not-used'})).sort().join(','),'coaches,groupSizes,height,levels,pitch,players,width','Public configuration retains only its seven public planning fields, no personal notes');
+equal(Object.keys(planner.normalize({players:20,privateNotes:'not-used'})).sort().join(','),'coaches,groupMode,groupSizes,height,levels,pitch,players,width','Public configuration retains only its eight public planning fields, no personal notes');
 for(const sizes of[[3,3,2,2],[3,3,4,4],[3,3,8,8],[5,7,4,6],[8,8,7,7]]){
-  const players=sizes.reduce((a,b)=>a+b,0),training=planner.adapt(thu,{players,groupSizes:sizes,levels:['base','challenge','standard','base']});
+  const players=sizes.reduce((a,b)=>a+b,0),training=planner.adapt(thu,{players,groupSizes:sizes,groupMode:'manual',levels:['base','challenge','standard','base']});
   equal(JSON.stringify(training.attendanceCases.find(c=>c.total===players).groups),JSON.stringify(sizes),'Manual skill-group counts are used by the actual attendance plan');
   for(const block of training.blocks){
     const areas=FootballScenes.groups(block.diagram,players,training.quarterPitch);
@@ -574,7 +574,7 @@ for(const sizes of[[3,3,2,2],[3,3,3,2],[3,3,3,3],[2,7,7,8],[5,7,6,6],[7,6,6,6],[
   const rondo=training.blocks[2];for(const size of new Set(sizes)){const rotation=rondo.rotation.find(r=>r.size===size),table=rondo.tables.find(t=>t.groupSize===size);equal(rotation.rounds,table.rows.length,'New group size resolves the complete matching rotation');equal(rotation.rounds*(rotation.playSeconds+rotation.restSeconds)+rotation.bufferSeconds,270,'Changed rondo rotation still fits its full series');}
   equal(JSON.stringify(sizes),before,'Regrouping does not modify the supplied draft counts');
 }
-for(const invalid of[[2,2,2,2],[8,8,8,7],[1,7,7,8],[9,5,5,5],[5.5,6.5,6,6],[6,6,6],null])equal(planner.regroup(regroupSource,invalid),null,'Invalid inline totals or sizes cannot be applied');
+for(const invalid of[[2,2,2,2],[8,8,8,7],[1,7,7,8],[9,5,5,5],[5.5,6.5,6,6],[6],null])equal(planner.regroup(regroupSource,invalid),null,'Invalid inline totals or sizes cannot be applied');
 equal(JSON.stringify(regroupSource),regroupBefore,'Regrouping cannot modify the previous saved configuration');
 const resizeSource=planner.normalize({players:24,coaches:3,groupSizes:[3,7,8,6],levels:['base','challenge','standard','base']}),resizeBefore=JSON.stringify(resizeSource);
 for(const space of[{pitch:'quarter',width:35,height:25},{pitch:'half',width:50,height:35},{pitch:'full',width:70,height:50},{pitch:'full',width:105,height:68},{pitch:'half',width:35,height:90},{pitch:'full',width:120,height:25}]){
@@ -628,7 +628,7 @@ for(let players=10;players<=30;players++)for(const level of['base','standard','c
   }
   equal(JSON.stringify(training),before,'Brief rendering cannot mutate the actual session or skill variants');
 }
-const tenPlayerPlan=planner.adapt(thu,{players:10});
+const tenPlayerPlan=planner.adapt(thu,{players:10,groupMode:'manual',groupSizes:[3,3,2,2]});
 for(const block of tenPlayerPlan.blocks.slice(1,5)){
   const variant=planner.forGroup(tenPlayerPlan,block,2),brief=briefModel.build(tenPlayerPlan,block,2);
   check(guide.supports(variant),'Two-player replacement retains every coaching-guide step');

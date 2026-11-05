@@ -24,18 +24,18 @@
   <link rel="stylesheet" href="./preparation-enhanced.css?v=1">
   <link rel="stylesheet" href="./equipment-enhanced.css?v=1">
   <link rel="stylesheet" href="./training-calendar.css?v=1">
-  <script src="./training-calendar.js?v=5" defer></script>
-  <script src="./football.js?v=40" defer></script>
-  <script src="./training-planner.js?v=7" defer></script>
-  <script src="./football-sequence.js?v=5" defer></script>
-  <script src="./exercise-brief.js?v=10" defer></script>
+  <script src="./training-calendar.js?v=6" defer></script>
+  <script src="./football.js?v=41" defer></script>
+  <script src="./training-planner.js?v=8" defer></script>
+  <script src="./football-sequence.js?v=6" defer></script>
+  <script src="./exercise-brief.js?v=11" defer></script>
   <script src="./coaching-guide.js?v=5" defer></script>
-  <script src="./pitch-setup.js?v=11" defer></script>
+  <script src="./pitch-setup.js?v=12" defer></script>
   <script src="./interval-timer.js?v=7" defer></script>
-  <script src="./training-programs.js?v=9" defer></script>
-  <script src="./training-load.js?v=7" defer></script>
+  <script src="./training-programs.js?v=10" defer></script>
+  <script src="./training-load.js?v=8" defer></script>
   <script src="./exercise-views.js?v=7" defer></script>
-  <script src="./app.js?v=47" defer></script>
+  <script src="./app.js?v=48" defer></script>
   <link rel="stylesheet" href="./pwa.css?v=2">
   <link rel="stylesheet" href="./exercise-views.css?v=5">
   <script src="./pwa.js?v=3" defer></script>
@@ -118,6 +118,7 @@
             <div class="plan-choice-row" aria-label="Počet trénerov"><button type="button" data-plan-control="plan-coaches" data-plan-value="1">1 tréner</button><button type="button" data-plan-control="plan-coaches" data-plan-value="2">2 tréneri</button><button type="button" data-plan-control="plan-coaches" data-plan-value="3">3 tréneri</button><button type="button" data-plan-control="plan-coaches" data-plan-value="4">4 tréneri</button></div>
           </section>
           <section id="plan-panel-groups" data-plan-panel="groups" aria-label="Nastaviť skupiny" hidden>
+            <label>Počet skupín<select id="plan-group-count" aria-label="Počet skupín"><option value="auto">Automaticky podľa počtu detí</option><option value="2">2 skupiny</option><option value="3">3 skupiny</option><option value="4">4 skupiny</option></select></label>
             <div id="plan-group-picker" class="plan-group-picker" aria-label="Vyber skupinu"></div>
             <p id="plan-group-total" class="small-note" role="status"></p><p id="plan-group-error" class="notice" role="alert" tabindex="-1" hidden></p><div id="plan-groups" class="plan-groups"></div>
             <button id="plan-half-basics" class="secondary-button" type="button">Polovica na základy</button>

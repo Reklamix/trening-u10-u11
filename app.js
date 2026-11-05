@@ -121,6 +121,7 @@ const PersonalPlans = [
     const params = new URLSearchParams(location.hash.slice(1));
     const config={};for(const[key,param]of Object.entries({players:'pocet',pitch:'plocha',coaches:'treneri',width:'dlzka',height:'sirka'}))if(params.has(param))config[key]=params.get(param);
     for(const[key,param]of Object.entries({levels:'urovne',groupSizes:'skupiny'}))if(params.has(param))config[key]=params.get(param).split(',');
+    if(params.has('rezimskupin'))config.groupMode=params.get('rezimskupin');
     return { id: params.get('trening'), block: params.get('blok'), section: params.get('sekcia'), attendance: Number(params.get('pocet')),config };
   }
 
@@ -130,7 +131,7 @@ const PersonalPlans = [
     const params = new URLSearchParams({ trening: id });
     if (state.selected?.id === id && state.selected.attendanceCases) params.set('pocet', String(state.attendance));
     if(state.selected?.id===id&&state.selected.planConfig){const config=state.selected.planConfig;for(const[key,param]of Object.entries({pitch:'plocha',coaches:'treneri',width:'dlzka',height:'sirka'}))params.set(param,String(config[key]));}
-    if(state.selected?.id===id&&state.selected.planConfig){params.set('urovne',state.selected.planConfig.levels.join(','));params.set('skupiny',state.selected.planConfig.groupSizes.join(','));}
+    if(state.selected?.id===id&&state.selected.planConfig){params.set('urovne',state.selected.planConfig.levels.join(','));params.set('skupiny',state.selected.planConfig.groupSizes.join(','));params.set('rezimskupin',state.selected.planConfig.groupMode);}
     if (block) params.set('blok', block);
     if (section) params.set('sekcia', section);
     url.hash = params.toString();
@@ -614,7 +615,7 @@ const PersonalPlans = [
     const img=el('img','shell-kit-image');img.src='./assets/'+src;img.alt='';return img;
   }
   function compactQuantity(item) {
-    const gates=item.quantity.match(/^(\d+) bránok zo \d+ .*kužeľov$/);
+    const gates=item.quantity.match(/^(\d+) brán(?:ok|ky|ka) zo? \d+ .*(?:kužeľov|mét)$/);
     if(item.name.toLocaleLowerCase('sk').includes('brán')&&gates)return gates[1]+' z kužeľov';
     const equals=item.quantity.lastIndexOf('=');
     return equals>=0?item.quantity.slice(equals+1).trim():item.quantity;
@@ -649,6 +650,7 @@ const PersonalPlans = [
     $('plan-form').querySelectorAll('[data-plan-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.planTab===tab)));
   }
   function showPlanGroup(index) {
+    index=Math.max(0,Math.min(index,state.selected.planConfig.groupSizes.length-1));
     $('plan-groups').dataset.activeGroup=String(index);
     $('plan-groups').querySelectorAll('[data-group-card]').forEach(card=>{card.hidden=Number(card.dataset.groupCard)!==index;});
     $('plan-group-picker').querySelectorAll('button').forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));
@@ -657,7 +659,7 @@ const PersonalPlans = [
     $('plan-form').querySelectorAll('[data-plan-control]').forEach(button=>button.setAttribute('aria-pressed',String($(button.dataset.planControl).value===button.dataset.planValue)));
     const counts=[...$('plan-groups').querySelectorAll('[data-group-size]')],sum=counts.reduce((total,input)=>total+Number(input.value),0);
     $('plan-group-total').textContent=`Spolu ${sum} / ${state.attendance} detí · 2–8 v skupine`;
-    $('plan-group-picker').querySelectorAll('button').forEach((button,i)=>{button.textContent=['A1','A2','B1','B2'][i]+' · '+counts[i].value;});
+    $('plan-group-picker').querySelectorAll('button').forEach((button,i)=>{button.textContent=TrainingPlanner.labels(counts.length)[i]+' · '+counts[i].value;});
     $('plan-groups').querySelectorAll('[data-group-card]').forEach(card=>{
       const count=card.querySelector('[data-group-size]'),level=card.querySelector('[data-group-level]');
       card.querySelectorAll('[data-count-delta]').forEach(button=>{button.disabled=Number(button.dataset.countDelta)<0?Number(count.value)<=2:Number(count.value)>=8;});
@@ -746,8 +748,9 @@ const PersonalPlans = [
     if(config){$('plan-pitch').value=config.pitch;$('plan-coaches').value=String(config.coaches);$('plan-width').value=config.width;$('plan-height').value=config.height;$('plan-dimensions-label').textContent=`Rozmery ${config.width} × ${config.height} m · upraviť`;}
     $('plan-groups').replaceChildren();$('plan-group-error').hidden=true;
     $('plan-group-picker').replaceChildren();
+    if(config){$('plan-group-count').value=config.groupMode==='auto'?'auto':String(config.groupSizes.length);for(const option of $('plan-group-count').options)if(option.value!=='auto')option.disabled=config.players<Number(option.value)*2||config.players>Number(option.value)*8;}
     if(config)config.groupSizes.forEach((size,index)=>{
-      const name=['A1','A2','B1','B2'][index],pick=el('button');pick.type='button';pick.addEventListener('click',()=>showPlanGroup(index));$('plan-group-picker').append(pick);
+      const name=TrainingPlanner.labels(config.groupSizes.length)[index],pick=el('button');pick.type='button';pick.addEventListener('click',()=>showPlanGroup(index));$('plan-group-picker').append(pick);
       const card=el('div','plan-group-card');card.dataset.groupCard=index;card.append(el('strong','',name));
       const countLabel=el('label','','Detí v skupine'),count=el('input');count.type='number';count.inputMode='numeric';count.min='2';count.max='8';count.step='1';count.required=true;count.value=size;count.dataset.groupSize=index;count.setAttribute('aria-label','Detí v skupine '+name);
       const stepper=el('div','plan-count-stepper');
@@ -807,18 +810,18 @@ const PersonalPlans = [
   }
   function changeGroupLevel(index,level){
     const source=state.trainings.find(training=>training.id===state.selected.id),current=state.selected.planConfig;
-    if(!current||!TrainingPlanner.supports(source)||!Number.isInteger(index)||index<0||index>3||!Object.hasOwn(TrainingPlanner.levels,level))return false;
+    if(!current||!TrainingPlanner.supports(source)||!Number.isInteger(index)||index<0||index>=current.groupSizes.length||!Object.hasOwn(TrainingPlanner.levels,level))return false;
     const config=TrainingPlanner.normalize({...current,levels:current.levels.map((value,i)=>i===index?level:value)});
     configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
     render(TrainingPlanner.adapt(source,config));
     history.replaceState(history.state,'',linkFor(source.id,activeBlock().id,state.view==='field'?null:state.view));
-    message(`${['A1','A2','B1','B2'][index]} · ${TrainingPlanner.levels[level]}. `+(configSaved?'Uložené pre túto skupinu v tomto tréningu.':'Použité; prehliadač nastavenie neuložil. Zachovaj si zdieľaný odkaz.'));
+    message(`${TrainingPlanner.labels(current.groupSizes.length)[index]} · ${TrainingPlanner.levels[level]}. `+(configSaved?'Uložené pre túto skupinu v tomto tréningu.':'Použité; prehliadač nastavenie neuložil. Zachovaj si zdieľaný odkaz.'));
     return true;
   }
   function applyPlan(changes){
     const source=state.trainings.find(training=>training.id===state.selected.id);
     if(!TrainingPlanner.supports(source))return;
-    const config=TrainingPlanner.normalize({...state.selected.planConfig,...changes,...(changes.players?{groupSizes:TrainingPlanner.groups(Number(changes.players))}:{})});configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
+    const config=TrainingPlanner.normalize({...state.selected.planConfig,...changes,...(changes.players?{groupSizes:TrainingPlanner.groups(Number(changes.players)),groupMode:'auto'}:{})});configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
     const block=activeBlock().id,section=state.view==='field'?null:state.view;
     const next=TrainingPlanner.adapt(source,config);state.attendance=config.players;
     render(next);history.replaceState(history.state,'',linkFor(source.id,block,section));renderActive();setView(state.view);
@@ -1051,8 +1054,9 @@ const PersonalPlans = [
   document.querySelectorAll('[data-plan-control]').forEach(button=>button.addEventListener('click',()=>{const select=$(button.dataset.planControl);select.value=button.dataset.planValue;select.dispatchEvent(new Event('change',{bubbles:true}));syncPlanDraft(true);}));
   $('plan-form').addEventListener('invalid',event=>{const card=event.target.closest('[data-group-card]');if(card){showPlanTab('groups');showPlanGroup(Number(card.dataset.groupCard));}else{showPlanTab('pitch');const details=event.target.closest('details');if(details)details.open=true;}},true);
   $('plan-pitch').addEventListener('change',()=>{const preset=TrainingPlanner.pitches[$('plan-pitch').value];$('plan-width').value=preset.width;$('plan-height').value=preset.height;$('plan-dimensions-label').textContent=`Rozmery ${preset.width} × ${preset.height} m · upraviť`;});
-  $('plan-half-basics').addEventListener('click',()=>{const preset=TrainingPlanner.halfBasics(state.attendance);document.querySelectorAll('[data-group-size]').forEach((input,i)=>{input.value=preset.groupSizes[i];input.removeAttribute('aria-invalid');});document.querySelectorAll('[data-group-level]').forEach((select,i)=>select.value=preset.levels[i]);$('plan-group-error').hidden=true;syncPlanDraft(true);message('Polovica na základy pripravená. Potvrď Hotovo · uložiť.');});
-  $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav rozdelenie na ${state.attendance}.`;showPlanTab('groups');$('conditions-panel').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});$('conditions-panel').open=false;$('conditions-panel').querySelector('summary').focus({preventScroll:true});});
+  $('plan-group-count').addEventListener('change',event=>{const value=event.target.value,count=value==='auto'?undefined:Number(value);applyPlan({groupMode:value==='auto'?'auto':'manual',groupSizes:TrainingPlanner.groups(state.attendance,count)});showPlanTab('groups');});
+  $('plan-half-basics').addEventListener('click',()=>{applyPlan({...TrainingPlanner.halfBasics(state.attendance),groupMode:'manual'});showPlanTab('groups');message('Polovica detí na základy; rozdelenie a nákresy sú prepočítané.');});
+  $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav rozdelenie na ${state.attendance}.`;showPlanTab('groups');$('conditions-panel').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,groupMode:groupSizes.every((n,i)=>n===state.selected.planConfig.groupSizes[i])?state.selected.planConfig.groupMode:'manual',levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});$('conditions-panel').open=false;$('conditions-panel').querySelector('summary').focus({preventScroll:true});});
   $('planning-from').addEventListener('change',event=>{if(TrainingCalendar.validDate(event.target.value)){planningFrom=event.target.value;renderCalendar();}});
   $('planning-today').addEventListener('click',()=>{planningFrom=TrainingCalendar.today();renderCalendar();});
   $('planning-prepared').addEventListener('click',()=>{const first=state.trainings.filter(t=>t.planning).sort((a,b)=>a.date.localeCompare(b.date))[0];if(first){planningFrom=first.planning.period.from;planningDays=14;renderCalendar();}});

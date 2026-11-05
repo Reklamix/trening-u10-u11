@@ -57,7 +57,7 @@ const SessionPrograms = {
       if(stage&&i>0&&i<5){
         stage.areas=gameAreas.map((a,j)=>({...a,programKind:kinds[i],skill:c.levels[j],count:c.groupSizes[j]}));
         if(kinds[i]==='rondo')stage.areas=stage.areas.map(a=>{const length=a.skill==='base'?6:8,width=a.skill==='base'?6:7;return{...a,x:a.x+(a.w-length)/2,y:a.y+(a.h-width)/2,w:length,h:width,length,width};});
-        stage.instructions=`Štyri plochy podľa nákresu; ${c.groupSizes.join(' + ')} detí. Medzi pracovnými plochami 3 m, po obvode aspoň 2 m voľna.`;
+        stage.instructions=`${c.groupSizes.length} plochy podľa nákresu; ${c.groupSizes.join(' + ')} detí. Medzi pracovnými plochami 3 m, po obvode aspoň 2 m voľna.`;
         b.space=stage.instructions;
       }
       b.rotation=Array.from({length:7},(_,j)=>({size:j+2,rounds:j+2,defenders:j===0?0:1,playSeconds:Math.min(45,Math.floor(300/(j+2))-15),restSeconds:15,bufferSeconds:0}));
@@ -94,6 +94,9 @@ const SessionPrograms = {
     const maximum=Math.max(...t.blocks.map(b=>this.cones(t,b).length));
     t.equipment[1].quantity=`${maximum} pracovných + 8 rezervných = ${maximum+8} mét`;
     t.equipment[1].detail='Maximum súčasne rozložených mét podľa zvolených skupín. Bránkové méty sú už započítané; medzi cvikmi ich presúvaj podľa prípravy.';
+    const gates=Math.max(...t.blocks.map(b=>this.cones(t,b).filter(p=>p.kind==='gate').length/2));
+    t.equipment[2].quantity=`${gates} bránok z ${gates*2} pripravených kužeľov`;
+    t.equipment[2].detail='Maximum súčasných kužeľových bránok; ich méty už patria do celkového počtu mét.';
     if(t.loadRevision)TrainingLoad.equipment(t);
     const load=t.loadRevision?'Pohybová príprava 6+1 → 10+1: krátke kvalitné zrýchlenia, koordinácia a väčšia hra s nábehmi a návratmi. Rýchlosť podľa pripravenosti; ďalšiu sériu spustí tréner.':tue?'Krátke intenzívne akcie do 10 s, návrat a oddych 15–20 s. Ďalší štart až po signále, medzi sériami voda.':'Aktívne držanie lopty a malé hry, po prihrávke nová ponuka. Zrýchlenie iba do voľného priestoru; medzi hernými úsekmi oddych.';
     t.organizationNotes.push('Riadená záťaž: '+load,'Na začiatku sleduj pripravenosť, počas práce kvalitu pohybu. Pri únave uber odpor alebo čas hry a pridaj oddych.');
@@ -143,7 +146,7 @@ const SessionPrograms = {
     const key=t.blocks.find(b=>b.programKind===kind)?.diagram,area=t.quarterPitch.stages[key]?.areas?.[index];
     if(!area)return 'Bez nového rozkladania; pomôcky zbieraj až po zastavení hry.';
     const l=area.length,w=area.width,n=area.count;
-    if(kind==='warm')return `4 rohové méty na zónu ${l} × ${w} m, 8 spolu. Vnútri voľný priestor na vedenie medzi deťmi.`;
+    if(kind==='warm')return `4 rohové méty na zónu ${l} × ${w} m, ${t.quarterPitch.stages[key].areas.length*4} spolu. Vnútri voľný priestor na vedenie medzi deťmi.`;
     if(['duel','two-one'].includes(kind)){
       const lanes=this.lanes(kind,n),laneW=(w-(lanes-1))/lanes;
       return `4 rohy plochy ${l} × ${w} m. Vo vzdialenosti 2 m od štartu označ servisný pás pre oddych a lopty. Za ním ${lanes} ${lanes===1?'dráha':'dráhy'} ${(l-2)} × ${laneW} m${lanes===2?', medzi nimi 1 m deliaci pás':''}. ${kind==='two-one'?`Na vzdialenom konci každej dráhy dve bránky ${lanes===2?1:2} m, vyznačené 4 métami.`:`Na vzdialenom konci uprostred každej dráhy jedna ${lanes===2?1:2} m bránka z 2 mét. Len prízemné strely; za bránkou nechaj voľný obvodový pás. Návrat mimo streleckej dráhy, lopty zbieraj až po zastavení oboch dráh.`} Všetko vo vnútri pracovnej plochy.`;
@@ -285,7 +288,7 @@ const SessionPrograms = {
       const start=t.startTime?t.startTime.split(':').map(Number):null,clock=m=>{const total=start[0]*60+start[1]+m;return`${String(Math.floor(total/60)).padStart(2,'0')}:${String(total%60).padStart(2,'0')}`;};
       const action=b.programKind==='finish'?'Zastav všetky hry. Pokojný záver pri trénerovi; potom spoločné upratanie.':this.placement(b.programKind,t,0)+` Teraz ${cones.length} mét spolu.${removed.length?` ${removed.length} nepotrebných mét odlož mimo plochy.`:''}`;
       const lines=areas.flatMap((area,j)=>{const scene=FootballScenes.build(b.diagram,{area,size:area.count,total:t.planConfig.players,pitchIndex:j});return(scene.lines||[]).map(line=>({from:FootballScenes.mapPoint(area,scene.pitch,line.from),to:FootballScenes.mapPoint(area,scene.pitch,line.to)}));});
-      const shortAction=i===0?`Vyznač dve zóny ${areas[0].length} × ${areas[0].width} m; 8 rohových mét.`:b.programKind==='finish'?'Zastav hry, zíďte sa pri trénerovi. Potom upracte pomôcky.':`Uprav rozloženie podľa nákresu. ${cones.length} mét: ${moves.length} presuň, ${remaining.length} pridaj${removed.length?`, ${removed.length} odlož`:''}.`;
+      const shortAction=i===0?`Vyznač ${areas.length} zóny ${areas[0].length} × ${areas[0].width} m; ${cones.length} rohových mét.`:b.programKind==='finish'?'Zastav hry, zíďte sa pri trénerovi. Potom upracte pomôcky.':`Uprav rozloženie podľa nákresu. ${cones.length} mét: ${moves.length} presuň, ${remaining.length} pridaj${removed.length?`, ${removed.length} odlož`:''}.`;
       const step={title:b.title,name:b.title,blockId:b.id,when:start?`${clock(b.start)}–${clock(b.end)}`:`${b.start} min–${b.end} min`,shortAction,action,extra:'Podrobnosti platia pre zvolený počet a plochu. Lopty a oddychujúci nesmú byť v 3 m priechodoch.',coach:t.organizationNotes.filter(v=>v.startsWith('Tréner')).join(' '),kept,moves,added:remaining,total:cones.length,stored:capacity-cones.length,map:{key:b.diagram,areas,cones,lines}};
       previous=cones;return step;
     });return{layout:t.quarterPitch,steps};

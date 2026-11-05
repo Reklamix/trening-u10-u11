@@ -20,7 +20,7 @@ const TrainingLoad = {
     speed.cues=['Rýchle prvé kroky, po cieli brzdi postupne.'];
     speed.steps=['Očísluj deti. V skupine 2–3 jedna dráha; od 4 dve súbežné dráhy. Ďalšia vlna na signál po 7 s.','Štyri série, každý presne jeden beh v každej. Prvá séria uvoľnenejšia, ďalšie svižne podľa pripravenosti.','Návrat chôdzou po označenej vonkajšej strane. Oddychujúci čakajú v 2 m servisnom páse. Ďalšiu sériu spustí tréner.'];
     speed.adjustments=['Rýchlosť podľa pripravenosti a kvality brzdenia; nie podľa Základy/Výzva.','Po poslednom behu sa všetci vrátia a vydýchnu do konca série. Zrýchlenia nepridávaj navyše k dávke.'];
-    for(const b of[strength,speed]){b.stepTitles=['Úloha','Práca a oddych','Organizácia'];b.space=`Štyri oddelené plochy; skupiny ${c.groupSizes.join(' + ')}.`;t.quarterPitch.stages[b.diagram]={areas:areas.map((a,i)=>({...a,count:c.groupSizes[i],skill:c.levels[i],programKind:b.programKind,runDistance:Math.min(tue?15:10,a.length-5)})),instructions:b.space};}
+    for(const b of[strength,speed]){b.stepTitles=['Úloha','Práca a oddych','Organizácia'];b.space=`${c.groupSizes.length} oddelené plochy; skupiny ${c.groupSizes.join(' + ')}.`;t.quarterPitch.stages[b.diagram]={areas:areas.map((a,i)=>({...a,count:c.groupSizes[i],skill:c.levels[i],programKind:b.programKind,runDistance:Math.min(tue?15:10,a.length-5)})),instructions:b.space};}
     old[1].loadSeconds=tue?720:600;old[2].loadSeconds=tue?840:600;old[3].loadSeconds=tue?720:840;old[4].loadSeconds=1080;
     if(!tue)old[1].dose='30 s ukážka + 3 × 150 s prihrávky + 2 × 30 s oddych + 1 min voda = 10 min.';
     if(!tue)old[2].duelBudget=480;
@@ -38,7 +38,7 @@ const TrainingLoad = {
       rondo.steps=[rondo.summary,rondo.dose,'Obranca sa mení podľa čísel, nie po chybe. Pri dvoch deťoch prihrávajte bez obrancu.'];
       rondo.adjustments=['Základy: obranca iba kráča a zachytáva prihrávky, pri nohe neodoberá. Pri opakovanom neúspechu zníž tlak.','Upevnenie: primerane aktívny obranca a voľné dotyky; po prihrávke vytvor nový uhol.'];
       const rondoAreas=areas.map((a,i)=>{const length=c.levels[i]==='base'?6:8,width=c.levels[i]==='base'?6:7;return{...a,x:a.x+(a.w-length)/2,y:a.y+(a.h-width)/2,w:length,h:width,length,width,count:c.groupSizes[i],skill:c.levels[i],programKind:'rondo'};});
-      rondo.space='Štyri samostatné plochy: Základy 6 × 6 m, Upevnenie/Výzva 8 × 7 m. Priechody a obvod zostávajú voľné.';
+      rondo.space=`${c.groupSizes.length} samostatné plochy: Základy 6 × 6 m, Upevnenie/Výzva 8 × 7 m. Priechody a obvod zostávajú voľné.`;
       t.quarterPitch.stages[rondo.diagram]={areas:rondoAreas,instructions:rondo.space};
     }
     old[3].dose=tue?'1 min ukážka + 2 × 4 min herný úsek + 1 min oddych medzi úsekmi + 2 min voda/prestavba = 12 min.':'1 min ukážka + 2 × 5 min herný úsek + 1 min oddych medzi úsekmi + 2 min voda/prestavba = 14 min.';
@@ -48,11 +48,11 @@ const TrainingLoad = {
     game.steps=[game.summary,game.dose,'Vyrovnané družstvá v rámci svojej zóny, voľné dotyky. Bod za prevedenie alebo krátke zakončenie po zemi; N sám neboduje.'];
     game.adjustments=['Záťaž sleduj podľa skutočného zapojenia, kvality návratov a pripravenosti po prestávke.','Technicky rozdielne skupiny zachovaj podľa nastavenia. Väčší priestor je príležitosť na dlhší nábeh, nie povinnosť stále šprintovať.'];
     let games;
-    if(this.merged(c)){
+    if(this.merged(c)&&c.groupSizes.length===4){
       const w=Math.min((c.width-7)/2,30),h=Math.min(c.height-4,40),ox=(c.width-(2*w+3))/2,oy=(c.height-h)/2;
       games=[0,1].flatMap(i=>c.levels[i*2]===c.levels[i*2+1]?[{label:i?'B':'A',x:ox+i*(w+3),y:oy,w,h,length:h,width:w,members:[i*2,i*2+1],count:c.groupSizes[i*2]+c.groupSizes[i*2+1],skill:c.levels[i*2],programKind:'large-game'}]:[i*2,i*2+1].map(j=>({...areas[j],members:[j],count:c.groupSizes[j],skill:c.levels[j],programKind:'large-game'})));
     }else games=areas.map((a,i)=>({...a,members:[i],count:c.groupSizes[i],skill:c.levels[i],programKind:'large-game'}));
-    t.quarterPitch.stages[game.diagram]={areas:games,instructions:this.merged(c)?`${games.length} hry podľa náročnosti: A1+A2 alebo B1+B2 sa spoja iba pri rovnakej úrovni; rozdielne skupiny ostávajú oddelené. Priechody aspoň 3 m, obvod aspoň 2 m.`:'Na malej ploche zostávajú štyri malé hry; väčšiu hru zvoľ až s reálne dostupným priestorom.'};
+    t.quarterPitch.stages[game.diagram]={areas:games,instructions:this.merged(c)&&c.groupSizes.length===4?`${games.length} hry podľa náročnosti: A1+A2 alebo B1+B2 sa spoja iba pri rovnakej úrovni; rozdielne skupiny ostávajú oddelené. Priechody aspoň 3 m, obvod aspoň 2 m.`:`${games.length} oddelené hry podľa skupín; väčšiu hru zvoľ až s reálne dostupným priestorom a rovnakou náročnosťou.`};
     game.space=t.quarterPitch.stages[game.diagram].instructions;
     t.blocks=tue?[old[0],speed,...old.slice(1)]:[old[0],strength,speed,old[1],rondo,...old.slice(2)];
     let elapsed=0;for(const b of t.blocks){const seconds=b.loadSeconds??(b===strength?240:b===speed?360:(b.end-b.start)*60);b.start=elapsed/60;elapsed+=seconds;b.end=elapsed/60;}
@@ -63,7 +63,7 @@ const TrainingLoad = {
     t.focus=t.physicalGoal+' '+(tue?'Krátke súboje a rozhodovanie.':'Prvý dotyk, presná prihrávka a odvaha v 1 na 1 so zakončením.');
     for(const b of t.blocks)if(b.programKind==='rondo')b.rotation=Array.from({length:7},(_,i)=>this.rondo(i+2));
     for(const b of t.blocks)if(!['warm','finish','large-game'].includes(b.programKind))b.tables=Array.from({length:7},(_,i)=>this.table(t,b,i+2));
-    t.organizationNotes.push(t.physicalGoal,'Väčšia hra spája iba susedné technické skupiny A1+A2 a B1+B2 s rovnakou náročnosťou. Rozdielne úrovne ostávajú oddelené; fyzickú dávku uprav individuálne podľa pripravenosti.');
+    t.organizationNotes.push(t.physicalGoal,c.groupSizes.length===4?'Väčšia hra spája iba susedné technické skupiny A1+A2 a B1+B2 s rovnakou náročnosťou. Rozdielne úrovne ostávajú oddelené; fyzickú dávku uprav individuálne podľa pripravenosti.':'Každá skupina zostáva na vlastnej ploche podľa svojej náročnosti; fyzickú dávku uprav individuálne podľa pripravenosti.');
     if(!tue)t.organizationNotes.push('Dnes 85 minút: rondo zostáva a 1 na 1 so strelou je navyše. Ak klesá kvalita, pripravenosť alebo chuť hrať, záver skráť; 85 minút nie je povinná dávka pre každé dieťa.');
   },
   rondo(n){const work=Math.max(10,Math.min(35,Math.floor(210/n)-12));return{size:n,rounds:n,defenders:n===2?0:1,playSeconds:work,restSeconds:12,bufferSeconds:210-n*(work+12)};},
@@ -88,14 +88,14 @@ const TrainingLoad = {
     return SessionPrograms.table(b.programKind,n,b.duelBudget);
   },
   variant(t,b,index){
-    const area=t.quarterPitch.stages[b.diagram].areas[index],n=area.count,c=t.planConfig,members=area.members||[index],label=members.map(i=>['A1','A2','B1','B2'][i]+' · '+TrainingPlanner.levels[c.levels[i]]).join(' / ');
+    const area=t.quarterPitch.stages[b.diagram].areas[index],n=area.count,c=t.planConfig,members=area.members||[index],label=members.map(i=>TrainingPlanner.labels(c.groupSizes.length)[i]+' · '+TrainingPlanner.levels[c.levels[i]]).join(' / ');
     let task=b.summary,rotation='Všetci vo vlastnom priestore.';
     if(b.programKind==='speed'){
       const lanes=n>=4?2:1;task=`${lanes} ${lanes===1?'dráha':'dráhy'} po ${area.runDistance} m. Každý 4 behy, raz za 60 s; beh do 4 s a potom návrat/oddych. Na prvý pokus uvoľnenejšie, potom svižne podľa pripravenosti.`;
       rotation=`Štartujú ${lanes} ${lanes===1?'hráč':'hráči'} naraz, ďalšia vlna po 7 s. Pri nepárnom počte posledný beží sám. Po cieli je brzdný priestor; späť chôdzou vonkajšou stranou. Na ďalšiu sériu majú všetci čas na zotavenie.`;
     }
     if(b.programKind==='large-game'){
-      const f=this.form(n),d=this.gameDose(n);task=`${f.label}; spolu ${n} detí${members.length>1?' zo skupín '+members.map(i=>['A1','A2','B1','B2'][i]).join('+'):''}. Po prihrávke sa ponúkni, po strate sa zapoj do obrany. ${area.skill==='base'?'Pri príjme približne 2 s bez odoberania.':'Primeraná aktívna obrana.'} Voľné dotyky; ${f.neutral?'N pomáha tímu s loptou a sám neboduje.':'bez N.'}`;
+      const f=this.form(n),d=this.gameDose(n);task=`${f.label}; spolu ${n} detí${members.length>1?' zo skupín '+members.map(i=>TrainingPlanner.labels(c.groupSizes.length)[i]).join('+'):''}. Po prihrávke sa ponúkni, po strate sa zapoj do obrany. ${area.skill==='base'?'Pri príjme približne 2 s bez odoberania.':'Primeraná aktívna obrana.'} Voľné dotyky; ${f.neutral?'N pomáha tímu s loptou a sám neboduje.':'bez N.'}`;
       if(n===2)task='1 na 1. Veď loptu do voľnej cesty a preveď ju cez súperovu bránku. Po strate sa vráť medzi loptu a svoju bránku; bez neutrálneho hráča.';
       task+=' '+(n===2?'Voľná cesta? Zrýchli prvé dva kroky; kľučka nie je povinná.':SessionPrograms.confidenceCue);
       rotation=f.neutral?`V každom úseku N postupne 1–${n}, po ${d.slot} s hry; odchádzajúci N vymení miesto s prichádzajúcim. Každý rovnako dlho N.`:'Vyrovnané družstvá; všetci zapojení, bez čakajúcich.';
@@ -195,6 +195,6 @@ const TrainingLoad = {
     const c=t.planConfig,a=t.quarterPitch.stages[b.diagram].areas[index],n=a.count,v=this.variant(t,b,index),s=this.scene(b.diagram,{area:a,size:n,total:c.players,pitchIndex:index}),conesTotal=SessionPrograms.cones(t,b).length;
     const speed=b.programKind==='speed',strength=b.programKind==='strength',work=speed?'do 4 s':strength?'20 s':n<=6?'120 s':'3 min',rest=speed?'návrat a zotavenie':strength?'10 s':'1 min',balls=strength||speed?0:1,ballsTotal=balls?t.quarterPitch.stages[b.diagram].areas.length:0;
     const kit=[`${s.cones.length} mét na túto plochu; ${conesTotal} spolu.`,this.placement(t,b,index),balls?'1 lopta na hru + rezervné.':'Lopty odlož mimo dráh a voľných priechodov.','Signál/časovač a vlastná voda.'];
-    return{referenceVideo:speed&&t.date==='2026-11-03'?{url:'https://www.instagram.com/reel/De2Pr3eyR7R/',label:'Video: reakčný štart a súboj — COMPETE'}:null,title:b.title,selection:`Ukážka ${a.label} · ${n} z ${c.players} detí`,shortInstruction:b.summary,description:v.skillTask,steps:v.steps,space:`${a.length} × ${a.width} m; dostupných ${c.width} × ${c.height} m.`,grouping:`${a.label}: ${n} detí`,groups:c.groupSizes.map((size,i)=>`${['A1','A2','B1','B2'][i]}: ${size} · ${TrainingPlanner.levels[c.levels[i]]}`),coaches:t.organizationNotes.filter(s=>s.startsWith('Tréner')),spacing:'Medzi pracovnými plochami aspoň 3 m, obvod aspoň 2 m.',work,rest,rotation:v.rotationText,glance:{work,rest,workHint:speed?'jeden beh':'v úseku',restHint:'podľa rozpisu'},timing:{totalMinutes:b.end-b.start,total:`${b.end-b.start} min`,work,workHint:speed?'jeden beh':'v úseku',rest,restHint:'podľa rozpisu',repetitions:{value:'4',hint:speed?'behy na dieťa':strength?'úlohy':'herné úseky'},schedule:b.dose,note:v.rotationText},notes:b.adjustments,kit,kitNotes:[],conePlacement:this.placement(t,b,index),slogan:b.cues[0],ballsLocal:balls,ballsTotal,conesLocal:s.cones.length,conesTotal,round:null,visualKit:[...(balls?[{kind:'ball',title:'Lopty',value:`${ballsTotal} + 4 rezervné`,detail:'Jedna na hru a rezervné bokom.'}]:[]),{kind:'cone',title:'Méty a kužele',value:`${conesTotal} spolu`,detail:`${s.cones.length} na túto plochu.`},{kind:'timer',title:'Časovač',value:'Pre trénera',detail:'Práca, oddych a štarty.'},{kind:'water',title:'Voda',value:`Pre ${c.players} detí`,detail:'Každý vlastnú vodu.'}]};
+    return{referenceVideo:speed&&t.date==='2026-11-03'?{url:'https://www.instagram.com/reel/De2Pr3eyR7R/',label:'Video: reakčný štart a súboj — COMPETE'}:null,title:b.title,selection:`Ukážka ${a.label} · ${n} z ${c.players} detí`,shortInstruction:b.summary,description:v.skillTask,steps:v.steps,space:`${a.length} × ${a.width} m; dostupných ${c.width} × ${c.height} m.`,grouping:`${a.label}: ${n} detí`,groups:c.groupSizes.map((size,i)=>`${TrainingPlanner.labels(c.groupSizes.length)[i]}: ${size} · ${TrainingPlanner.levels[c.levels[i]]}`),coaches:t.organizationNotes.filter(s=>s.startsWith('Tréner')),spacing:'Medzi pracovnými plochami aspoň 3 m, obvod aspoň 2 m.',work,rest,rotation:v.rotationText,glance:{work,rest,workHint:speed?'jeden beh':'v úseku',restHint:'podľa rozpisu'},timing:{totalMinutes:b.end-b.start,total:`${b.end-b.start} min`,work,workHint:speed?'jeden beh':'v úseku',rest,restHint:'podľa rozpisu',repetitions:{value:'4',hint:speed?'behy na dieťa':strength?'úlohy':'herné úseky'},schedule:b.dose,note:v.rotationText},notes:b.adjustments,kit,kitNotes:[],conePlacement:this.placement(t,b,index),slogan:b.cues[0],ballsLocal:balls,ballsTotal,conesLocal:s.cones.length,conesTotal,round:null,visualKit:[...(balls?[{kind:'ball',title:'Lopty',value:`${ballsTotal} + 4 rezervné`,detail:'Jedna na hru a rezervné bokom.'}]:[]),{kind:'cone',title:'Méty a kužele',value:`${conesTotal} spolu`,detail:`${s.cones.length} na túto plochu.`},{kind:'timer',title:'Časovač',value:'Pre trénera',detail:'Práca, oddych a štarty.'},{kind:'water',title:'Voda',value:`Pre ${c.players} detí`,detail:'Každý vlastnú vodu.'}]};
   }
 };

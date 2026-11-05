@@ -6,6 +6,7 @@ const PitchSetupPlan = {
   },
   build(training) {
     if (!this.supports(training)) throw Error('No setup plan for this training');
+    if(training.planConfig?.groupSizes.length!==4&&typeof SessionPrograms!=='undefined')return this.forExercises(training);
     const layout = training.quarterPitch;
     const snapshot = (key, cornersOnly = false) => {
       const areas = layout.stages[key].areas;
@@ -99,7 +100,7 @@ const PitchSetupPlan = {
     return{...plan,index,block,currentTitle:training.blocks[current].title,brief:ExerciseBrief.build(training,block,0)};
   },
   forExercises(training){
-    if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training))return SessionPrograms.preparation(training);
+    if(typeof SessionPrograms!=='undefined'&&(SessionPrograms.supports(training)||training.planConfig?.groupSizes.length!==4))return SessionPrograms.preparation({...training,blocks:training.blocks.map(b=>({...b,programKind:b.programKind||({'football-warmup':'warm','football-pass':'pairs','football-rondo':'rondo','football-zones':'zones','football-mini-games':'game','football-finish':'finish'}[b.diagram])}))});
     const {layout,steps}=this.build(training),[warm,pass,expand,zones,games]=steps;
     const unchanged=(step,action)=>({...step,moves:[],added:[],kept:step.map.cones,action,coach:training.organizationNotes.join(' '),extra:'Rozloženie z predchádzajúceho cvičenia zostáva. Méty nepridávaj ani nepresúvaj.'});
     const views=[warm,pass,unchanged(pass,'Nechaj štyri plochy z prihrávok. Na rondo netreba presunúť žiadne kužele.'),{...zones,moves:expand.moves,kept:expand.kept,action:expand.action+' '+zones.action,coach:expand.coach.replace('Tento krok aj nasledujúci urobte','Úpravu rohov aj pridanie zónových mét urobte')},games,{...unchanged(games,'Zastav hru. Deti prejdú k trénerovi na pokojný záver. Pomôcky zbierajte až na pokyn, mimo prebiehajúcej hry.'),coach:'Celé mužstvo prejde k trénerovi. Pred zberom pomôcok zastavte všetky hry.'}];
