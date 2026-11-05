@@ -7,12 +7,12 @@ const code=files.map(f=>read(f).split('// FOOTBALL_BROWSER')[0].split('// PITCH_
 const api=runInNewContext(code+';({TrainingCalendar,TrainingPlanner,FootballScenes,FootballSequences,ExerciseBrief,PitchSetupPlan,TrainingIntervals,IntervalClock,SessionPrograms,TrainingLibrary,TrainingLoad})',{performance:{now:()=>0}});
 const {TrainingCalendar:C,TrainingPlanner:P,FootballScenes:F,FootballSequences:S,ExerciseBrief:B,PitchSetupPlan:U,TrainingIntervals:I,IntervalClock,SessionPrograms:G,TrainingLibrary:L}=api;
 const original=JSON.parse(read('trainings.json')),agenda=JSON.parse(read('upcoming.json')),saved=JSON.stringify(original),expanded=C.expand(original,agenda),programs=expanded.trainings.filter(G.supports.bind(G));
-assert.equal(JSON.stringify(original),saved);assert.equal(programs.length,2);
-assert.equal(expanded.trainings.filter(t=>t.planning?.status==='draft').length,4);
+assert.equal(JSON.stringify(original),saved);assert.equal(programs.length,3);
+assert.equal(expanded.trainings.filter(t=>t.planning?.status==='draft').length,3);
 let scenes=0;
 for(const source of programs){
  assert.equal(source.planning.status,'ready');
- const expected=source.date==='2026-11-02'?[10,14,20,30,40,50,64,82,85]:[10,16,28,42,54,72,75];
+ const expected=source.date==='2026-11-05'?[10,22,34,50,72,75]:source.date==='2026-11-02'?[10,14,20,30,40,50,64,82,85]:[10,16,28,42,54,72,75];
  assert.deepEqual(Array.from(source.blocks,b=>b.end),expected);
  for(const players of [10,14,19,20,22,24,26,30])for(const pitch of ['quarter','half','full'])for(const level of ['base','standard','challenge']){
   const t=P.adapt(source,{...source.defaultConfig,players,pitch,width:P.pitches[pitch].width,height:P.pitches[pitch].height,groupSizes:P.groups(players),levels:[level,level,level,level]});
@@ -74,8 +74,8 @@ for(const source of programs){
     if(['zones','game'].includes(b.programKind)){
      const work=scene.phases.filter(p=>p.kind==='work'),n=area.count,neutralTimes=nodes.map(node=>work.reduce((sum,p)=>sum+(p.roles[node.id].team==='N'?p.actualSeconds:0),0));
      assert.ok(neutralTimes.every(v=>Math.abs(v-neutralTimes[0])<1e-6),'Equal neutral minutes');
-     assert.equal(timer.parts.filter(p=>p.requiresStart).length,b.programKind==='zones'?1:2);
-     if(n<=3)assert.equal(work.reduce((sum,p)=>sum+p.actualSeconds,0),b.programKind==='zones'?(t.date==='2026-11-03'?288:360):540,'Small groups have additional rest');
+     assert.equal(timer.parts.filter(p=>p.requiresStart).length,b.programKind==='zones'?1:t.date==='2026-11-05'?3:2);
+     if(n<=3)assert.equal(work.reduce((sum,p)=>sum+p.actualSeconds,0),b.programKind==='zones'?(t.date==='2026-11-03'?288:360):(t.date==='2026-11-05'?576:540),'Small groups have additional rest');
     }
     if(b.programKind==='strength'){
      assert.equal(scene.phases.filter(p=>p.kind==='work').length,4);

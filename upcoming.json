@@ -31,12 +31,13 @@
     {
       "date": "2026-11-05",
       "title": "Prihraj a vytvor nový uhol",
-      "focus": "Po prihrávke sa znovu ponúknuť v inom uhle.",
+      "focus": "Presná prihrávka a nová ponuka do voľného uhla; krátke 1 na 1 a prenos do malých hier. 75 minút vrátane oddychu a prestavby, bez samostatného kondičného bloku.",
       "cue": "Prihraj a ukáž sa znova.",
       "topic": "Ponuka po prihrávke",
       "startTime": "18:00",
-      "status": "draft",
-      "templateId": "u11-pass-move-v1"
+      "status": "ready",
+      "templateId": "u11-pass-move-v1",
+      "programId": "u11-support-2026-11-05"
     },
     {
       "date": "2026-11-09",
