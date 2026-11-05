@@ -419,7 +419,7 @@ const PersonalPlans = [
   function currentClock() {
     const key=clockKey(),index=window.FootballBoard?.selection()?.index||0,signature=clockSignature();
     let clock=state.clocks.get(key);
-    if(!clock||!clock.started&&clock.signature!==signature){clock=new IntervalClock(TrainingIntervals.build(state.selected,activeBlock(),index));clock.signature=signature;state.clocks.set(key,clock);}
+    if(!clock||clock.signature!==signature){clock?.pause();window.TimerAudio?.cancel();clock=new IntervalClock(TrainingIntervals.build(state.selected,activeBlock(),index));clock.signature=signature;state.clocks.set(key,clock);}
     return clock;
   }
   function clockText(milliseconds) { const seconds = Math.ceil(milliseconds / 1000); return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }
@@ -692,7 +692,15 @@ const PersonalPlans = [
       card.append(label,details);return card;
     }));
   }
+  function resetClocksForConfiguration(training){
+    if(state.selected?.id!==training.id||JSON.stringify(state.selected.planConfig)===JSON.stringify(training.planConfig))return false;
+    let reset=false;
+    for(const [key,clock]of state.clocks){if(key.startsWith(training.id+'/')){clock.pause();state.clocks.delete(key);reset=true;}}
+    if(reset){window.TimerAudio?.cancel();timerVisualKey='';lastTimerState='';}
+    return reset;
+  }
   function render(training) {
+    resetClocksForConfiguration(training);
     state.selected = training;
     $('training-select').value = training.id;
     $('training-title').textContent = training.title;
@@ -812,9 +820,9 @@ const PersonalPlans = [
     if(!TrainingPlanner.supports(source))return;
     const config=TrainingPlanner.normalize({...state.selected.planConfig,...changes,...(changes.players?{groupSizes:TrainingPlanner.groups(Number(changes.players))}:{})});configCache[source.id]=config;configSaved=writeLocal('training-config-v1',configCache);
     const block=activeBlock().id,section=state.view==='field'?null:state.view;
-    const next=TrainingPlanner.adapt(source,config);state.selected=next;state.attendance=config.players;
-    history.replaceState(history.state,'',linkFor(source.id,block,section));render(next);renderActive();setView(state.view);
-    message(configSaved?'Podmienky uložené.':'Podmienky sú použité, ale prehliadač ich neuložil. Zachovaj si zdieľaný odkaz.');
+    const next=TrainingPlanner.adapt(source,config);state.attendance=config.players;
+    render(next);history.replaceState(history.state,'',linkFor(source.id,block,section));renderActive();setView(state.view);
+    message(configSaved?'Všetko prepočítané podľa nových podmienok. Časovač spusti pre nové rozdelenie.':'Podmienky sú použité, ale prehliadač ich neuložil. Zachovaj si zdieľaný odkaz.');
   }
   function setView(view) {
     if(view!=='field')window.FootballBoard?.pause();
