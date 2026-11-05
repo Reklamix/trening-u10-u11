@@ -1,6 +1,14 @@
 'use strict';
 
 const PitchSetupPlan = {
+  areaLabel(training,area){
+    const config=training.planConfig,labels=TrainingPlanner.labels(config.groupSizes.length);
+    const members=area.members||[labels.indexOf(area.label)];
+    const levels=area.skill?[area.skill]:members.map(i=>config.levels[i]).filter(Boolean);
+    const difficulty=[...new Set(levels)].map(level=>TrainingPlanner.levels[level]).filter(Boolean).join(' / ');
+    const count=area.count??members.reduce((sum,i)=>sum+(config.groupSizes[i]||0),0);
+    return{heading:`${area.label} · ${count} ${count>=2&&count<=4?'deti':'detí'}`,difficulty};
+  },
   supports(training) {
     return (training?.id === '2026-10-29' || training?.templateId === 'u11-pass-move-v1') && ['football-warmup','football-pass','football-zones','football-mini-games'].every(key => training.quarterPitch?.stages?.[key]?.areas?.length);
   },
@@ -183,10 +191,14 @@ const PitchSetupMotion = {
       map.append(svg('rect',{x:0,y:0,width:layout.width,height:layout.height,fill:'#e5eddd',stroke:'#173b31','stroke-width':.25}),svg('rect',{x:layout.corridor.x,y:0,width:layout.corridor.width,height:layout.height,fill:'#e7d5b7'}));
       const text=(x,y,value,size=1.4)=>svg('text',{x,y,'text-anchor':'middle','font-size':size*scale,fill:'#173b31','font-weight':650,'paint-order':'stroke',stroke:'white','stroke-width':.35},value);
       map.append(text(layout.width/2,-1.7*scale,`${layout.width} m`),text(-1.4*scale,layout.height/2,`${layout.height} m`,1.2),text(layout.corridor.x+layout.corridor.width/2,layout.height/2,'3 m',1.2/scale));
+      const areaLabels=svg('g',{'data-setup-labels':''});
       for(const area of step.map.areas){
         map.append(svg('rect',{'data-setup-area':area.label,x:area.x,y:area.y,width:area.w,height:area.h,fill:'#f6f8f1',stroke:'#638268','stroke-width':.22}));
         if(step.map.key==='football-zones'&&!step.map.cornersOnly)for(const x of[area.x,area.x+area.w-2])map.append(svg('rect',{x,y:area.y,width:2,height:area.h,fill:'#d8eea4'}));
-        map.append(text(area.x+area.w/2,area.y+area.h/2-.4*scale,area.label,1.8),text(area.x+area.w/2,area.y+area.h/2+1.5*scale,`${area.length} × ${area.width} m`,1.3));
+        const label=PitchSetupPlan.areaLabel(training,area),labelScale=Math.min(scale,area.h/7,area.w/Math.max(10,label.difficulty.length*.8)),cx=area.x+area.w/2,cy=area.y+area.h/2;
+        const title=text(cx,cy-1.8*labelScale,label.heading,1.7*labelScale/scale);title.setAttribute('data-setup-group-label',area.label);
+        const difficulty=text(cx,cy+.1*labelScale,label.difficulty,1.25*labelScale/scale);difficulty.setAttribute('data-setup-group-level',area.label);
+        areaLabels.append(title,difficulty,text(cx,cy+1.9*labelScale,`${area.length} × ${area.width} m`,1.25*labelScale/scale));
       }
       for(const line of step.map.lines||[])map.append(svg('line',{x1:line.from.x,y1:line.from.y,x2:line.to.x,y2:line.to.y,stroke:'#638268','stroke-width':.2,'stroke-dasharray':'.6 .4'}));
       for(const move of step.moves){
@@ -197,6 +209,7 @@ const PitchSetupMotion = {
       const cone=(p,kind,color)=>{const g=svg('g',{'data-setup-cone':kind});g.append(svg('path',{d:`M${p.x} ${p.y-.65}l-.55 1h1.1Z`,fill:color,stroke:'#173b31','stroke-width':.11}),svg('path',{d:`M${p.x-.22} ${p.y-.12}h.44`,stroke:'white','stroke-width':.12}));map.append(g);return g;};
       step.kept.forEach(p=>cone(p,'kept','#216a4b'));
       const added=step.added.map(p=>cone(p,'added','#f47700')),moved=step.moves.map(({to})=>cone(to,'moved','#16729c'));
+      map.append(areaLabels);
       body.append(map);
       if(preview)body.append(el('h4','','Pri prechode na ďalšie cvičenie'));
       const action=el('p','setup-action',step.shortAction);action.style.minHeight=actionHeight+'px';body.append(action);
