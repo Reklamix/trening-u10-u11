@@ -376,7 +376,8 @@ const November9Program = {
     if(kind==='pairs'&&n===5)return 'Séria 1 trojica 1/2/3 + dvojica 4/5; séria 2 trojica 1/4/5 + dvojica 2/3; séria 3 trojica 2/4/5 + dvojica 1/3. V trojici postupne všetci, bez čakania.';
     if(kind==='pairs')return 'Dvojice a pri nepárnom počte jedna trojica; všetci aktívni. Partnerov vymeň počas 30 s prestávky.';
     if(kind==='large-game')return this.keeperOrder.map((g,i)=>`Úsek ${i+1}: ľavá brána G${g[0]}, pravá G${g[1]}, na druhom ihrisku nohami G${g[2]}.`).join(' ')+' Brankári sa presúvajú počas 1 min oddychu; poľové tímy zostávajú. Bez ukotvených brán všetci nohami na kužeľové.';
-    if(kind==='zones'||kind==='warm')return `Neutrálny pomáha držiteľom lopty. Roly posúvaj podľa čísel; v 5 min úseku každý z piatich raz N. Pri inom počte rozdeľ celý úsek na ${n} rovnakých častí a posuň neutrálne roly.`;
+    if(kind==='warm')return 'Úvodná hra trvá 3 min. Neutrálny pomáha držiteľom lopty; po každej minúte preberie rolu ďalšie číslo. Všetci zostávajú aktívni.';
+    if(kind==='zones')return `Neutrálny pomáha držiteľom lopty. Roly posúvaj podľa čísel; v 5 min úseku každý z piatich raz N. Pri inom počte rozdeľ celý úsek na ${n} rovnakých častí a posuň neutrálne roly.`;
     return 'Spoločný pokojný záver; bez ďalšej záťaže.';
   },
   variant(t,b,index=0){const a=this.areas(t,b)[index]||this.areas(t,b)[0];return{...b,tables:this.tables(t,b,a),skillLabel:a.keeperPractice?'Brankári':TrainingPlanner.levels[a.skill],skillTask:this.task(t,b,a),rotationText:this.rotation(t,b,a.index),steps:[this.task(t,b,a),b.dose,this.rotation(t,b,a.index)]};},

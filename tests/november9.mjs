@@ -16,6 +16,8 @@ assert.equal(source.equipment[1].quantity,'40 pracovných + 8 rezervných = 48 m
 const defaultGroups=b=>N.areas(source,b).map(a=>a.count);
 assert.deepEqual(Array.from(defaultGroups(source.blocks[2])),[6,6,5,3]);
 assert.deepEqual(Array.from(defaultGroups(source.blocks[5])),[10,10]);
+assert.match(N.rotation(source,source.blocks[0],0),/3 min/);
+assert.ok(!/5 min/.test(N.rotation(source,source.blocks[0],0)),'Warm-up rotation describes its own three-minute game');
 let checked=0;
 for(const players of[10,16,20,24,30])for(const pitch of['quarter','half','full']){
  const t=P.adapt(source,{...source.defaultConfig,players,pitch,width:P.pitches[pitch].width,height:P.pitches[pitch].height,groupSizes:P.groups(players)});
