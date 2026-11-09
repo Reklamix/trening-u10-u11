@@ -2,6 +2,7 @@
 
 const TrainingIntervals = {
   build(training,block,index=0){
+    if(training.programId==='u11-receive-2026-11-09')return November9Program.intervals(training,block,index);
     if(!training.planConfig)return {scope:'Celý blok',parts:[{name:block.title,kind:'work',milliseconds:(block.end-block.start)*60000}]};
     const areas=FootballScenes.groups(block.diagram,training.planConfig.players,training.quarterPitch),area=areas[index]||areas[0];
     const base=FootballScenes.build(block.diagram,{total:training.planConfig.players,size:area?.count,pitchIndex:index,area});
@@ -34,6 +35,8 @@ const TrainingIntervals = {
     return {scope:area?`${area.label} · ${area.count} detí`:'Celé mužstvo',participants:scene.nodes.filter(n=>n.kind==='player').length,parts};
   },
   participantsText(clock,snapshot){
+    if(clock.rotation?.protocol==='november9')return November9Program.rotationDescription(clock,snapshot);
+    if(snapshot.part.november9&&!clock.speed)return November9Program.participantsDescription(clock,snapshot);
     const ids=Array.from({length:clock.participants||clock.rotation?.count||0},(_,i)=>i+1),list=values=>values.length?values.join(', '):'nikto';
     if(!ids.length)return 'Cvičia: podľa pôvodného rozpisu\nOddychujú: podľa pôvodného rozpisu\nĎalší: '+(snapshot.next?.name||'ďalšie cvičenie');
     if(snapshot.finished)return 'Cvičia: nikto\nOddychujú: všetci\nĎalší: ďalšie cvičenie';
@@ -43,7 +46,7 @@ const TrainingIntervals = {
       return `Cvičia: ${clock.taskRegroup?'nikto — pripravujú sa '+names(now):names(now)}\nOddychujú: ${clock.taskRegroup?'všetci počas výmeny':list(now.filter(p=>p.role==='R').map(p=>p.id))}\nĎalší: ${clock.taskRegroup?names(now):names(next)}`;
     }
     if(clock.speed&&snapshot.part.kind==='work'){
-      const lanes=ids.length>=4?2:1,wave=clock.waves[snapshot.index]||0,active=ids.slice(wave*lanes,(wave+1)*lanes),next=ids.slice((wave+1)*lanes,(wave+2)*lanes);
+      const lanes=clock.speedLanes||(ids.length>=4?2:1),wave=clock.waves[snapshot.index]||0,active=ids.slice(wave*lanes,(wave+1)*lanes),next=ids.slice((wave+1)*lanes,(wave+2)*lanes);
       return `Cvičia: ${clock.waiting?'nikto — čakajú na štart':list(active)}\nOddychujú: ${clock.waiting?'všetci':list(ids.filter(id=>!active.includes(id)))}\nĎalší: ${clock.waiting?list(active):next.length?list(next):'ďalšia séria až po zotavení'} · vlnu potvrdí tréner`;
     }
     const work=snapshot.part.kind==='work'&&!clock.waiting,roles=snapshot.part.roles||{},rest=work?ids.filter(id=>roles['child'+(id-1)]?.label?.endsWith('R')):ids;
@@ -54,6 +57,7 @@ const TrainingIntervals = {
     return `Cvičia: ${work?list(named(ids.filter(id=>!rest.includes(id)),roles)):'nikto — '+(snapshot.part.kind==='setup'?'ukážka trénera':'prestávka/príprava')}\nOddychujú: ${list(rest)}\nĎalší: ${next?list(named(nextIds,next.roles))+detail:'ďalšie cvičenie'}`;
   },
   rotationText(clock){
+    if(clock.rotation?.protocol==='november9')return November9Program.rotationDescription(clock,clock.snapshot());
     if(!clock.rotation)return '';
     const {roles,count,lanes}=clock.rotation,round=clock.rotationRound||0;
     const children=role=>roles.flatMap((value,i)=>value===role?[(i+round)%count+1]:[]).join(', ')||'—';
@@ -77,7 +81,7 @@ const TrainingIntervals = {
 
 class IntervalClock {
   constructor(spec){
-    this.participants=spec.participants;this.speed=spec.speed;this.rotation=spec.rotation;this.scope=spec.scope;this.originalParts=spec.parts.map(part=>({...part}));
+    this.participants=spec.participants;this.speed=spec.speed;this.speedLanes=spec.speedLanes;this.rotation=spec.rotation;this.scope=spec.scope;this.originalParts=spec.parts.map(part=>({...part}));
     this.trainingTotal=spec.parts.reduce((sum,part)=>sum+part.milliseconds,0);
     this.reset();
   }

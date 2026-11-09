@@ -22,7 +22,8 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
    assert.equal(I.signals(spec.parts).length,6,'Whole-task mode has only five final warnings and completion, never per-attack whistles');
    assert.ok(!/10 s/.test(brief.work+brief.rotation+brief.timing.schedule),'Coach sees no fixed attack countdown');
    const counts=Array.from({length:area.count},()=>({A:0,D:0,R:0}));
-   for(let round=0;round<area.count;round++)spec.rotation.roles.forEach((role,i)=>counts[(i+round)%area.count][role]++);
+   if(spec.rotation.protocol==='november9')for(const pair of spec.rotation.pairs)counts.forEach((c,i)=>c[i===pair[0]?'A':i===pair[1]?'D':'R']++);
+   else for(let round=0;round<area.count;round++)spec.rotation.roles.forEach((role,i)=>counts[(i+round)%area.count][role]++);
    assert.ok(counts.every(c=>JSON.stringify(c)===JSON.stringify(counts[0])),'A complete circle gives every child the same attack/defence/recovery turns');
    assert.ok(B.phasePlan(preview).every(g=>B.phaseDoses(g).some(d=>d.kind==='task')),'Preview never presents a per-attack seconds dose');
   }else assert.equal(B.phasePlan(preview).flatMap(g=>g.parts).reduce((n,p)=>n+p.actualSeconds,0),full.phases.reduce((n,p)=>n+p.actualSeconds,0),'Full work/rest dose remains visible despite representative playback');
@@ -35,7 +36,7 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
   assert.equal(schedule.parts.reduce((sum,p)=>sum+p.milliseconds,0),(b.end-b.start)*60000,'Timer preserves complete approved dose');
   if(b.programKind==='speed'){
     const runs=schedule.parts.filter(p=>p.kind==='work');assert.equal(runs.length,4);
-    assert.ok(runs.every(p=>p.milliseconds===60000),'One minute per series includes recovery, no individual sprint countdown');
+    assert.ok(runs.every(p=>p.milliseconds===(t.date==='2026-11-09'?100000:60000)),'Series includes the approved recovery, no individual sprint countdown');
     assert.equal(runs.filter(p=>p.requiresStart).length,3);
   }
   const peopleClock=new Clock(schedule),initial=I.participantsText(peopleClock,peopleClock.snapshot());

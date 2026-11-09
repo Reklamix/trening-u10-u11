@@ -436,9 +436,9 @@ const PersonalPlans = [
     $('exercise-clock-value').setAttribute('aria-label',clock.rotation?'Zostávajúci čas celej úlohy':'Zostávajúci čas aktuálneho úseku');
     const phaseKinds={task:'Celá úloha',ready:'Príprava',work:'Práca',rest:'Oddych',water:'Voda',setup:'Rozloženie',end:'Hotovo'};
     $('exercise-clock-phase').textContent=regroup?'Preskupenie':(phaseKinds[snapshot.part.kind]||'Úsek')+' · '+snapshot.part.name;
-    $('exercise-rotate').hidden=!clock.rotation;$('exercise-rotate').disabled=!clock.started||clock.taskRegroup||snapshot.finished;
+    $('exercise-rotate').hidden=!clock.rotation;$('exercise-rotate').disabled=!clock.started||clock.taskRegroup||snapshot.finished||(clock.rotation?.maxRounds!==undefined&&clock.rotationRound>=clock.rotation.maxRounds);
     $('exercise-rotation').hidden=false;const rotationText=clock.scope+'\n'+TrainingIntervals.participantsText(clock,snapshot);if($('exercise-rotation').textContent!==rotationText)$('exercise-rotation').textContent=rotationText;
-    $('exercise-wave').hidden=!clock.speed||snapshot.part.kind!=='work';$('exercise-wave').disabled=!clock.started||clock.waiting||snapshot.finished||(clock.waves[snapshot.index]||0)>=Math.ceil(clock.participants/(clock.participants>=4?2:1));
+    $('exercise-wave').hidden=!clock.speed||snapshot.part.kind!=='work';$('exercise-wave').disabled=!clock.started||clock.waiting||snapshot.finished||(clock.waves[snapshot.index]||0)>=Math.ceil(clock.participants/(clock.speedLanes||(clock.participants>=4?2:1)));
     $('exercise-clock-next').textContent=clock.rotation?(clock.taskRegroup?'Čas celej úlohy zahŕňa aj návrat a oddych. Ďalší útok až po potvrdení.':'Obrancu meň po dokončení útoku. Čas zahŕňa aj oddych.'):regroup?(snapshot.part.cue||'Priprav ďalšiu úlohu a rozostav deti.')+' Preskupenie nemá odpočet; tento čas je navyše.':clock.waiting?'Ďalšiu sériu spustíš tlačidlom':snapshot.next?'Potom: '+(phaseKinds[snapshot.next.kind]||snapshot.next.name)+' '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
     $('exercise-clock-phase').title=clock.scope+' · '+snapshot.part.name;
     $('exercise-clock-toggle').textContent=regroup?'Pripravení — pokračovať':clock.waiting?'Ďalšia séria':clock.deadline!==null&&remaining>0?'Pauza':remaining===0?'Znova':clock.started?'Pokračovať':'Spustiť';
@@ -472,6 +472,7 @@ const PersonalPlans = [
     const options = currentCase ? [...new Set(currentCase.groups)].sort() : [6];
     if (!options.includes(groupSize)) groupSize = options[0];
     $('grouping').textContent = currentCase ? 'Štyri skupiny: ' + currentCase.groups.join(' + ') + ' hráčov do poľa. ' + (keepers === 0 ? 'Bez brankárov, všetci hrajú nohami.' : 'Brankári zostávajú pri bránach.') : training.players + '. ' + training.coaches + '.';
+    if(training.programId==='u11-receive-2026-11-09')$('grouping').textContent=training.players+'. Základné skupiny zahŕňajú brankárov; v technike samostatná skupina G1–G3, v závere rotácia medzi bránami a hrou nohami.';
   }
   function navigate(view, index = state.blockIndex) {
     const training = state.selected;
@@ -1115,8 +1116,8 @@ const PersonalPlans = [
   }
   $('timer-toggle').addEventListener('click',toggleExerciseClock);
   $('exercise-clock-toggle').addEventListener('click',()=>{const clock=currentClock();if(clock.taskRegroup&&clock.deadline!==null&&clock.remaining()>0){clock.taskRegroup=false;updateTimer();return;}void toggleExerciseClock();});
-  $('exercise-wave').addEventListener('click',()=>{const clock=currentClock(),snapshot=clock.snapshot();if(!clock.speed||!clock.started||clock.waiting||snapshot.part.kind!=='work')return;const key=snapshot.index,limit=Math.ceil(clock.participants/(clock.participants>=4?2:1));clock.waves[key]=Math.min(limit,(clock.waves[key]||0)+1);updateTimer();});
-  $('exercise-rotate').addEventListener('click',()=>{const clock=currentClock();if(!clock.rotation||!clock.started||clock.taskRegroup||clock.snapshot().finished)return;clock.rotationRound++;clock.taskRegroup=true;updateTimer();});
+  $('exercise-wave').addEventListener('click',()=>{const clock=currentClock(),snapshot=clock.snapshot();if(!clock.speed||!clock.started||clock.waiting||snapshot.part.kind!=='work')return;const key=snapshot.index,limit=Math.ceil(clock.participants/(clock.speedLanes||(clock.participants>=4?2:1)));clock.waves[key]=Math.min(limit,(clock.waves[key]||0)+1);updateTimer();});
+  $('exercise-rotate').addEventListener('click',()=>{const clock=currentClock();if(!clock.rotation||!clock.started||clock.taskRegroup||clock.snapshot().finished||(clock.rotation.maxRounds!==undefined&&clock.rotationRound>=clock.rotation.maxRounds))return;clock.rotationRound++;clock.taskRegroup=true;updateTimer();});
   $('exercise-clock-details').addEventListener('click',()=>{if(state.selected.planConfig)window.FootballBoard?.showTimer();else $('timer-panel').open=true;});
   $('timer-reset').addEventListener('click',()=>{currentClock().reset();window.TimerAudio.cancel();updateTimer();});
   $('timer-sound').addEventListener('change',async()=>{window.TimerAudio.setEnabled($('timer-sound').checked);const ready=$('timer-sound').checked?await window.TimerAudio.unlock():false;$('timer-audio-status').textContent=$('timer-sound').checked?(ready?'Zvuk je aktívny.':'Zvuk aktivuješ tlačidlom Spustiť.'):'Zvuk je vypnutý.';updateTimer();});

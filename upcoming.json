@@ -42,12 +42,13 @@
     {
       "date": "2026-11-09",
       "title": "Príjem do voľného priestoru",
-      "focus": "Prvým dotykom si pripraviť priestor na ďalšiu akciu.",
+      "focus": "80 minút: rozhľad a prvý dotyk, 4 krátke štarty, 1 na 1 so zakončením a aktívna hra. 20 detí spolu vrátane 3 brankárov, 3 tréneri, polovica ihriska; brankári majú samostatný technický blok aj presnú rotáciu v závere.",
       "cue": "Prvý dotyk tam, kde je voľno.",
       "topic": "Prvý dotyk",
       "startTime": "18:00",
-      "status": "draft",
-      "templateId": "u11-pass-move-v1"
+      "status": "ready",
+      "templateId": "u11-pass-move-v1",
+      "programId": "u11-receive-2026-11-09"
     },
     {
       "date": "2026-11-10",

@@ -13,8 +13,9 @@ for(const players of Array.from({length:21},(_,i)=>i+10))for(const pitch of ['qu
   assert.equal(t.planConfig.groupSizes.length,expected);assert.equal(t.planConfig.groupSizes.reduce((a,b)=>a+b,0),players);
   for(const [i,b] of t.blocks.entries()){
    const areas=F.groups(b.diagram,players,t.quarterPitch),step=prep.steps[i];
-   if(!['finish','large-game','warm'].includes(b.programKind))assert.equal(areas.length,expected,'No phantom fourth station');
-   if(b.programKind==='warm')assert.equal(areas.length,expected===4?2:expected);
+   if(source.date==='2026-11-09'&&b.programKind==='pairs')assert.equal(areas.length,Math.min(4,Math.ceil((players-3)/6))+1,'Field groups plus one real keeper group');
+   else if(!['finish','large-game','warm'].includes(b.programKind))assert.equal(areas.length,expected,'No phantom fourth station');
+   if(b.programKind==='warm')assert.equal(areas.length,source.date==='2026-11-09'?expected:expected===4?2:expected);
    if(areas.length)assert.equal(areas.reduce((sum,a)=>sum+a.count,0),players);
    for(const [j,a] of areas.entries()){
     assert.ok(a.x>=2-1e-8&&a.y>=2-1e-8&&a.x+a.w<=t.planConfig.width-2+1e-8&&a.y+a.h<=t.planConfig.height-2+1e-8,'2 m perimeter');
