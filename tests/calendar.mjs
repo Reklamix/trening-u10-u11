@@ -30,7 +30,7 @@ for(const training of drafts){
  assert.equal(training.planning.status,training.programId?'ready':'draft');
  assert.equal(training.planning.scheduleConfirmed,true);
  assert.equal(training.startTime,'18:00');
- const duration=training.date==='2026-11-02'?85:['2026-11-09','2026-11-10'].includes(training.date)?80:75;
+ const duration=training.date==='2026-11-02'?85:training.date==='2026-11-09'?80:75;
  assert.equal(training.duration,duration);
  assert.ok(planner.supports(training));
  assert.equal(training.blocks.reduce((sum,b)=>sum+b.end-b.start,0),duration);
@@ -47,7 +47,7 @@ for(const training of drafts){
   if(!t.startTime)assert.equal(plan.steps[0].when,'0 min–10 min');
   assert.equal(plan.layout.width,planner.pitches[pitch].width);
   assert.ok(t.equipment[0].quantity.includes(String(players+4)));
-  assert.equal(t.blocks.at(-1).end,duration);
+  assert.equal(t.blocks.at(-1).end,training.date==='2026-11-10'?(players<=12?75:80):duration);
   adaptations++;
  }
 }

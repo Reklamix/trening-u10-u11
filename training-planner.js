@@ -13,7 +13,7 @@ const TrainingPlanner = {
     const groupMode=input.groupMode==='manual'||(input.groupMode!=='auto'&&valid&&!legacyDefault)?'manual':'auto';
     const groupSizes=groupMode==='manual'&&valid?sizes:this.groups(players);
     const selectedLevels=Array.from({length:groupSizes.length},(_,i)=>{const at=levels.length>=2&&levels.length!==groupSizes.length?Math.min(levels.length-1,Math.floor((i+.5)*levels.length/groupSizes.length)):i;return Object.hasOwn(this.levels,levels[at])?levels[at]:'standard';});
-    return{players,coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90),groupMode,groupSizes,levels:selectedLevels,...(Object.hasOwn(input,'keepers')?{keepers:integer(input.keepers,2,2,3)}:{})};
+    return{players,coaches:integer(input.coaches,2,1,4),pitch,width:integer(input.width,preset.width,35,120),height:integer(input.height,preset.height,25,90),groupMode,groupSizes,levels:selectedLevels,...(Object.hasOwn(input,'keepers')?{keepers:integer(input.keepers,0,0,3)}:{})};
   },
   groups(total,count=total<=12?2:total<=18?3:4){return Array.from({length:count},(_,index)=>Math.floor(total/count)+(index<total%count?1:0));},
   labels(count){return count===4?['A1','A2','B1','B2']:['A','B','C'].slice(0,count);},

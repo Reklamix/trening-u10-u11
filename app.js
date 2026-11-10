@@ -481,7 +481,7 @@ const PersonalPlans = [
     const options = currentCase ? [...new Set(currentCase.groups)].sort() : [6];
     if (!options.includes(groupSize)) groupSize = options[0];
     $('grouping').textContent = currentCase ? 'Štyri skupiny: ' + currentCase.groups.join(' + ') + ' hráčov do poľa. ' + (keepers === 0 ? 'Bez brankárov, všetci hrajú nohami.' : 'Brankári zostávajú pri bránach.') : training.players + '. ' + training.coaches + '.';
-    if(training.programId==='u11-duel-rondo-2026-11-10')$('grouping').textContent=training.players+'. Štyri päťky pri 20 deťoch; v závere 10 + 10, variant '+training.keepers+' GK. Tréner 1: A/B a ihrisko I; tréner 2: C/D a ihrisko II.';
+    if(training.programId==='u11-duel-rondo-2026-11-10')$('grouping').textContent=training.compact?training.players+'. Dve susedné skupiny, jeden tréner. V závere spoločná hra všetkých nohami.':training.players+'. Štyri päťky pri 20 deťoch; v závere 10 + 10, variant '+training.keepers+' GK. Tréner 1: A/B a ihrisko I; tréner 2: C/D a ihrisko II.';
     if(training.programId==='u11-receive-2026-11-09')$('grouping').textContent=training.players+'. Základné skupiny zahŕňajú brankárov; v technike samostatná skupina G1–G3, v závere rotácia medzi bránami a hrou nohami.';
   }
   function navigate(view, index = state.blockIndex) {
