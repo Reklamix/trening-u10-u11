@@ -11,7 +11,7 @@ const source=all.find(t=>t.date==='2026-11-09');
 assert.equal(source.planning.status,'ready');assert.equal(source.defaultConfig.coaches,3);
 assert.equal(source.planConfig.players,20);assert.equal(source.duration,80);
 assert.deepEqual(Array.from(source.blocks,b=>b.end),[10,18,30,41,54,77,80]);
-assert.equal(JSON.stringify(all.find(t=>t.date==='2026-11-10').planning.status),'"draft"');
+assert.equal(JSON.stringify(all.find(t=>t.date==='2026-11-12').planning.status),'"draft"');
 assert.equal(source.equipment[1].quantity,'40 pracovných + 8 rezervných = 48 mét');
 const defaultGroups=b=>N.areas(source,b).map(a=>a.count);
 assert.deepEqual(Array.from(defaultGroups(source.blocks[2])),[6,6,5,3]);

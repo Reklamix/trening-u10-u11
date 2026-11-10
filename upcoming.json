@@ -53,12 +53,13 @@
     {
       "date": "2026-11-10",
       "title": "Rozhodnutie: prihrať alebo viesť",
-      "focus": "Vybrať prihrávku voľnému hráčovi alebo vedenie do otvoreného priestoru.",
+      "focus": "80 minút: krátke štarty, rondo 4 na 1, samostatné 1 na 1 so zakončením a hra 2 na 2 s jedným neutrálnym. Približne 20 detí spolu, 2 tréneri, polovica ihriska. V nastaveniach zvoľ 2 alebo 3 brankárov; predvolený variant má dvoch.",
       "cue": "Voľný spoluhráč alebo voľná cesta?",
       "topic": "Rozhodovanie",
       "startTime": "18:00",
-      "status": "draft",
-      "templateId": "u11-pass-move-v1"
+      "status": "ready",
+      "templateId": "u11-pass-move-v1",
+      "programId": "u11-duel-rondo-2026-11-10"
     },
     {
       "date": "2026-11-12",

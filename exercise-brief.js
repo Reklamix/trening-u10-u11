@@ -44,6 +44,7 @@ const ExerciseBrief = {
     return brief;
   },
   raw(training,block,index=0){
+    if(training.programId==='u11-duel-rondo-2026-11-10')return November10Program.brief(training,block,index);
     if(training.programId==='u11-receive-2026-11-09')return November9Program.brief(training,block,index);
     if(typeof SessionPrograms!=='undefined'&&SessionPrograms.supports(training))return SessionPrograms.brief(training,block,index,this.build(SessionPrograms.plain(training),block,index));
     if(!training?.planConfig||!this.slogans[block.diagram])return null;

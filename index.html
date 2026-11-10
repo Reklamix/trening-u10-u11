@@ -24,18 +24,18 @@
   <link rel="stylesheet" href="./preparation-enhanced.css?v=1">
   <link rel="stylesheet" href="./equipment-enhanced.css?v=1">
   <link rel="stylesheet" href="./training-calendar.css?v=1">
-  <script src="./training-calendar.js?v=7" defer></script>
-  <script src="./football.js?v=41" defer></script>
-  <script src="./training-planner.js?v=8" defer></script>
-  <script src="./football-sequence.js?v=7" defer></script>
-  <script src="./exercise-brief.js?v=12" defer></script>
+  <script src="./training-calendar.js?v=8" defer></script>
+  <script src="./football.js?v=42" defer></script>
+  <script src="./training-planner.js?v=9" defer></script>
+  <script src="./football-sequence.js?v=8" defer></script>
+  <script src="./exercise-brief.js?v=13" defer></script>
   <script src="./coaching-guide.js?v=5" defer></script>
   <script src="./pitch-setup.js?v=13" defer></script>
-  <script src="./interval-timer.js?v=8" defer></script>
-  <script src="./training-programs.js?v=12" defer></script>
+  <script src="./interval-timer.js?v=9" defer></script>
+  <script src="./training-programs.js?v=13" defer></script>
   <script src="./training-load.js?v=8" defer></script>
   <script src="./exercise-views.js?v=7" defer></script>
-  <script src="./app.js?v=49" defer></script>
+  <script src="./app.js?v=50" defer></script>
   <link rel="stylesheet" href="./pwa.css?v=2">
   <link rel="stylesheet" href="./exercise-views.css?v=5">
   <script src="./pwa.js?v=3" defer></script>
@@ -114,6 +114,7 @@
             </div><p class="small-note">Predvoľby sú orientačné. Over skutočný priestor.</p></details>
           </section>
           <section id="plan-panel-coaches" data-plan-panel="coaches" aria-label="Nastaviť trénerov" hidden>
+            <label id="plan-keepers-wrap" hidden>Brankári dnes<select id="plan-keepers" aria-label="Počet brankárov"><option value="2">2 brankári</option><option value="3">3 brankári</option></select><span class="small-note">Počet je zahrnutý v celkovom počte detí. Ulož podmienky a oba zápasy sa prepočítajú.</span></label>
             <select id="plan-coaches" aria-label="Trénerov" hidden><option value="1">1 tréner</option><option value="2">2 tréneri</option><option value="3">3 tréneri</option><option value="4">4 tréneri</option></select>
             <div class="plan-choice-row" aria-label="Počet trénerov"><button type="button" data-plan-control="plan-coaches" data-plan-value="1">1 tréner</button><button type="button" data-plan-control="plan-coaches" data-plan-value="2">2 tréneri</button><button type="button" data-plan-control="plan-coaches" data-plan-value="3">3 tréneri</button><button type="button" data-plan-control="plan-coaches" data-plan-value="4">4 tréneri</button></div>
           </section>

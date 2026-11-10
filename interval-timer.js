@@ -2,6 +2,7 @@
 
 const TrainingIntervals = {
   build(training,block,index=0){
+    if(training.programId==='u11-duel-rondo-2026-11-10')return November10Program.intervals(training,block,index);
     if(training.programId==='u11-receive-2026-11-09')return November9Program.intervals(training,block,index);
     if(!training.planConfig)return {scope:'Celý blok',parts:[{name:block.title,kind:'work',milliseconds:(block.end-block.start)*60000}]};
     const areas=FootballScenes.groups(block.diagram,training.planConfig.players,training.quarterPitch),area=areas[index]||areas[0];
@@ -35,6 +36,8 @@ const TrainingIntervals = {
     return {scope:area?`${area.label} · ${area.count} detí`:'Celé mužstvo',participants:scene.nodes.filter(n=>n.kind==='player').length,parts};
   },
   participantsText(clock,snapshot){
+    if(clock.rotation?.protocol==='november10')return November10Program.rotationDescription(clock,snapshot);
+    if(snapshot.part.november10&&!clock.speed)return November10Program.participantsDescription(clock,snapshot);
     if(clock.rotation?.protocol==='november9')return November9Program.rotationDescription(clock,snapshot);
     if(snapshot.part.november9&&!clock.speed)return November9Program.participantsDescription(clock,snapshot);
     const ids=Array.from({length:clock.participants||clock.rotation?.count||0},(_,i)=>i+1),list=values=>values.length?values.join(', '):'nikto';
@@ -57,6 +60,7 @@ const TrainingIntervals = {
     return `Cvičia: ${work?list(named(ids.filter(id=>!rest.includes(id)),roles)):'nikto — '+(snapshot.part.kind==='setup'?'ukážka trénera':'prestávka/príprava')}\nOddychujú: ${list(rest)}\nĎalší: ${next?list(named(nextIds,next.roles))+detail:'ďalšie cvičenie'}`;
   },
   rotationText(clock){
+    if(clock.rotation?.protocol==='november10')return November10Program.rotationDescription(clock,clock.snapshot());
     if(clock.rotation?.protocol==='november9')return November9Program.rotationDescription(clock,clock.snapshot());
     if(!clock.rotation)return '';
     const {roles,count,lanes}=clock.rotation,round=clock.rotationRound||0;
@@ -104,7 +108,7 @@ class IntervalClock {
     this.progressBase=this.total-this.left;this.deadline=now+this.left;this.started=true;
   }
   pause(now=Date.now()){this.left=this.remaining(now);this.deadline=null;}
-  reset(){this.waves={};this.rotationRound=0;this.taskRegroup=false;this.parts=this.originalParts.map(part=>({...part}));this.total=this.trainingTotal;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
+  reset(){if(this.rotation?.protocol==='november10'){this.recoveryUntil=0;this.duelStopped=false;}this.waves={};this.rotationRound=0;this.taskRegroup=false;this.parts=this.originalParts.map(part=>({...part}));this.total=this.trainingTotal;this.signals=TrainingIntervals.signals(this.parts);this.left=this.total;this.deadline=null;this.started=false;this.waiting=false;this.waitIndex=-1;this.progressBase=0;}
   snapshot(now=Date.now()){
     const elapsed=this.elapsed(now);let offset=0,overall=0;
     for(const part of this.parts){const end=offset+part.milliseconds;if(part.kind!=='ready'&&elapsed<end)overall+=end-Math.max(offset,elapsed);offset=end;}offset=0;

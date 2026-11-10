@@ -44,6 +44,7 @@ const TrainingCalendar = {
       if(t.programId)t.defaultConfig={...t.defaultConfig,pitch:'half',width:50,height:35};
       if(t.programId==='u11-support-2026-11-05')t.defaultConfig={...t.defaultConfig,players:16,pitch:'quarter',width:35,height:25,groupSizes:[6,5,5],groupMode:'auto'};
       if(t.programId==='u11-receive-2026-11-09')t.defaultConfig={...t.defaultConfig,players:20,coaches:3,pitch:'half',width:50,height:35,groupSizes:[5,5,5,5],groupMode:'auto'};
+      if(t.programId==='u11-duel-rondo-2026-11-10')t.defaultConfig={...t.defaultConfig,players:20,coaches:2,keepers:2,pitch:'half',width:50,height:35,groupSizes:[5,5,5,5],groupMode:'auto'};
       t.players=`Návrh: ${t.defaultConfig.players} detí · počet možno upraviť 10–30`;
       t.notes.push({title:'Zameranie tohto dňa',text:plan.focus+' '+plan.cue+' Zachovávame známy 75-minútový formát a dávky; mení sa hlavný trénerský podnet. Obsah a podmienky zostávajú pracovný návrh.'});
       for(const block of t.blocks)block.cues.unshift(plan.cue);

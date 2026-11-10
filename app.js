@@ -122,6 +122,7 @@ const PersonalPlans = [
     const config={};for(const[key,param]of Object.entries({players:'pocet',pitch:'plocha',coaches:'treneri',width:'dlzka',height:'sirka'}))if(params.has(param))config[key]=params.get(param);
     for(const[key,param]of Object.entries({levels:'urovne',groupSizes:'skupiny'}))if(params.has(param))config[key]=params.get(param).split(',');
     if(params.has('rezimskupin'))config.groupMode=params.get('rezimskupin');
+    if(params.get('trening')==='2026-11-10'&&params.has('brankari'))config.keepers=params.get('brankari');
     return { id: params.get('trening'), block: params.get('blok'), section: params.get('sekcia'), attendance: Number(params.get('pocet')),config };
   }
 
@@ -132,6 +133,7 @@ const PersonalPlans = [
     if (state.selected?.id === id && state.selected.attendanceCases) params.set('pocet', String(state.attendance));
     if(state.selected?.id===id&&state.selected.planConfig){const config=state.selected.planConfig;for(const[key,param]of Object.entries({pitch:'plocha',coaches:'treneri',width:'dlzka',height:'sirka'}))params.set(param,String(config[key]));}
     if(state.selected?.id===id&&state.selected.planConfig){params.set('urovne',state.selected.planConfig.levels.join(','));params.set('skupiny',state.selected.planConfig.groupSizes.join(','));params.set('rezimskupin',state.selected.planConfig.groupMode);}
+    if(state.selected?.id===id&&state.selected.programId==='u11-duel-rondo-2026-11-10')params.set('brankari',String(state.selected.planConfig.keepers));
     if (block) params.set('blok', block);
     if (section) params.set('sekcia', section);
     url.hash = params.toString();
@@ -428,6 +430,7 @@ const PersonalPlans = [
     if (!state.selected) return;
     const clock = currentClock();
     const remaining = clock.remaining(),snapshot=clock.snapshot();
+    if(clock.rotation?.protocol==='november10')November10Program.syncDuel(clock,snapshot);
     const regroup=!snapshot.finished&&(clock.taskRegroup||clock.waiting&&snapshot.part.regroupBefore);
     const value = regroup&&!clock.rotation?'—':clockText(snapshot.remaining);
     $('timer-value').textContent = value;
@@ -442,6 +445,12 @@ const PersonalPlans = [
     $('exercise-clock-next').textContent=clock.rotation?(clock.taskRegroup?'Čas celej úlohy zahŕňa aj návrat a oddych. Ďalší útok až po potvrdení.':'Obrancu meň po dokončení útoku. Čas zahŕňa aj oddych.'):regroup?(snapshot.part.cue||'Priprav ďalšiu úlohu a rozostav deti.')+' Preskupenie nemá odpočet; tento čas je navyše.':clock.waiting?'Ďalšiu sériu spustíš tlačidlom':snapshot.next?'Potom: '+(phaseKinds[snapshot.next.kind]||snapshot.next.name)+' '+clockText(snapshot.next.milliseconds):'Potom: koniec cvičenia';
     $('exercise-clock-phase').title=clock.scope+' · '+snapshot.part.name;
     $('exercise-clock-toggle').textContent=regroup?'Pripravení — pokračovať':clock.waiting?'Ďalšia séria':clock.deadline!==null&&remaining>0?'Pauza':remaining===0?'Znova':clock.started?'Pokračovať':'Spustiť';
+    $('exercise-clock-toggle').disabled=false;
+    if(clock.rotation?.protocol==='november10'){
+      $('exercise-rotate').hidden=snapshot.part.kind!=='task';$('exercise-rotate').disabled=$('exercise-rotate').disabled||clock.waiting||clock.deadline===null;
+      $('exercise-clock-toggle').disabled=clock.taskRegroup&&!November10Program.canConfirmDuel(clock);
+      $('exercise-clock-next').textContent=clock.taskRegroup?'Dodrž odmeraný oddych a potvrď pripravenosť oboch plôch.':snapshot.part.kind==='task'?'Útok končí prirodzene. Výmena odmeria najmenej 20 s oddychu, medzi okruhmi 60 s.':snapshot.next?'Potom: '+snapshot.next.name:'Potom: ďalšie cvičenie';
+    }
     $('exercise-clock-toggle').setAttribute('aria-label',regroup?'Pripravení — pokračovať':clock.waiting?'Spustiť ďalšiu sériu':clock.deadline!==null&&remaining>0?'Pozastaviť časovač':remaining===0?'Spustiť cvičenie znova':clock.started?'Pokračovať v časovači':'Spustiť časovač');
     $('exercise-clock-toggle').setAttribute('aria-pressed',String(clock.deadline!==null&&remaining>0));
     $('timer-scope').textContent=clock.scope+' · cvičenie zostáva '+clockText(snapshot.overall);
@@ -472,6 +481,7 @@ const PersonalPlans = [
     const options = currentCase ? [...new Set(currentCase.groups)].sort() : [6];
     if (!options.includes(groupSize)) groupSize = options[0];
     $('grouping').textContent = currentCase ? 'Štyri skupiny: ' + currentCase.groups.join(' + ') + ' hráčov do poľa. ' + (keepers === 0 ? 'Bez brankárov, všetci hrajú nohami.' : 'Brankári zostávajú pri bránach.') : training.players + '. ' + training.coaches + '.';
+    if(training.programId==='u11-duel-rondo-2026-11-10')$('grouping').textContent=training.players+'. Štyri päťky pri 20 deťoch; v závere 10 + 10, variant '+training.keepers+' GK. Tréner 1: A/B a ihrisko I; tréner 2: C/D a ihrisko II.';
     if(training.programId==='u11-receive-2026-11-09')$('grouping').textContent=training.players+'. Základné skupiny zahŕňajú brankárov; v technike samostatná skupina G1–G3, v závere rotácia medzi bránami a hrou nohami.';
   }
   function navigate(view, index = state.blockIndex) {
@@ -746,6 +756,7 @@ const PersonalPlans = [
     $('conditions-summary').textContent=config?`${config.players} detí · ${config.coaches} ${config.coaches===1?'tréner':'tréneri'}`:'';
     const facts=[[training.duration+' min','Celkový čas','stopwatch','timeline-panel'],[config?config.width+' × '+config.height+' m':training.category,'Priestor','bounding-box',config?'conditions-panel':'organization-panel',config?'plan-pitch':null],[config?String(config.coaches):training.coaches,'Tréneri','people-fill',config?'conditions-panel':'organization-panel',config?'plan-coaches':null]];
     $('summary-facts').replaceChildren(...facts.map(([value,label,icon,panel,focusId])=>{const tile=el('button'),img=el('img');tile.type='button';tile.setAttribute('aria-controls',panel);if($(panel).matches('details'))tile.setAttribute('aria-expanded',String($(panel).open));img.src='./assets/bootstrap-icons/'+icon+'.svg';img.alt='';const text=el('span');text.append(el('small','',label),el('strong','',value));tile.append(img,text);tile.addEventListener('click',()=>openSummaryPanel(panel,focusId));return tile;}));
+    $('plan-keepers-wrap').hidden=training.programId!=='u11-duel-rondo-2026-11-10';if(training.programId==='u11-duel-rondo-2026-11-10')$('plan-keepers').value=String(config.keepers);
     if(config){$('plan-pitch').value=config.pitch;$('plan-coaches').value=String(config.coaches);$('plan-width').value=config.width;$('plan-height').value=config.height;$('plan-dimensions-label').textContent=`Rozmery ${config.width} × ${config.height} m · upraviť`;}
     $('plan-groups').replaceChildren();$('plan-group-error').hidden=true;
     $('plan-group-picker').replaceChildren();
@@ -1057,7 +1068,7 @@ const PersonalPlans = [
   $('plan-pitch').addEventListener('change',()=>{const preset=TrainingPlanner.pitches[$('plan-pitch').value];$('plan-width').value=preset.width;$('plan-height').value=preset.height;$('plan-dimensions-label').textContent=`Rozmery ${preset.width} × ${preset.height} m · upraviť`;});
   $('plan-group-count').addEventListener('change',event=>{const value=event.target.value,count=value==='auto'?undefined:Number(value);applyPlan({groupMode:value==='auto'?'auto':'manual',groupSizes:TrainingPlanner.groups(state.attendance,count)});showPlanTab('groups');});
   $('plan-half-basics').addEventListener('click',()=>{applyPlan({...TrainingPlanner.halfBasics(state.attendance),groupMode:'manual'});showPlanTab('groups');message('Polovica detí na základy; rozdelenie a nákresy sú prepočítané.');});
-  $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav rozdelenie na ${state.attendance}.`;showPlanTab('groups');$('conditions-panel').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,groupMode:groupSizes.every((n,i)=>n===state.selected.planConfig.groupSizes[i])?state.selected.planConfig.groupMode:'manual',levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});$('conditions-panel').open=false;$('conditions-panel').querySelector('summary').focus({preventScroll:true});});
+  $('plan-form').addEventListener('submit',event=>{event.preventDefault();const counts=[...document.querySelectorAll('[data-group-size]')],groupSizes=counts.map(input=>Number(input.value)),sum=groupSizes.reduce((a,b)=>a+b,0);if(sum!==state.attendance){counts.forEach(input=>input.setAttribute('aria-invalid','true'));$('plan-group-error').textContent=`V skupinách je ${sum} detí, hore máš vybraných ${state.attendance}. Uprav rozdelenie na ${state.attendance}.`;showPlanTab('groups');$('conditions-panel').open=true;$('plan-group-error').hidden=false;$('plan-group-error').focus();return;}applyPlan({...(state.selected.programId==='u11-duel-rondo-2026-11-10'?{keepers:Number($('plan-keepers').value)}:{}),pitch:$('plan-pitch').value,coaches:$('plan-coaches').value,width:$('plan-width').value,height:$('plan-height').value,groupSizes,groupMode:groupSizes.every((n,i)=>n===state.selected.planConfig.groupSizes[i])?state.selected.planConfig.groupMode:'manual',levels:[...document.querySelectorAll('[data-group-level]')].map(select=>select.value)});$('conditions-panel').open=false;$('conditions-panel').querySelector('summary').focus({preventScroll:true});});
   $('planning-from').addEventListener('change',event=>{if(TrainingCalendar.validDate(event.target.value)){planningFrom=event.target.value;renderCalendar();}});
   $('planning-today').addEventListener('click',()=>{planningFrom=TrainingCalendar.today();renderCalendar();});
   $('planning-prepared').addEventListener('click',()=>{const first=state.trainings.filter(t=>t.planning).sort((a,b)=>a.date.localeCompare(b.date))[0];if(first){planningFrom=first.planning.period.from;planningDays=14;renderCalendar();}});
@@ -1109,15 +1120,16 @@ const PersonalPlans = [
   async function toggleExerciseClock(){
     const clock=currentClock();
     if(clock.deadline!==null&&clock.remaining()>0){clock.pause();window.TimerAudio.cancel();updateTimer();return;}
+    if(clock.rotation?.protocol==='november10'&&!November10Program.canConfirmDuel(clock)){updateTimer();return;}
     const initial=clock.waiting||!clock.started||clock.remaining()===0;
     $('timer-toggle').disabled=true;$('exercise-clock-toggle').disabled=true;
     try{const soundReady=await window.TimerAudio.unlock();if(currentClock()!==clock)return;clock.start();window.TimerAudio.bind(clock,initial);$('timer-audio-status').textContent=$('timer-sound').checked?(soundReady?'Zvuk je aktívny.':'Zvuk nie je dostupný. Skús Vyskúšať zvuk.'):'Zvuk je vypnutý.';updateTimer();}
     finally{$('timer-toggle').disabled=false;$('exercise-clock-toggle').disabled=false;}
   }
   $('timer-toggle').addEventListener('click',toggleExerciseClock);
-  $('exercise-clock-toggle').addEventListener('click',()=>{const clock=currentClock();if(clock.taskRegroup&&clock.deadline!==null&&clock.remaining()>0){clock.taskRegroup=false;updateTimer();return;}void toggleExerciseClock();});
+  $('exercise-clock-toggle').addEventListener('click',()=>{const clock=currentClock();if(clock.rotation?.protocol==='november10'&&!November10Program.canConfirmDuel(clock))return;if(clock.taskRegroup&&clock.deadline!==null&&clock.remaining()>0){clock.taskRegroup=false;updateTimer();return;}void toggleExerciseClock();});
   $('exercise-wave').addEventListener('click',()=>{const clock=currentClock(),snapshot=clock.snapshot();if(!clock.speed||!clock.started||clock.waiting||snapshot.part.kind!=='work')return;const key=snapshot.index,limit=Math.ceil(clock.participants/(clock.speedLanes||(clock.participants>=4?2:1)));clock.waves[key]=Math.min(limit,(clock.waves[key]||0)+1);updateTimer();});
-  $('exercise-rotate').addEventListener('click',()=>{const clock=currentClock();if(!clock.rotation||!clock.started||clock.taskRegroup||clock.snapshot().finished||(clock.rotation.maxRounds!==undefined&&clock.rotationRound>=clock.rotation.maxRounds))return;clock.rotationRound++;clock.taskRegroup=true;updateTimer();});
+  $('exercise-rotate').addEventListener('click',()=>{const clock=currentClock();if(clock.rotation?.protocol==='november10'){November10Program.advanceDuel(clock);updateTimer();return;}if(!clock.rotation||!clock.started||clock.taskRegroup||clock.snapshot().finished||(clock.rotation.maxRounds!==undefined&&clock.rotationRound>=clock.rotation.maxRounds))return;clock.rotationRound++;clock.taskRegroup=true;updateTimer();});
   $('exercise-clock-details').addEventListener('click',()=>{if(state.selected.planConfig)window.FootballBoard?.showTimer();else $('timer-panel').open=true;});
   $('timer-reset').addEventListener('click',()=>{currentClock().reset();window.TimerAudio.cancel();updateTimer();});
   $('timer-sound').addEventListener('change',async()=>{window.TimerAudio.setEnabled($('timer-sound').checked);const ready=$('timer-sound').checked?await window.TimerAudio.unlock():false;$('timer-audio-status').textContent=$('timer-sound').checked?(ready?'Zvuk je aktívny.':'Zvuk aktivuješ tlačidlom Spustiť.'):'Zvuk je vypnutý.';updateTimer();});

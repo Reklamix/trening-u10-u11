@@ -369,7 +369,7 @@ const FootballPhaseNavigation={
       if(!focused)return;
       const data=options.brief(pitchIndex);if(!data)return;itemPager.replaceChildren();briefRoot.replaceChildren();visualLabel.textContent=data.selection.replace(/^Ukážka /,'').replace(/ z \d+ detí/,' detí');previewBody.textContent=scene?.phases?.findLast(phase=>phase.start<=clock.time())?.cue||data.shortInstruction;
       const selectedArea=areas[pitchIndex],config=options.levelConfig(),localCount=selectedArea?.count||options.total;
-      groupBar.replaceChildren();const groupButton=html('button','card-group-button',selectedArea?.label||'U11');groupButton.type='button';groupButton.setAttribute('aria-label','Vybrať skupinu a náročnosť');groupButton.addEventListener('click',()=>selectTopic('space',{settings:true}));groupBar.append(groupButton,html('span','',`${localCount} ${localCount>=2&&localCount<=4?'deti':'detí'}${selectedArea?.label?.length>1?' · '+TrainingPlanner.levels[config.levels[pitchIndex]]:''}`));
+      groupBar.replaceChildren();const groupButton=html('button','card-group-button',selectedArea?.label||'U11');groupButton.type='button';groupButton.setAttribute('aria-label','Vybrať skupinu a náročnosť');groupButton.addEventListener('click',()=>selectTopic('space',{settings:true}));groupBar.append(groupButton,html('span','',`${localCount} ${localCount>=2&&localCount<=4?'deti':'detí'}${selectedArea?.label?.length>1?' · '+TrainingPlanner.levels[selectedArea?.november10?selectedArea.skill:config.levels[pitchIndex]]:''}`));
       const durationBadge=html('button','exercise-duration-badge');durationBadge.type='button';durationBadge.append(html('span','','Celé cvičenie'),html('strong','',data.timing.total));durationBadge.setAttribute('aria-label','Celé cvičenie vrátane prestávok: '+data.timing.total);durationBadge.addEventListener('click',()=>selectTopic('time'));groupBar.append(durationBadge);
       glance.replaceChildren();
       const total=html('button','exercise-dose-total');total.type='button';total.setAttribute('aria-label','Celé cvičenie vrátane prestávok: '+data.timing.total);total.append(html('span','','Celé cvičenie vrátane prestávok'),html('strong','',data.timing.total));total.addEventListener('click',()=>selectTopic('time'));glance.append(total);
@@ -451,7 +451,7 @@ const FootballPhaseNavigation={
     }
     function renderLevelTools(){
       const config=options.levelConfig?.();levelTools.replaceChildren();if(!config||!areas.length)return;
-      const indices=areas[pitchIndex]?.members||(block.diagram==='football-warmup'?TrainingPlanner.warmMembers(config,pitchIndex):[pitchIndex]);
+      const indices=areas[pitchIndex]?.november10?[Math.min(pitchIndex,config.groupSizes.length-1)]:areas[pitchIndex]?.members||(block.diagram==='football-warmup'?TrainingPlanner.warmMembers(config,pitchIndex):[pitchIndex]);
       for(const index of indices){
         const group=TrainingPlanner.labels(config.groupSizes.length)[index],label=html('label','football-select-label','Náročnosť '+group),select=html('select');select.setAttribute('aria-label','Náročnosť '+group);select.dataset.levelGroup=index;
         for(const[value,title]of Object.entries(TrainingPlanner.levels)){const option=html('option','',title);option.value=value;select.append(option);}select.value=config.levels[index];

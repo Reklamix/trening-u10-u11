@@ -18,11 +18,11 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
   if(task){
    assert.equal(preview.phases.filter(p=>p.kind==='work').length,1,'One complete example, not one animation per child');
    const done=preview.phases.at(-1);for(const frames of Object.values(preview.tracks)){const atActionEnd=F.sample(frames,done.start),atPreviewEnd=F.sample(frames,done.end);assert.deepEqual(atPreviewEnd,atActionEnd,'Finished example holds its final pose instead of jumping to the last child in the old full sequence');}
-   const spec=I.build(t,b,index),brief=B.build(t,b,index);assert.equal(spec.parts.length,1);assert.equal(spec.parts[0].kind,'task');assert.equal(spec.parts[0].milliseconds,(b.end-b.start)*60000);
-   assert.equal(I.signals(spec.parts).length,6,'Whole-task mode has only five final warnings and completion, never per-attack whistles');
+   const spec=I.build(t,b,index),brief=B.build(t,b,index);if(t.date==='2026-11-10'){assert.deepEqual(Array.from(spec.parts,p=>[p.kind,p.milliseconds]),[['setup',60000],['task',540000],['water',120000]]);}else{assert.equal(spec.parts.length,1);assert.equal(spec.parts[0].kind,'task');assert.equal(spec.parts[0].milliseconds,(b.end-b.start)*60000);}
+   assert.equal(I.signals(spec.parts.filter(p=>p.kind==='task')).length,6,'Whole-task mode has only five final warnings and completion, never per-attack whistles');
    assert.ok(!/10 s/.test(brief.work+brief.rotation+brief.timing.schedule),'Coach sees no fixed attack countdown');
    const counts=Array.from({length:area.count},()=>({A:0,D:0,R:0}));
-   if(spec.rotation.protocol==='november9')for(const pair of spec.rotation.pairs)counts.forEach((c,i)=>c[i===pair[0]?'A':i===pair[1]?'D':'R']++);
+   if(['november9','november10'].includes(spec.rotation.protocol))for(const pair of spec.rotation.pairs)counts.forEach((c,i)=>c[i===pair[0]?'A':i===pair[1]?'D':'R']++);
    else for(let round=0;round<area.count;round++)spec.rotation.roles.forEach((role,i)=>counts[(i+round)%area.count][role]++);
    assert.ok(counts.every(c=>JSON.stringify(c)===JSON.stringify(counts[0])),'A complete circle gives every child the same attack/defence/recovery turns');
    assert.ok(B.phasePlan(preview).every(g=>B.phaseDoses(g).some(d=>d.kind==='task')),'Preview never presents a per-attack seconds dose');
@@ -35,9 +35,9 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
   const schedule=I.build(t,b,index);
   assert.equal(schedule.parts.reduce((sum,p)=>sum+p.milliseconds,0),(b.end-b.start)*60000,'Timer preserves complete approved dose');
   if(b.programKind==='speed'){
-    const runs=schedule.parts.filter(p=>p.kind==='work');assert.equal(runs.length,4);
-    assert.ok(runs.every(p=>p.milliseconds===(t.date==='2026-11-09'?100000:60000)),'Series includes the approved recovery, no individual sprint countdown');
-    assert.equal(runs.filter(p=>p.requiresStart).length,3);
+    const runs=schedule.parts.filter(p=>p.kind==='work');assert.equal(runs.length,t.date==='2026-11-10'?3:4);
+    assert.ok(runs.every(p=>p.milliseconds===(t.date==='2026-11-10'?90000:t.date==='2026-11-09'?100000:60000)),'Series includes the approved recovery, no individual sprint countdown');
+    assert.equal(runs.filter(p=>p.requiresStart).length,t.date==='2026-11-10'?2:3);
   }
   const peopleClock=new Clock(schedule),initial=I.participantsText(peopleClock,peopleClock.snapshot());
   for(const label of ['Cvičia:','Oddychujú:','Ďalší:'])assert.ok(initial.includes(label),'All three participation rows visible for every drill');
