@@ -6,10 +6,10 @@ const files=['training-calendar.js','football.js','training-planner.js','footbal
 const code=files.map(f=>read(f).split('// FOOTBALL_BROWSER')[0].split('// PITCH_SETUP_BROWSER')[0].split('// TIMER_AUDIO_BROWSER')[0]).join('\n');
 const api=runInNewContext(code+';({TrainingCalendar,TrainingPlanner,FootballScenes,FootballSequences,ExerciseBrief,PitchSetupPlan,TrainingIntervals,IntervalClock,SessionPrograms,TrainingLibrary,TrainingLoad})',{performance:{now:()=>0}});
 const {TrainingCalendar:C,TrainingPlanner:P,FootballScenes:F,FootballSequences:S,ExerciseBrief:B,PitchSetupPlan:U,TrainingIntervals:I,IntervalClock,SessionPrograms:G,TrainingLibrary:L}=api;
-const original=JSON.parse(read('trainings.json')),agenda=JSON.parse(read('upcoming.json')),saved=JSON.stringify(original),expanded=C.expand(original,agenda),programs=expanded.trainings.filter(t=>G.supports(t)&&!['2026-11-09','2026-11-10'].includes(t.date));
+const original=JSON.parse(read('trainings.json')),agenda=JSON.parse(read('upcoming.json')),saved=JSON.stringify(original),expanded=C.expand(original,agenda),programs=expanded.trainings.filter(t=>G.supports(t)&&!['2026-11-09','2026-11-10','2026-11-12'].includes(t.date));
 assert.equal(JSON.stringify(original),saved);assert.equal(programs.length,3);
-assert.equal(expanded.trainings.filter(t=>t.planning?.status==='draft').length,1);
-assert.equal(expanded.trainings.filter(t=>G.supports(t)).length,5,'New date has its own independently tested program');
+assert.equal(expanded.trainings.filter(t=>t.planning?.status==='draft').length,0);
+assert.equal(expanded.trainings.filter(t=>G.supports(t)).length,6,'New date has its own independently tested program');
 let scenes=0;
 for(const source of programs){
  assert.equal(source.planning.status,'ready');

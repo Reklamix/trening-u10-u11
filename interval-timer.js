@@ -2,6 +2,7 @@
 
 const TrainingIntervals = {
   build(training,block,index=0){
+    if(training.programId==='u11-combine-2026-11-12')return November12Program.intervals(training,block,index);
     if(training.programId==='u11-duel-rondo-2026-11-10')return November10Program.intervals(training,block,index);
     if(training.programId==='u11-receive-2026-11-09')return November9Program.intervals(training,block,index);
     if(!training.planConfig)return {scope:'Celý blok',parts:[{name:block.title,kind:'work',milliseconds:(block.end-block.start)*60000}]};

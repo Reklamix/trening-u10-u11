@@ -39,6 +39,7 @@ const FootballSequences = {
     return out;
   },
   build(training, block, index, base) {
+    if(training.programId==='u11-combine-2026-11-12')return November12Program.sequence(training,block,index,base);
     if(training.programId==='u11-duel-rondo-2026-11-10')return November10Program.sequence(training,block,index,base);
     if(training.programId==='u11-receive-2026-11-09')return November9Program.sequence(training,block,index,base);
     const config=training.planConfig;

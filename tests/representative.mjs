@@ -18,7 +18,7 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
   if(task){
    assert.equal(preview.phases.filter(p=>p.kind==='work').length,1,'One complete example, not one animation per child');
    const done=preview.phases.at(-1);for(const frames of Object.values(preview.tracks)){const atActionEnd=F.sample(frames,done.start),atPreviewEnd=F.sample(frames,done.end);assert.deepEqual(atPreviewEnd,atActionEnd,'Finished example holds its final pose instead of jumping to the last child in the old full sequence');}
-   const spec=I.build(t,b,index),brief=B.build(t,b,index);if(t.date==='2026-11-10'){assert.deepEqual(Array.from(spec.parts,p=>[p.kind,p.milliseconds]),[['setup',60000],['task',540000],['water',120000]]);}else{assert.equal(spec.parts.length,1);assert.equal(spec.parts[0].kind,'task');assert.equal(spec.parts[0].milliseconds,(b.end-b.start)*60000);}
+   const spec=I.build(t,b,index),brief=B.build(t,b,index);if(['2026-11-10','2026-11-12'].includes(t.date)){assert.deepEqual(Array.from(spec.parts,p=>[p.kind,p.milliseconds]),[['setup',60000],['task',540000],['water',120000]]);}else{assert.equal(spec.parts.length,1);assert.equal(spec.parts[0].kind,'task');assert.equal(spec.parts[0].milliseconds,(b.end-b.start)*60000);}
    assert.equal(I.signals(spec.parts.filter(p=>p.kind==='task')).length,6,'Whole-task mode has only five final warnings and completion, never per-attack whistles');
    assert.ok(!/10 s/.test(brief.work+brief.rotation+brief.timing.schedule),'Coach sees no fixed attack countdown');
    const counts=Array.from({length:area.count},()=>({A:0,D:0,R:0}));
@@ -36,7 +36,7 @@ for(const source of all.filter(t=>G.supports(t)||t.id==='2026-10-29'))for(const 
   assert.equal(schedule.parts.reduce((sum,p)=>sum+p.milliseconds,0),(b.end-b.start)*60000,'Timer preserves complete approved dose');
   if(b.programKind==='speed'){
     const runs=schedule.parts.filter(p=>p.kind==='work');assert.equal(runs.length,t.date==='2026-11-10'?3:4);
-    assert.ok(runs.every(p=>p.milliseconds===(t.date==='2026-11-10'?90000:t.date==='2026-11-09'?100000:60000)),'Series includes the approved recovery, no individual sprint countdown');
+    assert.ok(runs.every(p=>p.milliseconds===(['2026-11-10','2026-11-12'].includes(t.date)?90000:t.date==='2026-11-09'?100000:60000)),'Series includes the approved recovery, no individual sprint countdown');
     assert.equal(runs.filter(p=>p.requiresStart).length,t.date==='2026-11-10'?2:3);
   }
   const peopleClock=new Clock(schedule),initial=I.participantsText(peopleClock,peopleClock.snapshot());

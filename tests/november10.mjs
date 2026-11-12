@@ -8,7 +8,7 @@ const code=files.map(f=>read(f).split('// FOOTBALL_BROWSER')[0].split('// PITCH_
 const {C,P,F,S,B,I,N,U,Clock}=vm.runInNewContext(code+';({C:TrainingCalendar,P:TrainingPlanner,F:FootballScenes,S:FootballSequences,B:ExerciseBrief,I:TrainingIntervals,N:November10Program,U:PitchSetupPlan,Clock:IntervalClock})',{performance:{now:()=>0},Date:class extends Date{static now(){return now;}}});
 const all=C.expand(JSON.parse(read('trainings.json')),JSON.parse(read('upcoming.json'))).trainings,source=all.find(t=>t.date==='2026-11-10');
 assert.equal(source.planning.status,'ready');assert.equal(source.defaultConfig.keepers,0);assert.equal(source.defaultConfig.coaches,1);assert.equal(source.duration,75);
-assert.deepEqual(Array.from(source.blocks,b=>b.end),[10,16,28,40,54,72,75]);assert.equal(all.find(t=>t.date==='2026-11-12').planning.status,'draft');
+assert.deepEqual(Array.from(source.blocks,b=>b.end),[10,16,28,40,54,72,75]);assert.equal(all.find(t=>t.date==='2026-11-12').planning.status,'ready');
 let scenes=0;
 for(const keepers of[2,3])for(const players of[10,16,20,24,30])for(const pitch of['quarter','half','full']){
  const t=P.adapt(source,{...source.defaultConfig,coaches:2,keepers,players,pitch,...P.pitches[pitch],groupSizes:P.groups(players)});

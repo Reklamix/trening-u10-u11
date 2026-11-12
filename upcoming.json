@@ -64,12 +64,13 @@
     {
       "date": "2026-11-12",
       "title": "Spoj to v hre",
-      "focus": "V hre spojiť rozhľad, príjem lopty a novú ponuku.",
+      "focus": "80 minút pre 15–18 detí spolu, dvoch trénerov a štvrtinu ihriska: 4 krátke štarty, rondo, 1 na 1 so zakončením, 2 na 2 s jedným neutrálnym a dve záverečné hry. Všetci nohami, aj bez brankárov. Rozmery a povrch over pred začiatkom.",
       "cue": "Pozri, priprav, rozhodni sa.",
       "topic": "Prenos do hry",
       "startTime": "18:00",
-      "status": "draft",
-      "templateId": "u11-pass-move-v1"
+      "status": "ready",
+      "templateId": "u11-pass-move-v1",
+      "programId": "u11-combine-2026-11-12"
     }
   ],
   "scheduleConfirmed": true

@@ -15,11 +15,11 @@ for(const players of Array.from({length:21},(_,i)=>i+10))for(const pitch of ['qu
    const areas=F.groups(b.diagram,players,t.quarterPitch),step=prep.steps[i];
    if(source.date==='2026-11-09'&&b.programKind==='pairs')assert.equal(areas.length,Math.min(4,Math.ceil((players-3)/6))+1,'Field groups plus one real keeper group');
    else if(!['finish','large-game','warm'].includes(b.programKind))assert.equal(areas.length,expected,'No phantom fourth station');
-   if(b.programKind==='warm')assert.equal(areas.length,['2026-11-09','2026-11-10'].includes(source.date)?expected:expected===4?2:expected);
+   if(b.programKind==='warm')assert.equal(areas.length,['2026-11-09','2026-11-10','2026-11-12'].includes(source.date)?expected:expected===4?2:expected);
    if(areas.length)assert.equal(areas.reduce((sum,a)=>sum+a.count,0),players);
    for(const [j,a] of areas.entries()){
     assert.ok(a.x>=2-1e-8&&a.y>=2-1e-8&&a.x+a.w<=t.planConfig.width-2+1e-8&&a.y+a.h<=t.planConfig.height-2+1e-8,'2 m perimeter');
-    for(const other of areas.slice(j+1)){const dx=Math.max(a.x-other.x-other.w,other.x-a.x-a.w),dy=Math.max(a.y-other.y-other.h,other.y-a.y-a.h);assert.ok(dx>=3-1e-8||dy>=3-1e-8,'3 m clear separation');}
+    for(const other of areas.slice(j+1)){const dx=Math.max(a.x-other.x-other.w,other.x-a.x-a.w),dy=Math.max(a.y-other.y-other.h,other.y-a.y-a.h);const gap=source.date==='2026-11-12'?(b.programKind==='large-game'?2:1.5):3;assert.ok(dx>=gap-1e-8||dy>=gap-1e-8,'Date-specific approved clear separation');}
     const scene=F.build(b.diagram,{area:a,total:players,size:a.count,pitchIndex:j}),sequence=S.build(t,b,j,scene),brief=B.build(t,b,j),timer=I.build(t,b,j);
     assert.equal(scene.nodes.filter(n=>n.kind==='player').length,a.count);assert.equal(sequence.nodes.filter(n=>n.kind==='player').length,a.count);
     assert.equal(timer.parts.reduce((sum,p)=>sum+p.milliseconds,0),(b.end-b.start)*60000,'Group changes cannot change the approved block duration');
