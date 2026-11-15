@@ -176,3 +176,7 @@ body.coach-flow:has(#main) .header-button,.coach-flow .app-settings-open{min-hei
 .notation-dialog .football-legend-item svg{width:54px;height:33px;flex:none}
 .notation-dialog .small-note{font-size:14px;line-height:1.5;margin-top:16px}
 .notation-dialog .guide-link{display:block;min-height:44px;padding-block:10px}
+.coach-flow .football-figure svg [data-motion-arrow] .motion-outline{fill:none;stroke:#123c30;stroke-width:6}
+.coach-flow .football-figure svg [data-motion-arrow] .motion-route{fill:none;stroke:var(--motion-color,#fff);stroke-width:3}
+.coach-flow .football-figure svg [data-motion-arrow] .motion-head{fill:var(--motion-color,#fff);stroke:#123c30;stroke-width:2;paint-order:stroke}
+.coach-flow .football-figure svg [data-actor] .motion-halo{stroke:var(--motion-color,#fff);stroke-width:3;filter:none}

@@ -222,20 +222,73 @@ const FootballPhaseNavigation={
 const FootballNotation = Object.freeze({
   source:'https://www.fifatrainingcentre.com/media/native/test/FIFA_Session_Plan_FIFA_Session_Plan_marques_ball_manipulation-new.pdf',
   label(kind){return {run:'Beh bez lopty',pass:'Prihrávka',dribble:'Vedenie lopty',shot:'Strela na bránu'}[kind]||'Beh bez lopty';},
+  color(kind){return {run:'#8eeeff',pass:'#ffe477',shot:'#ffe477',dribble:'#ffffff'}[kind]||'#ffffff';},
+  prepare(scene){
+    const players=scene.nodes.filter(n=>n.kind==='player');
+    const motions=scene.arrows.map(arrow=>{
+      const start=arrow.start??0,end=arrow.end??scene.duration,origin=arrow.points[0];
+      const phase=scene.phases?.find(p=>start>=p.start&&start<p.end);
+      const candidates=players.filter(n=>phase?.roles[n.id]?.visible!==false).map(n=>({node:n,p:scene.tracks[n.id]?FootballScenes.sample(scene.tracks[n.id],start):n}));
+      candidates.sort((a,b)=>Math.hypot(a.p.x-origin.x,a.p.y-origin.y)-Math.hypot(b.p.x-origin.x,b.p.y-origin.y));
+      const nearest=candidates[0],actor=nearest&&Math.hypot(nearest.p.x-origin.x,nearest.p.y-origin.y)<35?nearest.node.id:null;
+      return {arrow,start,end,actor,lookEnd:end};
+    });
+    // Adjacent one-second arrows in free dribbling describe one continuous route.
+    // Look ahead on that real route, never across a different action or a phase cut.
+    const groups=new Map();
+    for(const m of motions)if(m.actor&&['run','dribble'].includes(m.arrow.kind)){const key=m.actor+':'+m.arrow.kind;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(m);}
+    for(const group of groups.values()){
+      group.sort((a,b)=>a.start-b.start);
+      for(let i=group.length-2;i>=0;i--)if(Math.abs(group[i].end-group[i+1].start)<.001)group[i].lookEnd=group[i+1].lookEnd;
+    }
+    return motions;
+  },
+  motion(scene,m,time){
+    const {arrow,actor}=m,points=arrow.points;
+    if(time<m.start||time>=m.end)return {visible:false,active:false,points,actor};
+    if(['pass','shot'].includes(arrow.kind)){
+      const a=points[0],b=points.at(-1),dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1;
+      const balls=scene.nodes.filter(n=>n.kind==='ball');
+      const ball=balls.find(n=>{
+        const frames=scene.tracks[n.id]||[],next=frames.findIndex(f=>f[0]>time);
+        if(next<1||frames[next][3]==='cut')return false;
+        const f=frames[next-1],g=frames[next],vx=g[1]-f[1],vy=g[2]-f[2],speed=Math.hypot(vx,vy);
+        if(speed<.1||(dx*vx+dy*vy)/(len*speed)<.75)return false;
+        const p=FootballScenes.sample(frames,time),along=((p.x-a.x)*dx+(p.y-a.y)*dy)/len;
+        return along>-15&&along<len+15&&Math.abs((p.x-a.x)*dy-(p.y-a.y)*dx)/len<16;
+      });
+      return {visible:true,active:!!ball,points,actor,ball:ball?.id};
+    }
+    const frames=scene.tracks[actor];
+    if(!frames?.length)return {visible:true,active:false,points,actor};
+    const phase=scene.phases?.find(p=>time>=p.start&&time<p.end);
+    let end=Math.min(time+1.8,m.lookEnd,phase?.end??scene.duration);
+    const cut=frames.find(f=>f[0]>time&&f[0]<=end&&f[3]==='cut');
+    if(cut)end=Math.max(time,cut[0]-.00001);
+    const current=FootballScenes.sample(frames,time),soon=FootballScenes.sample(frames,Math.min(end,time+.08));
+    const active=Math.hypot(soon.x-current.x,soon.y-current.y)>.05;
+    const path=[current];
+    for(let t=time+.6;t<end;t+=.6)path.push(FootballScenes.sample(frames,t));
+    path.push(FootballScenes.sample(frames,end));
+    // Short first touches keep their honest length; never invent extra running.
+    return {visible:true,active,points:active?path:points,actor};
+  },
   arrow(input,kind='run',scale=1,endInset=0){
     const points=input.filter((p,i)=>i===0||Math.hypot(p.x-input[i-1].x,p.y-input[i-1].y)>.001).map(p=>({...p}));
     if(points.length<2)return {path:'',head:'',dash:kind==='run'?`${5*scale} ${4*scale}`:null};
     if(endInset){const b=points.at(-1),a=points.at(-2),len=Math.hypot(b.x-a.x,b.y-a.y),amount=Math.min(endInset,len/2);b.x-=(b.x-a.x)/len*amount;b.y-=(b.y-a.y)/len*amount;}
-    const coords=[points[0]];
-    for(let j=1;j<points.length;j++){
-      const a=points[j-1],b=points[j],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);
-      if(kind==='dribble'){
-        const teeth=Math.max(1,Math.round(len/(12*scale))),steps=teeth*4;
-        for(let i=1;i<=steps;i++){
-          const u=i/steps,off=(i%4===1?1:i%4===3?-1:0)*2.7*scale;
-          coords.push({x:a.x+dx*u-dy/len*off,y:a.y+dy*u+dx/len*off});
-        }
-      }else coords.push(b);
+    let coords=points;
+    if(kind==='dribble'){
+      const lengths=points.slice(1).map((p,i)=>Math.hypot(p.x-points[i].x,p.y-points[i].y)),total=lengths.reduce((sum,n)=>sum+n,0);
+      const steps=Math.max(1,Math.round(total/(16*scale)))*4;coords=[points[0]];
+      let segment=0,before=0;
+      for(let i=1;i<=steps;i++){
+        const distance=total*i/steps;
+        while(segment<lengths.length-1&&before+lengths[segment]<distance){before+=lengths[segment++];}
+        const a=points[segment],b=points[segment+1],len=lengths[segment],u=(distance-before)/len,dx=b.x-a.x,dy=b.y-a.y;
+        const off=(i%4===1?1:i%4===3?-1:0)*2.7*scale;
+        coords.push({x:a.x+dx*u-dy/len*off,y:a.y+dy*u+dx/len*off});
+      }
     }
     const b=points.at(-1),a=points.at(-2),angle=Math.atan2(b.y-a.y,b.x-a.x),size=8*scale;
     const number=n=>Number(n.toFixed(3));
@@ -346,7 +399,7 @@ const FootballNotation = Object.freeze({
       }
       item.append(icon,document.createTextNode(label));list.append(item);
     }
-    const notationNote=html('p','small-note','Beh je prerušovaný. Prihrávka a strela majú plnú šípku; strela smeruje na bránu. Cikcak znamená vedenie lopty, nie povinný slalom. Čiary bez šípok označujú plochu.'),notationSource=html('a','guide-link','Vzor: FIFA Training Centre ↗');
+    const notationNote=html('p','small-note','Beh je prerušovaný. Prihrávka a strela majú plnú šípku; strela smeruje na bránu. Cikcak znamená vedenie lopty, nie povinný slalom. Čiary bez šípok označujú plochu. Počas prehrávania svieti kruh práve aktívneho hráča: modrý beh, žltá prihrávka alebo strela, biele vedenie lopty.'),notationSource=html('a','guide-link','Vzor: FIFA Training Centre ↗');
     notationSource.href=FootballNotation.source;notationSource.target='_blank';notationSource.rel='noopener noreferrer';
     legend.append(caption,list,notationNote,notationSource);
     if(focused){
@@ -584,17 +637,19 @@ const FootballNotation = Object.freeze({
         if(p.goals&&!p.goalGates)for(const x of[p.x-6,p.x+p.w])for(const u of[.25,.7]){const y=p.y+p.h*u;svg.append(svgNode('rect',{x,y:y-8,width:6,height:16,fill:'white',stroke:'#173b31'}),svgNode('path',{d:`M${x} ${y-3}h6M${x} ${y+3}h6`,stroke:'#638268'}));}
         if(focused){const bottom=p.y+p.h+18,mid=p.x+p.w/2,side=p.x-24;svg.append(svgNode('path',{class:'card-dimension-line',d:`M${p.x} ${bottom}h${p.w/2-24}M${mid+24} ${bottom}H${p.x+p.w}M${p.x+5} ${bottom-3}l-5 3 5 3M${p.x+p.w-5} ${bottom-3}l5 3-5 3M${side} ${p.y}V${p.y+p.h}M${side-3} ${p.y+5}l3-5 3 5M${side-3} ${p.y+p.h-5}l3 5 3-5`,fill:'none',stroke:'white','stroke-width':1}),svgNode('text',{x:mid,y:bottom+4,'text-anchor':'middle',fill:'white','font-size':16,'font-weight':650},`${p.length} m`),svgNode('text',{x:side-10,y:p.y+p.h/2,'text-anchor':'middle',fill:'white','font-size':16,'font-weight':650,transform:`rotate(-90 ${side-10} ${p.y+p.h/2})`},`${p.width} m`));}else svg.append(svgNode('text',{x:180,y:p.y+p.h+22,'text-anchor':'middle',fill:'#596c63','font-size':11},`${p.length} × ${p.width} m${p.zones?' · zóny 2 m':''}`));
       }
-      const drawnPassRoutes=new Set();
-      for(const a of scene.arrows){
-        const layer=svgNode('g',{'data-motion-arrow':a.number,'data-motion-kind':a.kind});
+      const motions=FootballNotation.prepare(scene);
+      for(const motion of motions){
+        const a=motion.arrow;
+        const layer=svgNode('g',{'data-motion-arrow':a.number,'data-motion-kind':a.kind,style:`--motion-color:${FootballNotation.color(a.kind)}`});
         const points=a.points,shape=FootballNotation.arrow(points,a.kind,1,focused&&a.kind==='pass'?13:0);
         layer.append(svgNode('title',{},FootballNotation.label(a.kind)));
-        const routeKey=focused&&areas[pitchIndex]?.skill==='base'&&block.diagram==='football-pass'?points.map(point=>point.x+','+point.y).sort().join('|'):null,duplicateRoute=routeKey&&drawnPassRoutes.has(routeKey);if(routeKey)drawnPassRoutes.add(routeKey);
-        if(!duplicateRoute)layer.append(svgNode('path',{d:shape.path,fill:'none',stroke:focused?'white':'#173b31','stroke-width':1.8,'stroke-linejoin':'round',...(shape.dash?{'stroke-dasharray':shape.dash}:{})}));
-        layer.append(svgNode('path',{d:shape.head,fill:focused?'white':'#173b31'}));
+        const outline=svgNode('path',{class:'motion-outline',d:shape.path,fill:'none',stroke:'#123c30','stroke-width':6,'stroke-linejoin':'round','stroke-linecap':'round',...(shape.dash?{'stroke-dasharray':shape.dash}:{})});
+        const route=svgNode('path',{class:'motion-route',d:shape.path,fill:'none',stroke:focused?FootballNotation.color(a.kind):'#173b31','stroke-width':focused?3:2,'stroke-linejoin':'round',...(shape.dash?{'stroke-dasharray':shape.dash}:{})});
+        const head=svgNode('path',{class:'motion-head',d:shape.head,fill:focused?FootballNotation.color(a.kind):'#173b31',stroke:focused?'#123c30':'none','stroke-width':2,'stroke-linejoin':'round','paint-order':'stroke'});
+        if(focused)layer.append(outline);layer.append(route,head);
         const mid=points[Math.floor((points.length-1)/2)],end=points[Math.ceil((points.length-1)/2)]||mid;
         if(a.label!==false)layer.append(svgNode('text',{x:(mid.x+end.x)/2+5,y:(mid.y+end.y)/2-5,fill:focused?'white':'#173b31','font-size':9,'font-weight':700,'paint-order':'stroke',stroke:focused?'#2f5a27':'white','stroke-width':3},String(a.number)));
-        svg.append(layer);arrowLayers.push({element:layer,start:a.start??0,end:a.end??Infinity});
+        svg.append(layer);arrowLayers.push({element:layer,motion,outline,route,head});
       }
       for(const node of scene.nodes){
         const g=svgNode('g',{'data-actor':node.id,'data-team':node.team||'',transform:`translate(${node.x} ${node.y})`});
@@ -611,10 +666,11 @@ const FootballNotation = Object.freeze({
     function paintActor(g,node){
         g.replaceChildren();g.setAttribute('data-team',node.team||'');
         const r=node.kind==='ball'?4:focused?Math.max(13,Math.max(scene.pitch?.w||280,scene.pitch?.h||240)/18):scene.localCount>12?7:10;
-        if(focused&&node.kind==='ball')g.append(svgNode('image',{href:'./assets/card-ball.webp',x:-6,y:-6,width:12,height:12}));
+        if(focused&&node.kind==='ball')g.append(svgNode('circle',{class:'motion-halo',r:10,fill:'#ffe477',stroke:'#123c30','stroke-width':1.5,visibility:'hidden'}),svgNode('image',{href:'./assets/card-ball.webp',x:-7,y:-7,width:14,height:14}));
         else if(focused&&node.kind==='player'&&node.team==='A')g.append(svgNode('circle',{cx:0,cy:0,r,fill:'#087bea',stroke:'white','stroke-width':1.8}));
         else if(node.kind==='coach')g.append(svgNode('circle',{cx:0,cy:0,r:11,fill:colors.T,stroke:'#173b31'}));
         else g.append(svgNode('circle',{cx:0,cy:0,r,fill:node.kind==='ball'?'white':colors[node.team],stroke:node.kind==='ball'?'#173b31':'white','stroke-width':1}));
+        if(focused&&node.kind==='player')g.append(svgNode('circle',{class:'motion-halo',r:r+3,fill:'none',stroke:'white','stroke-width':3,visibility:'hidden'}));
         if(node.kind==='ball'&&!focused)g.append(svgNode('circle',{cx:0,cy:0,r:1.5,fill:'#173b31'}));
         else if(node.kind!=='ball')g.append(svgNode('text',{x:0,y:.5,'text-anchor':'middle','dominant-baseline':'middle',fill:['N','T'].includes(node.team)?'#173b31':'white','font-size':focused?Math.max(11,r*.83):r===7?7:9,'font-weight':650},focused?String(node.label).replace(/^P(?=\d)/,''):node.label));
     }
@@ -672,7 +728,22 @@ const FootballNotation = Object.freeze({
       if(index!==lastStep||complete!==lastComplete){status.textContent=(complete?'Ukážka dokončená. ':'')+scene.steps[index].text;lastStep=index;lastComplete=complete;}
       status.classList.toggle('football-complete',complete);
       progress.textContent=`Krok ${index+1}/${scene.steps.length} · ${time.toFixed(1)} / ${scene.duration.toFixed(1)} s`;
-      for(const layer of arrowLayers)layer.element.setAttribute('visibility',time>=layer.start&&time<layer.end?'visible':'hidden');
+      const highlights=new Map();
+      for(const layer of arrowLayers){
+        const state=FootballNotation.motion(scene,layer.motion,time),kind=layer.motion.arrow.kind;
+        if(layer.visible!==state.visible){layer.element.setAttribute('visibility',state.visible?'visible':'hidden');layer.visible=state.visible;}
+        if(layer.isActive!==state.active){layer.element.setAttribute('data-active',String(state.active));layer.isActive=state.active;}
+        if(!state.visible)continue;
+        if(focused){
+          // During playback only the real current ball route is emphasized.
+          const opacity=clock.origin!==null&&!state.active?'.22':'1';if(layer.opacity!==opacity){layer.element.setAttribute('opacity',opacity);layer.opacity=opacity;}
+          const shape=FootballNotation.arrow(state.points,kind,1.35,kind==='pass'?16:0);
+          for(const path of [layer.outline,layer.route]){path.setAttribute('d',shape.path);if(shape.dash)path.setAttribute('stroke-dasharray',shape.dash);}
+          layer.head.setAttribute('d',shape.head);
+          if(state.active){if(state.actor)highlights.set(state.actor,kind);if(state.ball)highlights.set(state.ball,kind);}
+        }
+      }
+      for(const [id,g]of actors){const halo=g.querySelector('.motion-halo'),kind=highlights.get(id);if(!halo)continue;halo.setAttribute('visibility',kind?'visible':'hidden');if(kind)g.style.setProperty('--motion-color',FootballNotation.color(kind));g.setAttribute('data-current-action',kind||'');}
       scrub.value=String(time);next.disabled=time>=scene.duration;play.textContent=clock.origin===null?(complete?'Prehrať znova':focused?'Prehrať ukážku':'Prehrať'):focused?'Pauza ukážky':'Pauza';play.dataset.playing=String(clock.origin!==null);if(focused){const icon=uiIcon(clock.origin===null?'play-fill':'pause-fill');play.prepend(icon);}
       if(complete&&clock.origin!==null){clock.pause();play.textContent='Prehrať znova';}
     }
