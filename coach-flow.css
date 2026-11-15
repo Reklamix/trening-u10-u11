@@ -147,3 +147,27 @@ body.coach-flow:has(#main) .header-button,.coach-flow .app-settings-open{min-hei
 .coach-flow #main.exercise-focus .football-figure .football-controls .button{display:flex;align-items:center;justify-content:center;gap:6px}
 .coach-flow #main.exercise-focus .football-figure .football-controls .button img{width:18px;height:18px}
 @media(min-width:700px){.coach-flow #main.exercise-focus .exercise-inline-description p{font-size:16px}}
+/* Phone ergonomics: readable copy, thumb-sized controls and space above fixed actions. */
+@media(max-width:699px){
+ .coach-flow #main.exercise-focus:has(.hybrid-board){padding-inline:max(8px,env(safe-area-inset-left)) max(8px,env(safe-area-inset-right));padding-bottom:calc(142px + env(safe-area-inset-bottom))}
+ .coach-flow #main.exercise-focus .exercise-visual-tabs{grid-template-columns:44px repeat(3,minmax(0,1fr)) 44px}
+ .coach-flow #main.exercise-focus .football-figure .football-controls .button,.coach-flow #main.exercise-focus .football-figure .playback-shortcut{min-height:44px}
+ .coach-flow #main.exercise-focus .card-group-button{min-width:44px;min-height:44px}
+ .coach-flow #main.exercise-focus .exercise-inline-description p{font-size:16px;line-height:1.45;overflow-wrap:anywhere}
+ .coach-flow #main.exercise-focus .hybrid-board .exercise-clock{position:sticky;top:8px;z-index:10;box-shadow:0 2px 8px #123f3510}
+ .coach-flow #main.exercise-focus .exercise-topic-nav button{min-height:48px;font-size:15px}
+ .coach-flow select,.coach-flow input[type=number],.coach-flow input[type=password]{font-size:16px}
+ .coach-flow #main[data-view=overview] #summary-equipment strong{font-size:14px}
+ .coach-flow #main[data-view=overview] #summary-equipment small{font-size:13px}
+ .coach-flow #main.exercise-focus .step-actions{bottom:calc(58px + env(safe-area-inset-bottom));padding:8px}
+ .coach-flow #bottom-nav{min-height:58px;padding:3px 6px calc(3px + env(safe-area-inset-bottom))}
+ .coach-flow #bottom-nav a{min-height:50px}
+ .coach-flow #main.exercise-focus .step-actions #preview-next-block{font-size:14px}
+}
+@media(max-width:350px){
+ .coach-flow #main.exercise-focus .activity-heading h1{font-size:17px}
+ .coach-flow #main.exercise-focus .exercise-visual-tabs{grid-template-columns:44px repeat(3,minmax(0,1fr)) 44px;gap:3px}
+ .coach-flow #main.exercise-focus .exercise-visual-tabs button{font-size:11px}
+ .coach-flow #main.exercise-focus .hybrid-board .exercise-clock{grid-template-columns:minmax(0,1fr) 100px}
+ .coach-flow #main:not(.exercise-focus){padding-inline:10px}
+}
