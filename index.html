@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="./equipment-enhanced.css?v=1">
   <link rel="stylesheet" href="./training-calendar.css?v=1">
   <script src="./training-calendar.js?v=10" defer></script>
-  <script src="./football.js?v=42" defer></script>
+  <script src="./football.js?v=43" defer></script>
   <script src="./training-planner.js?v=10" defer></script>
   <script src="./football-sequence.js?v=9" defer></script>
   <script src="./exercise-brief.js?v=14" defer></script>
@@ -35,12 +35,13 @@
   <script src="./training-programs.js?v=15" defer></script>
   <script src="./training-load.js?v=8" defer></script>
   <script src="./exercise-views.js?v=7" defer></script>
-  <script src="./app.js?v=52" defer></script>
+  <script src="./app.js?v=53" defer></script>
   <link rel="stylesheet" href="./pwa.css?v=2">
   <link rel="stylesheet" href="./exercise-views.css?v=5">
   <script src="./pwa.js?v=3" defer></script>
+  <link rel="stylesheet" href="./coach-flow.css?v=1">
 </head>
-<body>
+<body class="coach-flow">
   <a class="skip-link" href="#main">Preskočiť na tréning</a>
   <header class="site-header"><div class="header-inner">
     <a class="brand" href="./" aria-label="Tréningy U11, úvod"><img src="./assets/app/icon-training-unified.svg" alt=""><span>TRÉNINGY <b>U11</b></span></a>
@@ -81,15 +82,18 @@
       <section id="overview-view" class="view" hidden aria-labelledby="training-title">
         <div class="overview-grid"><div class="overview-main"><header class="overview-hero">
         <p class="eyebrow">Trénerova karta · Prehľad</p><h1 id="training-title"></h1><p id="training-cue" class="active-cue"></p>
+        <p id="summary-duration" class="summary-duration"></p>
+        <div id="summary-conditions" class="summary-conditions" aria-label="Podmienky tréningu"><button id="summary-pitch" type="button" aria-controls="conditions-panel"></button><button id="summary-coaches" type="button" aria-controls="conditions-panel"></button></div>
         <div id="summary-facts" class="summary-facts" aria-label="Dnešné podmienky"></div>
         </header>
         <p id="training-plan-status" class="planning-notice" hidden></p>
         <section class="summary-kit"><div class="section-heading"><div><h2>Pomôcky</h2><p id="summary-equipment-progress" class="small-note" role="status"></p></div><button id="show-equipment" type="button" class="text-button">Podrobnosti →</button></div><div id="summary-equipment" class="summary-gear-grid"></div></section>
         <div class="summary-journey"><button id="summary-setup" class="secondary-button" type="button">Pripraviť plochu</button><button id="summary-start" class="button" type="button">Začať tréning</button></div>
         <section id="timeline-panel" class="overview-schedule" aria-labelledby="summary-timeline-title">
-          <header class="schedule-heading"><div><h2 id="summary-timeline-title" tabindex="-1">Cvičenia a časy</h2></div><span id="summary-schedule-count" class="schedule-count"></span></header>
+          <header class="schedule-heading"><button id="list-back" type="button" class="secondary-button" aria-label="Späť na úvod"><img src="./assets/bootstrap-icons/arrow-left.svg" alt="" width="22" height="22"></button><div><h2 id="summary-timeline-title" tabindex="-1">Cvičenia</h2></div><span id="summary-schedule-count" class="schedule-count"></span></header>
           <p id="summary-schedule-range" class="schedule-range"></p>
           <nav id="overview-blocks" class="overview-blocks" aria-label="Cvičenia podľa časového plánu"></nav>
+          <button id="list-start" class="button" type="button">Začať prvým cvičením →</button>
 
         </section>
 

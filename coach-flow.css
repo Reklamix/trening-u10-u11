@@ -1,0 +1,135 @@
+/* Approved coach flow, 15 November. Presentation only; keep the existing controllers. */
+body.coach-flow{--flow-ink:#123f35;--flow-green:#12634e;--flow-border:#d4ded4;background:#f5f6f0;color:var(--flow-ink)}
+.coach-flow button,.coach-flow a,.coach-flow select{touch-action:manipulation}
+.coach-flow button:focus-visible,.coach-flow a:focus-visible,.coach-flow select:focus-visible{outline:3px solid #558b6d;outline-offset:3px}
+body.coach-flow:has(#main) .site-header{background:var(--flow-ink);border:0;color:white;padding:0}
+.coach-flow .header-inner{max-width:1080px;min-height:64px;padding:8px 16px}
+.coach-flow .brand,.coach-flow .brand b{color:white}.coach-flow .brand img{width:42px;height:42px}
+body.coach-flow:has(#main) .header-button,.coach-flow .app-settings-open{min-height:44px;background:transparent;color:white;border-color:#ffffff45;border-radius:10px}
+.coach-flow .app-settings-open img{filter:brightness(0) invert(1)}
+.coach-flow #main:not(.exercise-focus){max-width:1080px;padding:16px 16px calc(90px + env(safe-area-inset-bottom))}
+.coach-flow #main[data-view=overview] .session-picker{margin:0 0 16px;max-width:none}
+.coach-flow #main[data-view=overview] .date-picker{width:100%}
+.coach-flow #main[data-view=overview] .date-picker>label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.coach-flow #main[data-view=overview] .session-picker select{font-size:16px;border-radius:10px;min-height:48px}
+.coach-flow #main[data-view=overview] .overview-grid{display:block;max-width:none}
+.coach-flow #main[data-view=overview] .overview-main{min-width:0}
+.coach-flow #main[data-view=overview] .overview-hero{padding:0;margin:0 0 16px;background:none;color:var(--flow-ink);border:0;border-radius:0}
+.coach-flow #main[data-view=overview]:not([data-list-only=true]) .overview-hero h1{display:block;color:var(--flow-ink);font-size:30px;line-height:1.15;letter-spacing:-.6px;margin:0 0 8px}
+.coach-flow #main[data-view=overview] .overview-hero>.eyebrow,.coach-flow #main[data-view=overview] .overview-hero>.active-cue,.coach-flow #main[data-view=overview] #summary-facts{display:none}
+.coach-flow .summary-duration{font-size:16px;margin:0 0 18px;line-height:1.5}
+.coach-flow .summary-conditions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end}
+.coach-flow .summary-conditions>button{min-height:46px;padding:8px 3px;border:1px solid var(--flow-border);border-radius:10px;background:white;color:var(--flow-ink);font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.coach-flow .summary-conditions .attendance-picker{min-width:0;width:100%;max-width:none;position:relative}
+.coach-flow .summary-conditions label{position:absolute;left:10px;top:4px;font-size:10px;line-height:1.2;pointer-events:none;color:#526e62}
+.coach-flow .summary-conditions select{width:100%;min-height:46px;padding:16px 24px 3px 10px;border:1px solid var(--flow-border);border-radius:10px;font-size:15px;font-weight:700;background-color:white;color:var(--flow-ink)}
+.coach-flow #main[data-view=overview] .summary-kit{margin:0 0 16px;padding:0;background:none;border:0;box-shadow:none}
+.coach-flow #main[data-view=overview] .summary-kit .section-heading{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}
+.coach-flow #main[data-view=overview] .summary-kit .section-heading>div{display:contents}
+.coach-flow #main[data-view=overview] .summary-kit h2{font-size:21px;margin:0}
+.coach-flow #main[data-view=overview] #summary-equipment-progress{background:none;font-size:12px;padding:0;margin:0;color:#526e62}
+.coach-flow #main[data-view=overview] #show-equipment{display:none}
+.coach-flow #main[data-view=overview] #summary-equipment{display:grid;grid-template-columns:1fr;grid-auto-rows:minmax(58px,auto);gap:0;border:1px solid var(--flow-border);border-radius:12px;overflow:hidden;background:white}
+.coach-flow #main[data-view=overview] #summary-equipment>button:nth-child(n){position:relative;display:grid;grid-template-columns:26px minmax(0,1fr) 22px;gap:10px;min-height:58px;height:100%;padding:9px 10px;border:0;border-bottom:1px solid #e4e9e1;border-radius:0;box-shadow:none;background:transparent}
+.coach-flow #main[data-view=overview] #summary-equipment>button:last-child{border-bottom:0}
+.coach-flow #main[data-view=overview] #summary-equipment>button[aria-pressed=true]{background:#edf4e8}
+.coach-flow #main[data-view=overview] #summary-equipment>button img{width:26px;height:26px;object-fit:contain}
+.coach-flow #main[data-view=overview] #summary-equipment>button>span{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center}
+.coach-flow #main[data-view=overview] #summary-equipment strong{font-size:13px;line-height:1.35;font-weight:650}
+.coach-flow #main[data-view=overview] #summary-equipment small{font-size:12px;line-height:1.35;color:#315b49;text-align:right}
+.coach-flow #main[data-view=overview] #summary-equipment>button::after{content:'';position:static;width:19px;height:19px;border:1.5px solid #718d7e;border-radius:4px;font-size:15px;line-height:18px;text-align:center}
+.coach-flow #main[data-view=overview] #summary-equipment>button[aria-pressed=true]::after{content:'✓';background:var(--flow-green);color:white;border-color:var(--flow-green)}
+.coach-flow #main[data-view=overview]:not([data-list-only=true]) .summary-journey{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 16px}
+.coach-flow #main[data-view=overview]:not([data-list-only=true]) #summary-start{display:block}
+.coach-flow #main[data-view=overview] .summary-journey button{min-height:48px;font-size:16px;border-radius:10px}
+.coach-flow #main[data-view=overview] #summary-setup{background:white;border:1px solid #12634e;color:var(--flow-ink)}
+.coach-flow #main[data-view=overview] .overview-settings{border:0;border-top:1px solid var(--flow-border);border-radius:0;background:transparent;padding:0}
+.coach-flow #main[data-view=overview] .overview-settings>summary{font-size:14px;min-height:44px}
+.coach-flow #main[data-list-only=true] .session-picker{display:none}
+.coach-flow #main[data-list-only=true] .overview-schedule{display:block;border:0;background:none;padding:0;margin:0}
+.coach-flow #main[data-list-only=true] .schedule-heading{display:flex;align-items:center;justify-content:flex-start;gap:12px;margin:0 0 12px}
+.coach-flow #list-back{display:flex;align-items:center;justify-content:center;width:44px;min-height:44px;padding:8px;border-radius:10px}
+.coach-flow #main[data-list-only=true] .schedule-heading h2{font-size:26px;margin:0;color:var(--flow-ink)}
+.coach-flow #main[data-list-only=true] .schedule-count{margin-left:auto;font-size:12px;background:none;padding:0}
+.coach-flow #main[data-list-only=true] .schedule-range{font-size:13px;line-height:1.5;margin:0 0 18px;color:#526e62}
+.coach-flow #main[data-list-only=true] #overview-blocks{display:grid;grid-template-columns:1fr;gap:0}
+.coach-flow #main[data-list-only=true] .overview-item{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:12px;min-height:72px;padding:10px 0;border:0;border-bottom:1px solid var(--flow-border);border-radius:0;background:transparent;box-shadow:none;text-align:left}
+.coach-flow #main[data-list-only=true] .overview-item.is-active{background:#e6efd9;border-radius:10px;padding-inline:10px}
+.coach-flow #main[data-list-only=true] .overview-index{width:28px;height:28px;border:1px solid #315b49;border-radius:50%;background:none;color:var(--flow-ink);font-size:14px}
+.coach-flow #main[data-list-only=true] .is-complete .overview-index{background:var(--flow-green);color:white}
+.coach-flow #main[data-list-only=true] .overview-description{display:flex;flex-direction:column;gap:4px}
+.coach-flow #main[data-list-only=true] .overview-description strong{order:0;font-size:15px;line-height:1.3;color:var(--flow-ink)}
+.coach-flow #main[data-list-only=true] .overview-time{order:1;font-size:12px;line-height:1.3}
+.coach-flow #main[data-list-only=true] .overview-duration{font-size:13px;white-space:nowrap;background:none;padding:0}
+.coach-flow #main[data-list-only=true] .overview-arrow{display:block}
+.coach-flow #list-start{width:100%;min-height:48px;margin-top:22px;font-size:16px;border-radius:10px}
+/* One square board and one timer. The page scrolls naturally on shorter phones. */
+.coach-flow #main.exercise-focus:has(.hybrid-board){height:auto;min-height:100dvh;max-width:1120px;padding:0 12px calc(146px + env(safe-area-inset-bottom));overflow:visible}
+.coach-flow .exercise-focus #field-view{display:block;max-width:none}
+.coach-flow #main.exercise-focus .activity-heading{display:flex;align-items:center;gap:10px;min-height:64px;height:auto;padding:10px 50px 10px 0;margin:0;position:relative}
+.coach-flow #main.exercise-focus .activity-heading>div{min-width:0;flex:1}
+.coach-flow #main.exercise-focus .activity-heading h1{font-size:19px;line-height:1.2;white-space:normal;overflow:visible;text-overflow:clip;margin:0 0 4px;letter-spacing:-.4px}
+.coach-flow #main.exercise-focus .hybrid-meta{font-size:12px;margin:0}
+.coach-flow #main.exercise-focus #exercise-back{display:flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;min-height:44px;padding:8px;border:0;background:transparent}
+.coach-flow #exercise-back>span{display:none}
+.coach-flow #main.exercise-focus .exercise-card-menu{position:absolute;right:0;top:10px;z-index:35}
+.coach-flow .card-menu-items{max-height:70dvh;overflow-y:auto;overscroll-behavior:contain}
+.coach-flow #main.exercise-focus .card-menu-items{width:min(340px,calc(100vw - 24px));padding:12px}
+.coach-flow #main.exercise-focus .card-menu-items .exercise-phase-bar{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:5px}
+.coach-flow #main.exercise-focus .card-menu-items .football-playback-settings{display:flex;gap:10px;align-items:center;padding:10px 0}
+.coach-flow #main.exercise-focus .card-menu-items .football-select-label select{min-height:44px;font-size:14px;width:100%}
+.coach-flow #main.exercise-focus .card-menu-items .football-repeat{display:flex;align-items:center;font-size:13px;min-height:44px;gap:6px}
+.coach-flow #main.exercise-focus .hybrid-board{max-height:none;height:auto;overflow:visible;padding:0;margin:0;gap:0}
+.coach-flow #main.exercise-focus .exercise-visual-tabs{margin:0 0 8px;grid-template-columns:36px repeat(3,minmax(0,1fr)) 36px;gap:4px}
+.coach-flow #main.exercise-focus .exercise-visual-tabs button{min-height:44px;padding:6px 2px;font-size:12px;line-height:1.2;border-radius:8px;background:white;color:var(--flow-ink)}
+.coach-flow #main.exercise-focus .exercise-visual-tabs button[aria-pressed=true]{background:#dceacb;border-color:#cedfba;font-weight:750}
+.coach-flow #main.exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.football-figure{width:100%;max-width:none;aspect-ratio:1;height:auto;min-height:0;flex:none;border-radius:12px;margin:0 0 8px;background:#155c38;background-image:none;overflow:hidden}
+.coach-flow #main.exercise-focus #field-view .hybrid-board>.football-figure>svg{width:100%;height:100%;max-height:none;padding:34px 10px 48px;background:none}
+.coach-flow #main.exercise-focus .hybrid-board .football-figure .football-controls{left:10px;right:10px;bottom:8px;width:auto;transform:none;display:flex;justify-content:space-between;gap:8px;margin:0}
+.coach-flow #main.exercise-focus .football-figure .football-controls .exercise-mode-button{display:none}
+.coach-flow #main.exercise-focus .football-figure .football-controls .button{min-height:40px;padding:6px 12px;font-size:13px;background:#fff;color:#123f35;border:1px solid #cfe0cb;border-radius:8px}
+.coach-flow #main.exercise-focus .football-figure .playback-shortcut{display:block;min-height:40px;padding:6px 9px;border:0;border-radius:8px;background:#ffffff14;color:white;font:inherit;font-weight:650;font-size:13px}
+.coach-flow #main.exercise-focus .hybrid-board .exercise-clock{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;min-height:76px;padding:8px 10px;border:1px solid var(--flow-border);border-radius:10px;background:#fff;margin:0 0 8px}
+.coach-flow #main.exercise-focus .hybrid-board #exercise-clock-phase{font-size:10px;white-space:normal;line-height:1.3;min-height:0;color:#31594a}
+.coach-flow #main.exercise-focus .hybrid-board #exercise-clock-value{font-size:32px;line-height:1.1;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.coach-flow #main.exercise-focus #exercise-clock-toggle{min-height:44px;font-size:15px;padding:8px;border-radius:8px}
+.coach-flow #main.exercise-focus .hybrid-board #exercise-clock-next{font-size:11px;line-height:1.3}
+.coach-flow #main.exercise-focus .exercise-summary{min-height:0;margin:0;padding:0}
+.coach-flow #main.exercise-focus .hybrid-cue{display:block;min-height:0;padding:0;margin:0 0 10px;background:none;border:0;border-radius:0}
+.coach-flow #main.exercise-focus .phase-current-cue{display:block;-webkit-line-clamp:unset;line-clamp:unset;max-height:none;overflow:visible;font-size:14px;line-height:1.45;margin:0;white-space:normal}
+.coach-flow #main.exercise-focus .exercise-description-open{display:none}
+.coach-flow #main.exercise-focus .hybrid-board .exercise-topic-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding:0;width:100%;max-width:none}
+.coach-flow #main.exercise-focus .exercise-topic-nav button{min-height:44px;padding:8px 4px;font-size:13px;border-radius:9px}
+.coach-flow #main.exercise-focus .exercise-topic-nav [data-topic=kit]{order:1}
+.coach-flow #main.exercise-focus .exercise-topic-nav [data-topic=space]{order:2}
+.coach-flow #main.exercise-focus .step-actions{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:100%;max-width:1088px;padding:10px 12px;margin:0;background:#f5f6f0;border-top:1px solid var(--flow-border);border-radius:0;box-shadow:none;z-index:19}
+.coach-flow #main.exercise-focus .step-actions #complete-block,.coach-flow #main.exercise-focus .step-actions #preview-next-block{min-height:48px;border-radius:9px;font-size:15px}
+.coach-flow #main.exercise-focus .step-actions #preview-next-block{flex-basis:32%;background:#fff}
+.coach-flow #main.exercise-focus .step-actions #preview-next-block small{font-size:11px}
+.coach-flow #bottom-nav{display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:1088px;min-height:64px;padding:5px 8px calc(5px + env(safe-area-inset-bottom));border:1px solid var(--flow-border);border-bottom:0;border-radius:14px 14px 0 0;background:#fff;box-shadow:none;z-index:20}
+.coach-flow #bottom-nav[hidden]{display:none}
+.coach-flow #bottom-nav a{min-height:52px;font-size:11px;gap:4px;padding:4px;border-radius:9px}
+.coach-flow #bottom-nav img{width:23px;height:23px}
+.coach-flow #bottom-nav a[aria-current]{background:#e6efd9;color:#123f35}
+.coach-flow .button{background:var(--flow-green);box-shadow:none}
+@media(min-width:700px){
+ .coach-flow #main[data-view=overview]:not([data-list-only=true]) .overview-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(250px,.8fr);gap:36px;align-items:start}
+ .coach-flow #main[data-view=overview] .overview-tools{position:sticky;top:20px}
+ .coach-flow #main[data-list-only=true] .overview-grid{max-width:780px;margin-inline:auto}
+ .coach-flow #main[data-view=overview] .summary-conditions>button{font-size:15px}
+ .coach-flow #main[data-view=overview] #summary-equipment strong{font-size:15px}
+ .coach-flow #main[data-view=overview] #summary-equipment small{font-size:14px}
+}
+@media(min-width:700px){
+ .coach-flow #main.exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:44px auto auto;gap:12px 28px;align-items:start}
+ .coach-flow #main.exercise-focus .hybrid-board>.exercise-visual-tabs{grid-column:1;grid-row:1;margin:0}
+ .coach-flow #main.exercise-focus .hybrid-board>.exercise-view-group{grid-column:1;grid-row:2}
+ .coach-flow #main.exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.football-figure{grid-column:1;grid-row:3}
+ .coach-flow #main.exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.hybrid-details{display:flex;flex-direction:column;grid-column:2;grid-row:3;gap:12px;padding-bottom:60px}
+ .coach-flow #main.exercise-focus .hybrid-board[data-topic=steps][data-instructions=false]>.exercise-topic-nav{grid-column:2;grid-row:3;align-self:end}
+ .coach-flow #main.exercise-focus .hybrid-board[data-visual-view=animation]>.football-figure,.coach-flow #main.exercise-focus .hybrid-board[data-visual-view=animation]>.hybrid-details,.coach-flow #main.exercise-focus .hybrid-board[data-visual-view=animation]>.exercise-topic-nav{grid-row:2}
+ .coach-flow #main.exercise-focus .hybrid-board #exercise-clock-value{font-size:44px}
+ .coach-flow #main.exercise-focus .phase-current-cue{font-size:17px;line-height:1.6}
+ .coach-flow #main.exercise-focus .activity-heading h1{font-size:26px}
+}
+@media(prefers-reduced-motion:reduce){.coach-flow *{scroll-behavior:auto}}

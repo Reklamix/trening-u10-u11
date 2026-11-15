@@ -274,3 +274,13 @@ Evidence: planning-two-weeks-local.png in the project visualization folder.
 User confirmed U11 Monday/Tuesday/Thursday18:00. All six upcoming sessions now have18:00; `scheduleConfirmed` distinguishes confirmed dates/times from draft training content. Calendar metadata removes the obsolete time-confirmation prompt, overview retains a content-draft notice, explainer and README reflect the confirmation. No doses, activities, animation/timer logic, previous dates or private plans changed. app37/calendar2.
 
 Verification: syntax app/calendar, tests/calendar (six18:00 sessions, schedule status,54adaptations and unconfirmed/no-time fallback), validate65904 and git diff-check PASS. Local DOM all6metadata18:00/75min; Nov2preparation18:00–18:10; overview term confirmed/content draft. Wider trajectory/audio/physical-device checks not repeated for this metadata/label change.
+
+## Approved three-screen coach flow — 15 November 2026
+- Scope: home preparation/checklist, exercise list, execution screen. Approved image: project `output/design/u11-ui-20261115-proposal.png`.
+- Reused original controllers and all data; changed index/app/football UI wiring plus isolated coach-flow.css. No manifest, SW, push, timer core, animation tracks, training data, encrypted plans or URL changes.
+- Browser: 375x812, 768x1024, 1366x900. Home/list/exercise, persistent navigation, checklist, next exercise, back/home, all three visual slides, group selection, description dialog, attendance 18→16 and quarter→half→quarter saved, setup 5+5+6 verified. Playback moved actors, pause/speed/phase back and next worked. Timer counted down; switching visual views retained countdown. Zero browser JS errors after final reload.
+- Existing tests: interval-timer 3213 schedules, phase-clock, PWA, exercise-views 1295, config-refresh 94, representative 2223, validate 62359, programs 4707, November12 216, November10 606 PASS. JS syntax and git diff --check PASS.
+- Existing failure: sequences.mjs:51, expected four within-skill pair/trio groups, got two. Same exact failure reproduced using unmodified afadf21 sources in separate local fixture; no animation model changed here. Evidence outside public repository: output/design/u11-flow-baseline-test.txt. Fix is outside this UI request.
+- Screenshots outside public repository: output/design/u11-flow-mobile-home.jpg, u11-flow-mobile-exercise.jpg, u11-flow-desktop-exercise.jpg.
+- Physical Android/iOS push delivery and full 80-minute timer run not repeated; PWA and timer code preserved and regression tests passed. Deployment/readback recorded in project memory and output/deploy.
+- Rollback: revert this UI commit or restore the previous versioned static release. Keep existing installation, subscriptions and local data.
