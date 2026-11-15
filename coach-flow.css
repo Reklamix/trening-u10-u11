@@ -171,3 +171,8 @@ body.coach-flow:has(#main) .header-button,.coach-flow .app-settings-open{min-hei
  .coach-flow #main.exercise-focus .hybrid-board .exercise-clock{grid-template-columns:minmax(0,1fr) 100px}
  .coach-flow #main:not(.exercise-focus){padding-inline:10px}
 }
+.notation-dialog .football-legend{display:grid;grid-template-columns:1fr;gap:0}
+.notation-dialog .football-legend-item{display:flex;align-items:center;gap:16px;min-height:44px;font-size:16px;border-bottom:1px solid #dce5d6}
+.notation-dialog .football-legend-item svg{width:54px;height:33px;flex:none}
+.notation-dialog .small-note{font-size:14px;line-height:1.5;margin-top:16px}
+.notation-dialog .guide-link{display:block;min-height:44px;padding-block:10px}

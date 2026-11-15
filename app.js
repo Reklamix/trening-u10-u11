@@ -164,9 +164,7 @@ const PersonalPlans = [
 
   const player = (x, y, name, type = 'player') => {
     const color = { player: '#16729c', opponent: '#ab4e22', keeper: '#7250a4', target: '#17674c' }[type];
-    const shape = type === 'opponent'
-      ? `<rect x="${x - 10}" y="${y - 10}" width="20" height="20" rx="3" fill="${color}"/>`
-      : `<circle cx="${x}" cy="${y}" r="11" fill="${color}"/>`;
+    const shape = `<circle cx="${x}" cy="${y}" r="11" fill="${color}"/>`;
     return `${shape}<text class="player-label" x="${x}" y="${y + 4}" text-anchor="middle" font-size="12">${name}</text>`;
   };
   const ball = (x, y) => `<circle cx="${x}" cy="${y}" r="3.8" fill="white" stroke="#18372f"/><circle cx="${x}" cy="${y}" r="1.4" fill="#18372f"/>`;
@@ -175,18 +173,15 @@ const PersonalPlans = [
   const gate = (x, y) => `<path d="M${x - 5} ${y - 13}l5 -8 5 8zM${x - 5} ${y + 20}l5 -8 5 8z" fill="#ab4e22"/>`;
   const goal = (x, y, right = false) => `<rect x="${right ? x : x - 8}" y="${y - 20}" width="8" height="40" fill="none" stroke="#18372f" stroke-width="2"/>`;
   function arrow(x, y, x2, y2, pass = false) {
-    const angle = Math.atan2(y2 - y, x2 - x);
-    const a = [x2 - 7 * Math.cos(angle - .4), y2 - 7 * Math.sin(angle - .4)];
-    const b = [x2 - 7 * Math.cos(angle + .4), y2 - 7 * Math.sin(angle + .4)];
-    const color = pass ? '#52665f' : '#16729c';
-    return `<path d="M${x} ${y}L${x2} ${y2}" fill="none" stroke="${color}" stroke-width="2"${pass ? ' stroke-dasharray="5 4"' : ''}/><path d="M${x2} ${y2}L${a[0]} ${a[1]}L${b[0]} ${b[1]}Z" fill="${color}"/>`;
+    const kind=typeof pass==='string'?pass:pass?'pass':'run',shape=FootballNotation.arrow([{x,y},{x:x2,y:y2}],kind),color='#16729c';
+    return `<g data-motion-kind="${kind}"><title>${FootballNotation.label(kind)}</title><path d="${shape.path}" fill="none" stroke="${color}" stroke-width="2"${shape.dash?` stroke-dasharray="${shape.dash}"`:''}/><path d="${shape.head}" fill="${color}"/></g>`;
   }
 
   const drawings = {
     warmup: () => ({
       height: 230,
       body: field() + [gate(80, 75), gate(170, 155), gate(264, 77), gate(300, 150)].join('')
-        + player(62, 130, '1') + ball(78, 131) + arrow(79, 121, 103, 103) + arrow(103, 103, 136, 118)
+        + player(62, 130, '1') + ball(78, 131) + arrow(79, 121, 103, 103, 'dribble') + arrow(103, 103, 136, 118, 'dribble')
         + player(188, 64, '2') + player(291, 75, '3') + arrow(201, 66, 277, 74, true)
         + text(180, 20, 'Kľučka do voľna · prihrávka cez bránku'),
       caption: 'Príklad jednej zóny. Bránky aj hráči sú zobrazení iba čiastočne; po prihrávke sa znovu ponúkni.'
@@ -204,7 +199,7 @@ const PersonalPlans = [
       height: 236,
       body: field() + goal(330, 112, true) + player(309, 112, 'B', 'keeper')
         + player(65, 113, 'A') + ball(81, 114) + player(123, 97, 'O', 'opponent')
-        + arrow(81, 126, 129, 151) + arrow(129, 151, 215, 133)
+        + arrow(81, 126, 129, 151, 'dribble') + arrow(129, 151, 215, 133, 'dribble')
         + text(180, 21, 'Útočník 10–12 m od cieľa') + text(180, 218, 'Obranca asi 2 m pred útočníkom'),
       caption: 'Príklad s brankárom. Bez neho sú na cieľovej čiare dve malé bránky. Obranca sa zapojí po prvom dotyku.'
     }),
@@ -212,8 +207,8 @@ const PersonalPlans = [
       height: 246,
       body: field() + goal(330, 112, true) + player(309, 112, 'B', 'keeper')
         + player(64, 152, '1') + ball(80, 150) + player(116, 65, '2') + player(159, 112, 'O', 'opponent')
-        + arrow(80, 140, 110, 78, true) + arrow(131, 68, 252, 85)
-        + arrow(84, 159, 246, 153) + text(180, 21, 'Čo nechal obranca voľné?')
+        + arrow(80, 140, 110, 78, true) + arrow(131, 68, 252, 85, 'dribble')
+        + arrow(84, 159, 246, 153, 'dribble') + text(180, 21, 'Čo nechal obranca voľné?')
         + text(180, 219, 'Možnosť prihrávky aj vedenia lopty'),
       caption: 'Šípky ukazujú dve možnosti, nie povinné poradie. Keď obranca ide k lopte, hľadaj spoluhráča; keď kryje prihrávku, využij cestu.'
     }),
@@ -284,11 +279,11 @@ const PersonalPlans = [
   };
 
   drawings['duel-no-keeper'] = () => ({
-    height:236, body:field()+gate(330,74)+gate(330,157)+player(65,113,'A')+ball(81,114)+player(123,97,'O','opponent')+arrow(81,126,129,151)+arrow(129,151,215,133)+text(180,21,'1 na 1 · dve malé bránky')+text(180,218,'Začiatok s loptou pri nohe'),
+    height:236, body:field()+gate(330,74)+gate(330,157)+player(65,113,'A')+ball(81,114)+player(123,97,'O','opponent')+arrow(81,126,129,151, 'dribble')+arrow(129,151,215,133, 'dribble')+text(180,21,'1 na 1 · dve malé bránky')+text(180,218,'Začiatok s loptou pri nohe'),
     caption:'Útočník si vyberá jednu z dvoch malých bránok. Obranca sa zapojí po prvom dotyku. Nikto nechytá.'
   });
   drawings['two-one-no-keeper'] = () => ({
-    height:246, body:field()+gate(330,74)+gate(330,157)+player(64,152,'1')+ball(80,150)+player(116,65,'2')+player(159,112,'O','opponent')+arrow(80,140,110,78,true)+arrow(131,68,252,85)+arrow(84,159,246,153)+text(180,21,'2 na 1 · dve malé bránky')+text(180,219,'Prihrať alebo využiť voľnú cestu'),
+    height:246, body:field()+gate(330,74)+gate(330,157)+player(64,152,'1')+ball(80,150)+player(116,65,'2')+player(159,112,'O','opponent')+arrow(80,140,110,78,true)+arrow(131,68,252,85, 'dribble')+arrow(84,159,246,153, 'dribble')+text(180,21,'2 na 1 · dve malé bránky')+text(180,219,'Prihrať alebo využiť voľnú cestu'),
     caption:'Začína útočník s loptou pri nohe. Šípky ukazujú dve možnosti, nie povinné poradie. Dve malé bránky bez chytania.'
   });
   drawings['two-two-no-keeper'] = () => ({
