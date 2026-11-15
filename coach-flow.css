@@ -133,3 +133,17 @@ body.coach-flow:has(#main) .header-button,.coach-flow .app-settings-open{min-hei
  .coach-flow #main.exercise-focus .activity-heading h1{font-size:26px}
 }
 @media(prefers-reduced-motion:reduce){.coach-flow *{scroll-behavior:auto}}
+/* Keep the field legible and the coaching instruction open below the clock. */
+.coach-flow #main.exercise-focus #field-view .hybrid-board>.football-figure>svg{padding:42px 8px 50px}
+.coach-flow #main.exercise-focus .football-figure{background:linear-gradient(145deg,#0c5336,#17683c)}
+.coach-flow #main.exercise-focus .football-figure .football-controls .button{font-size:14px;font-weight:750;padding:8px 14px}
+.coach-flow #main.exercise-focus .exercise-inline-description{display:block;padding:10px 0 12px;border-top:1px solid var(--flow-border)}
+.coach-flow #main.exercise-focus .exercise-inline-description h2{font-size:16px;margin:0 0 6px;color:var(--flow-ink)}
+.coach-flow #main.exercise-focus .exercise-inline-description p{font-size:14px;line-height:1.5;margin:0 0 8px;color:#244b3d}
+.coach-flow #main.exercise-focus .exercise-inline-description p:last-child{margin-bottom:0}
+.coach-flow #main.exercise-focus .hybrid-board .exercise-topic-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+.coach-flow #main.exercise-focus .exercise-topic-nav [data-topic=steps]{display:none}
+.coach-flow #main.exercise-focus .exercise-summary>.phase-detail{display:none}
+.coach-flow #main.exercise-focus .football-figure .football-controls .button{display:flex;align-items:center;justify-content:center;gap:6px}
+.coach-flow #main.exercise-focus .football-figure .football-controls .button img{width:18px;height:18px}
+@media(min-width:700px){.coach-flow #main.exercise-focus .exercise-inline-description p{font-size:16px}}

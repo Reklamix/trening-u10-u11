@@ -17,6 +17,20 @@ class FootballTimeline {
 }
 
 const FootballScenes = {
+  // Rotate only the displayed diagram. Saved geometry and the whole-pitch map stay canonical.
+  presentation(scene){
+    const p=scene.pitch;if(!p||p.h<=p.w)return scene;
+    const point=q=>({...q,x:p.x+q.y-p.y,y:p.y+p.w-(q.x-p.x)});
+    const rect=r=>({x:p.x+r.y-p.y,y:p.y+p.w-(r.x-p.x)-r.w,w:r.h,h:r.w});
+    const decorations=[];
+    if(p.zones){const depth=p.w*2/p.length;for(const x of[p.x,p.x+p.w-depth])decorations.push({...rect({x,y:p.y,w:depth,h:p.h}),kind:'zone'});}
+    if(p.goals&&!p.goalGates)for(const x of[p.x-6,p.x+p.w])for(const u of[.25,.7])decorations.push({...rect({x,y:p.y+p.h*u-8,w:6,h:16}),kind:'goal'});
+    return {...scene,displayRotated:true,displayDecorations:decorations,pitch:{...p,w:p.h,h:p.w,length:p.width,width:p.length,zones:false,goals:false},
+      nodes:scene.nodes.map(point),cones:(scene.cones||[]).map(point),annotations:(scene.annotations||[]).map(point),
+      lines:(scene.lines||[]).map(line=>({...line,from:point(line.from),to:point(line.to)})),
+      arrows:scene.arrows.map(arrow=>({...arrow,points:arrow.points.map(point)})),
+      tracks:Object.fromEntries(Object.entries(scene.tracks).map(([id,frames])=>[id,frames.map(([t,x,y,...extra])=>{const q=point({x,y});return[t,q.x,q.y,...extra];})]))};
+  },
   keys:['football-warmup','football-pass','football-rondo','football-zones','football-matches','football-mini-games','football-finish','football-strength','football-speed','football-large-game'],
   groups(key,total,layout) {
     const areas=layout?.stages?.[key]?.areas||[];
@@ -206,7 +220,7 @@ const FootballPhaseNavigation={
 // FOOTBALL_BROWSER
 (() => {
   let active=null;
-  const playback={rate:1,loop:true};
+  const playback={rate:.5,loop:true};
   const NS='http://www.w3.org/2000/svg';
   const colors={A:'#176ca2',B:'#c14e33',N:'#eed06b',T:'#d6dfd0'};
   const svgNode=(tag,attrs={},text)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;};
@@ -395,7 +409,9 @@ const FootballPhaseNavigation={
       phaseNav.style.setProperty('--phase-count',phaseCards.length);phaseNav.classList.toggle('has-many',phaseCards.length>3);
       const rules=html('details','exercise-full-plan'),allSteps=html('ol');data.steps.forEach(text=>allSteps.append(html('li','',text)));rules.append(html('summary','','Celý rozpis a pravidlá'),glance,html('p','exercise-summary-description',data.description),allSteps);rules.open=fullPlanOpen;rules.addEventListener('toggle',()=>{if(rules.isConnected)fullPlanOpen=rules.open;});
       phaseBar.hidden=!!scene.taskMode;phaseNav.hidden=!!scene.taskMode;
-      summary.replaceChildren(html('h2','sr-only','Fázy cvičenia'),phaseNav,phaseDetail,rules);syncPhaseCards(FootballPhaseNavigation.index(scene.phases||[],clock.time()));
+      const inline=html('section','exercise-inline-description');inline.setAttribute('aria-label','Jednoduchý popis cvičenia');inline.append(html('h2','','Ako cvičiť'),html('p','',data.shortInstruction||data.description));
+      const rotation=html('p');rotation.append(html('strong','','Striedanie: '),document.createTextNode(data.rotation));inline.append(rotation);
+      summary.replaceChildren(html('h2','sr-only','Fázy cvičenia'),phaseNav,phaseDetail,inline,rules);syncPhaseCards(FootballPhaseNavigation.index(scene.phases||[],clock.time()));
       quickFacts.replaceChildren();const noun=(count,one,few,many)=>count===1?one:count>=2&&count<=4?few:many;for(const[label,value,hint,icon,action]of[['Plocha',selectedArea?`${selectedArea.length} × ${selectedArea.width} m`:'Pri trénerovi',`${config.width} × ${config.height} m spolu`,'bounding-box',()=>selectTopic('space')],['Deti',String(localCount),'z '+config.players,'people-fill',()=>selectTopic('space',{settings:true})],['Pomôcky',data.conesLocal?`${data.conesLocal} ${noun(data.conesLocal,'kužeľ','kužele','kužeľov')}`:'Voda',data.ballsLocal?`${data.ballsLocal} ${noun(data.ballsLocal,'lopta','lopty','lôpt')}`:data.conesLocal?'na túto plochu':'pre každého','cone-striped',()=>selectTopic('kit')]]){const button=html('button','card-quick-fact');button.type='button';const text=html('span');text.append(html('span','card-fact-label',label),html('strong','',value),html('small','',hint));const factIcon=uiIcon(icon);if(icon==='cone-striped')factIcon.src='./assets/card-cone.webp';button.append(factIcon,text);button.addEventListener('click',action);quickFacts.append(button);}
 
       const panels={};for(const key of['steps','space','time','coach','kit']){const panel=html('div','exercise-topic-panel');panel.id='exercise-panel-'+key;panel.dataset.panel=key;panel.setAttribute('role','region');panel.setAttribute('aria-label',{steps:'Postup cvičenia',space:'Plocha a skupiny',time:'Práca, oddych a striedanie',coach:'Pokyny trénera',kit:'Pomôcky cvičenia'}[key]);panels[key]=panel;briefRoot.append(panel);}
@@ -501,7 +517,7 @@ const FootballPhaseNavigation={
       dialog.addEventListener('close',()=>{dialog.remove();if(layoutDialog===dialog)layoutDialog=null;const target=returnFocus?.isConnected?returnFocus:briefRoot.querySelector('[data-exercise-map]')||areaTools.querySelector('button');target?.focus();},{once:true});dialog.showModal();
     }
     function build() {
-      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});if(focused&&options.planState?.())scene=FootballSequences.representative(FootballSequences.build(options.planState(),block,pitchIndex,scene),{taskDuration:['duel','two-one'].includes(block.programKind)?(block.end-block.start)*60:0,taskInstruction:options.brief?.()?.shortInstruction||''});root.dataset.taskMode=String(!!scene.taskMode);clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
+      pause();scene=FootballScenes.build(block.diagram,{total:options.total,size:options.size,pitchIndex,area:areas[pitchIndex]});if(focused&&options.planState?.())scene=FootballSequences.representative(FootballSequences.build(options.planState(),block,pitchIndex,scene),{taskDuration:['duel','two-one'].includes(block.programKind)?(block.end-block.start)*60:0,taskInstruction:options.brief?.(pitchIndex)?.shortInstruction||''});if(focused)scene=FootballScenes.presentation(scene);root.dataset.taskMode=String(!!scene.taskMode);clock=new FootballTimeline(scene.duration);svg.replaceChildren();actors=new Map();arrowLayers=[];lastStep=-1;lastComplete=false;
       renderLevelTools();
       renderCountTools();
       renderPitchTools();
@@ -516,8 +532,9 @@ const FootballPhaseNavigation={
         if(setup.extra)coneGuide.append(html('p','small-note',setup.extra));
       }
       const p=scene.pitch;root.classList.toggle('card-has-pitch',Boolean(p));
-      if(focused)svg.setAttribute('viewBox',p?`${p.x-44} ${p.y-24} ${p.w+88} ${p.h+96}`:'0 0 360 270');
+      if(focused)svg.setAttribute('viewBox',p?`${p.x-42} ${p.y-22} ${p.w+62} ${p.h+60}`:'0 0 360 270');
       if(p){
+        for(const d of scene.displayDecorations||[])svg.append(svgNode('rect',{x:d.x,y:d.y,width:d.w,height:d.h,fill:d.kind==='zone'?'#ffffff22':'white',stroke:'#f5fff080','stroke-width':1}));
         svg.append(svgNode('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:focused?'none':'#e5eddd',stroke:focused?'white':'#638268','stroke-width':1.2}));
         for(const line of scene.lines||[])svg.append(svgNode('line',{x1:line.from.x,y1:line.from.y,x2:line.to.x,y2:line.to.y,stroke:focused?'#ffffffa0':'#638268','stroke-width':1,'stroke-dasharray':'5 4'}));
         for(const note of scene.annotations||[])svg.append(svgNode('text',{x:note.x,y:note.y,'text-anchor':'middle','font-size':12,fill:focused?'white':'#173b31',stroke:focused?'#173b31':'white','stroke-width':3,'paint-order':'stroke'},note.text));
@@ -525,10 +542,10 @@ const FootballPhaseNavigation={
         for(const cone of scene.cones){
           const g=svgNode('g',{'data-cone':cone.kind,transform:`translate(${cone.x} ${cone.y})`});
           const shape='M0 -11L-9 6H9Z';
-          g.append(svgNode('title',{},cone.label||(cone.kind==='zone'?'Méta hranice koncovej zóny, 2 m od konca':cone.kind==='gate'?'Kužeľ dvojmetrovej bránky':'Kužeľ v rohu plochy')));if(focused)g.append(svgNode('image',{href:'./assets/card-cone.webp',x:-12,y:-18,width:24,height:24}));else g.append(svgNode('path',{d:shape,fill:'#f47700',stroke:'white','stroke-width':5,'stroke-linejoin':'round'}),svgNode('path',{d:shape,fill:'#f47700',stroke:'#713708','stroke-width':1.8,'stroke-linejoin':'round'}),svgNode('path',{d:'M-4 -2H4',stroke:'white','stroke-width':2.5}));svg.append(g);
+          g.append(svgNode('title',{},cone.label||(cone.kind==='zone'?'Méta hranice koncovej zóny, 2 m od konca':cone.kind==='gate'?'Kužeľ dvojmetrovej bránky':'Kužeľ v rohu plochy')));if(focused)g.append(svgNode('path',{d:'M0 -20L-13 9H13ZM-16 9H16V14H-16Z',fill:'#ff8a00',stroke:'#ffe2a3','stroke-width':1.2,'stroke-linejoin':'round'}),svgNode('path',{d:'M-5 -8H5M-9 2H9',stroke:'white','stroke-width':3}));else g.append(svgNode('path',{d:shape,fill:'#f47700',stroke:'white','stroke-width':5,'stroke-linejoin':'round'}),svgNode('path',{d:shape,fill:'#f47700',stroke:'#713708','stroke-width':1.8,'stroke-linejoin':'round'}),svgNode('path',{d:'M-4 -2H4',stroke:'white','stroke-width':2.5}));svg.append(g);
         }
         if(p.goals&&!p.goalGates)for(const x of[p.x-6,p.x+p.w])for(const u of[.25,.7]){const y=p.y+p.h*u;svg.append(svgNode('rect',{x,y:y-8,width:6,height:16,fill:'white',stroke:'#173b31'}),svgNode('path',{d:`M${x} ${y-3}h6M${x} ${y+3}h6`,stroke:'#638268'}));}
-        if(focused){const bottom=p.y+p.h+18,mid=p.x+p.w/2,side=p.x-24;svg.append(svgNode('path',{class:'card-dimension-line',d:`M${p.x} ${bottom}h${p.w/2-24}M${mid+24} ${bottom}H${p.x+p.w}M${p.x+5} ${bottom-3}l-5 3 5 3M${p.x+p.w-5} ${bottom-3}l5 3-5 3M${side} ${p.y}V${p.y+p.h}M${side-3} ${p.y+5}l3-5 3 5M${side-3} ${p.y+p.h-5}l3 5 3-5`,fill:'none',stroke:'white','stroke-width':1}),svgNode('text',{x:mid,y:bottom+4,'text-anchor':'middle',fill:'white','font-size':11},`${p.length} m`),svgNode('text',{x:side-10,y:p.y+p.h/2,'text-anchor':'middle',fill:'white','font-size':11,transform:`rotate(-90 ${side-10} ${p.y+p.h/2})`},`${p.width} m`));}else svg.append(svgNode('text',{x:180,y:p.y+p.h+22,'text-anchor':'middle',fill:'#596c63','font-size':11},`${p.length} × ${p.width} m${p.zones?' · zóny 2 m':''}`));
+        if(focused){const bottom=p.y+p.h+18,mid=p.x+p.w/2,side=p.x-24;svg.append(svgNode('path',{class:'card-dimension-line',d:`M${p.x} ${bottom}h${p.w/2-24}M${mid+24} ${bottom}H${p.x+p.w}M${p.x+5} ${bottom-3}l-5 3 5 3M${p.x+p.w-5} ${bottom-3}l5 3-5 3M${side} ${p.y}V${p.y+p.h}M${side-3} ${p.y+5}l3-5 3 5M${side-3} ${p.y+p.h-5}l3 5 3-5`,fill:'none',stroke:'white','stroke-width':1}),svgNode('text',{x:mid,y:bottom+4,'text-anchor':'middle',fill:'white','font-size':16,'font-weight':650},`${p.length} m`),svgNode('text',{x:side-10,y:p.y+p.h/2,'text-anchor':'middle',fill:'white','font-size':16,'font-weight':650,transform:`rotate(-90 ${side-10} ${p.y+p.h/2})`},`${p.width} m`));}else svg.append(svgNode('text',{x:180,y:p.y+p.h+22,'text-anchor':'middle',fill:'#596c63','font-size':11},`${p.length} × ${p.width} m${p.zones?' · zóny 2 m':''}`));
       }
       const drawnPassRoutes=new Set();
       for(const a of scene.arrows){
@@ -557,13 +574,13 @@ const FootballPhaseNavigation={
     }
     function paintActor(g,node){
         g.replaceChildren();g.setAttribute('data-team',node.team||'');
-        const r=node.kind==='ball'?4:focused?(scene.localCount>12?10:12):scene.localCount>12?7:10;
-        if(focused&&node.kind==='ball')g.append(svgNode('image',{href:'./assets/card-ball.webp',x:-4,y:-4,width:8,height:8}));
-        else if(focused&&node.kind==='player'&&node.team==='A')g.append(svgNode('image',{class:'card-player-sprite',href:'./assets/card-player-blue.webp',x:-r*1.16,y:-r*1.16,width:r*2.32,height:r*2.32}));
+        const r=node.kind==='ball'?4:focused?Math.max(13,Math.max(scene.pitch?.w||280,scene.pitch?.h||240)/18):scene.localCount>12?7:10;
+        if(focused&&node.kind==='ball')g.append(svgNode('image',{href:'./assets/card-ball.webp',x:-6,y:-6,width:12,height:12}));
+        else if(focused&&node.kind==='player'&&node.team==='A')g.append(svgNode('circle',{cx:0,cy:0,r,fill:'#087bea',stroke:'white','stroke-width':1.8}));
         else if(node.kind==='coach')g.append(svgNode('rect',{x:-11,y:-11,width:22,height:22,rx:2,fill:colors.T,stroke:'#173b31'}));
         else g.append(svgNode('circle',{cx:0,cy:0,r,fill:node.kind==='ball'?'white':colors[node.team],stroke:node.kind==='ball'?'#173b31':'white','stroke-width':1}));
         if(node.kind==='ball'&&!focused)g.append(svgNode('circle',{cx:0,cy:0,r:1.5,fill:'#173b31'}));
-        else if(node.kind!=='ball')g.append(svgNode('text',{x:0,y:.5,'text-anchor':'middle','dominant-baseline':'middle',fill:['N','T'].includes(node.team)?'#173b31':'white','font-size':focused?11:r===7?7:9,'font-weight':650},node.label));
+        else if(node.kind!=='ball')g.append(svgNode('text',{x:0,y:.5,'text-anchor':'middle','dominant-baseline':'middle',fill:['N','T'].includes(node.team)?'#173b31':'white','font-size':focused?Math.max(11,r*.83):r===7?7:9,'font-weight':650},focused?String(node.label).replace(/^P(?=\d)/,''):node.label));
     }
     function conciseCue(text){
       // The full instructions remain available in Postup; the field cue stays glanceable.
@@ -603,14 +620,24 @@ const FootballPhaseNavigation={
           for(const node of scene.nodes){const role=phase.roles[node.id];if(!role)continue;const g=actors.get(node.id);g.setAttribute('visibility',role.visible?'visible':'hidden');paintActor(g,{...node,...role});}
         }
       }
-      for(const[id,frames]of Object.entries(scene.tracks)){const p=FootballScenes.sample(frames,time);actors.get(id)?.setAttribute('transform',`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);}
+      const positions=new Map(Object.entries(scene.tracks).map(([id,frames])=>[id,FootballScenes.sample(frames,time)]));
+      const people=scene.nodes.filter(n=>n.kind==='player'&&phase?.roles[n.id]?.visible!==false);
+      for(const node of scene.nodes){
+        let p=positions.get(node.id);if(!p)continue;
+        if(focused&&node.kind==='ball'){
+          const nearest=people.map(n=>positions.get(n.id)).filter(Boolean).sort((a,b)=>Math.hypot(p.x-a.x,p.y-a.y)-Math.hypot(p.x-b.x,p.y-b.y))[0];
+          const gap=Math.max(13,Math.max(scene.pitch?.w||280,scene.pitch?.h||240)/18)+7;
+          if(nearest){const dx=p.x-nearest.x,dy=p.y-nearest.y,distance=Math.hypot(dx,dy);if(distance<gap){const angle=distance?Math.atan2(dy,dx):Math.PI/4;p={x:nearest.x+gap*Math.cos(angle),y:nearest.y+gap*Math.sin(angle)};}}
+        }
+        actors.get(node.id)?.setAttribute('transform',`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);
+      }
       let index=0;scene.steps.forEach((s,i)=>{if(time>=s.time-.001)index=i;});
       const complete=scene.duration>0&&time>=scene.duration;
       if(index!==lastStep||complete!==lastComplete){status.textContent=(complete?'Ukážka dokončená. ':'')+scene.steps[index].text;lastStep=index;lastComplete=complete;}
       status.classList.toggle('football-complete',complete);
       progress.textContent=`Krok ${index+1}/${scene.steps.length} · ${time.toFixed(1)} / ${scene.duration.toFixed(1)} s`;
       for(const layer of arrowLayers)layer.element.setAttribute('visibility',time>=layer.start&&time<layer.end?'visible':'hidden');
-      scrub.value=String(time);next.disabled=time>=scene.duration;play.textContent=clock.origin===null?(complete?'Prehrať znova':focused?'Prehrať ukážku':'Prehrať'):focused?'Pauza ukážky':'Pauza';play.dataset.playing=String(clock.origin!==null);
+      scrub.value=String(time);next.disabled=time>=scene.duration;play.textContent=clock.origin===null?(complete?'Prehrať znova':focused?'Prehrať ukážku':'Prehrať'):focused?'Pauza ukážky':'Pauza';play.dataset.playing=String(clock.origin!==null);if(focused){const icon=uiIcon(clock.origin===null?'play-fill':'pause-fill');play.prepend(icon);}
       if(complete&&clock.origin!==null){clock.pause();play.textContent='Prehrať znova';}
     }
     function tick(){render();if(clock.origin!==null)frame=requestAnimationFrame(tick);else frame=null;}

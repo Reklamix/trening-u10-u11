@@ -47,7 +47,10 @@ for(const total of Array.from({length:21},(_,i)=>i+10))for(const pitch of ['quar
       if(block.diagram==='football-warmup'){
         const passPhases=scene.phases.filter(p=>p.name.startsWith('Prihrávky'));
         assert.equal(passPhases.length,3);
-        const groupCounts=training.planConfig.groupSizes.slice(index*2,index*2+2),expectedBalls=groupCounts.reduce((sum,count)=>sum+Math.floor(count/2),0);
+        const memberIndices=area.members;
+        assert.ok(memberIndices?.length,'Each warm-up area identifies its real skill groups');
+        const groupCounts=memberIndices.map(member=>training.planConfig.groupSizes[member]),expectedBalls=groupCounts.reduce((sum,count)=>sum+Math.floor(count/2),0);
+        assert.equal(groupCounts.reduce((sum,count)=>sum+count,0),area.count,'Passing pods contain every child in this actual area');
         for(const phase of passPhases)assert.equal(scene.nodes.filter(node=>node.kind==='ball'&&phase.roles[node.id].visible).length,expectedBalls,'Pairs and trios stay inside their own skill group');
       }
       if(block.diagram==='football-rondo'&&area.count>2){

@@ -33,10 +33,11 @@ const ExerciseVisualViews = (()=>{
       const p=s.scene.pitch;if(!p)return el('p','exercise-view-note','Toto cvičenie nemá samostatné rozloženie kužeľov.');
       const drawing=svg('svg',{viewBox:primarySvg.getAttribute('viewBox'),role:'img','aria-label':`${info.areaLabel}: ${coneCount(info.cones)} · ${p.length} × ${p.width} m`});
       drawing.append(svg('rect',{x:p.x,y:p.y,width:p.w,height:p.h,fill:'none',stroke:'white','stroke-width':1.4}));
+      for(const d of s.scene.displayDecorations||[])drawing.append(svg('rect',{x:d.x,y:d.y,width:d.w,height:d.h,fill:d.kind==='zone'?'#ffffff22':'white',stroke:'#ffffffaa','stroke-width':1}));
       for(const line of s.scene.lines||[])drawing.append(svg('line',{x1:line.from.x,y1:line.from.y,x2:line.to.x,y2:line.to.y,stroke:'#ffffffaa','stroke-width':1,'stroke-dasharray':'4 4'}));
       for(const[c,cone]of (s.scene.cones||[]).entries()){
         const group=svg('g',{'data-view-cone':cone.kind,transform:`translate(${cone.x} ${cone.y})`});
-        group.append(svg('image',{href:'./assets/card-cone.webp',x:-12,y:-18,width:24,height:24}),svg('text',{x:12,y:-9,fill:'white','font-size':10,'font-weight':700},c+1));drawing.append(group);
+        group.append(svg('path',{d:'M0 -20L-13 9H13ZM-16 9H16V14H-16Z',fill:'#ff8a00',stroke:'#ffe2a3','stroke-width':1.2}),svg('path',{d:'M-5 -8H5M-9 2H9',stroke:'white','stroke-width':3}),svg('text',{x:12,y:-9,fill:'white','font-size':10,'font-weight':700},c+1));drawing.append(group);
       }
       drawing.append(svg('text',{x:p.x+p.w/2,y:p.y+p.h+25,'text-anchor':'middle','font-size':13,fill:'white'},`${p.length} × ${p.width} m`));
       return drawing;
